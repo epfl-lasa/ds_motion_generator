@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<launch>
+
+
+
+
+  <group ns="DS_1">
+  	<param name="gmm_path" value="$(find example_ds)/data/DS1"/>
+  	<param name="max_des_vel" value=".2"/>
+  	<node name="motionGenerator" pkg="example_ds" type="active_motionGenerator_node" output="screen"/>
+  </group>
+
+  <group ns="DS_2">
+  	<param name="gmm_path" value="$(find example_ds)/data/DS2"/>
+  	<param name="max_des_vel" value=".3"/>
+  	<node name="motionGenerator" pkg="example_ds" type="active_motionGenerator_node" output="screen"/>
+  </group>
+
+</launch>
