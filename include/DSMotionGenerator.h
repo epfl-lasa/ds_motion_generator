@@ -1,21 +1,36 @@
 #ifndef __DS_MOTION_GENERATOR_H__
 #define __DS_MOTION_GENERATOR_H__
 
-#include <Eigen/Eigen>
 #include "ros/ros.h"
 #include "geometry_msgs/Pose.h"
 #include "geometry_msgs/Twist.h"
 
+#include <vector>
+
+#include "MathLib.h"
+#include "GMRDynamics.h"
+
+#include <mutex>
 
 
 class DSMotionGenerator {
 
 
-protected:
+private:
 
-	double frequency_;
 	double max_desired_vel_;
-	std::string path_to_cds_gmm_;
+
+	int K_gmm_;
+	int dim_;
+	std::vector<double> Priors_;
+	std::vector<double> Mu_;
+	std::vector<double> Sigma_;
+	double dt_;
+	
+	std::mutex mutex_;
+
+
+	std::unique_ptr<GMRDynamics> SED_GMM_;
 
 
 	// A handle to the node in ros
@@ -26,26 +41,42 @@ protected:
 	ros::Publisher pub_desired_twist_;
 	// Subscriber for real position feed to SED
 	ros::Subscriber sub_real_pose_;
-	// Twist message for the desired velocity
-	geometry_msgs::Twist desired_velocity_;
-	// Pose message for the real velocity
-	geometry_msgs::Pose real_pose_;
+
+	MathLib::Vector desired_velocity_;
+	MathLib::Vector real_pose_;
+
+	// // Twist message for the desired velocity
+	geometry_msgs::Twist msg_desired_velocity_;
+	// // Pose message for the real velocity
+	geometry_msgs::Pose msg_real_pose_;
 
 
 public:
-	DSMotionGenerator(ros::NodeHandle &n, double frequency,
-	                  std::string path_to_cds_gmm, double max_desired_vel);
+	DSMotionGenerator(ros::NodeHandle &n,
+	                  double frequency,
+	                  int K_gmm,
+	                  int dim,
+	                  std::vector<double> Priors,
+	                  std::vector<double> Mu,
+	                  std::vector<double> Sigma,
+	                  double max_desired_vel);
 
-	void Init();
+	bool Init();
 
 	void Run();
 
 private:
+
+	bool InitializeDS();
+
+	bool InitializeROS();
+
 	void UpdateRealPosition(const geometry_msgs::Pose::ConstPtr& msg);
 
-protected:
+	void ComputeDesiredVelocity();
 
-	void ComputeDesiredVelocity(Eigen::VectorXd &desired_twist, Eigen::VectorXd &current_pose);
+	void PublishDesiredVelocity();
+
 
 };
 
