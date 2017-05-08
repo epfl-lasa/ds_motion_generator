@@ -213,7 +213,7 @@ void DSMotionGenerator::PublishDesiredVelocity() {
 }
 
 
-void DSMotionGenerator::DynCallback(example_ds::SED_paramsConfig &config, uint32_t level) {
+void DSMotionGenerator::DynCallback(ds_motion_generator::SED_paramsConfig &config, uint32_t level) {
 
 
 	double  Wn = config.Wn;

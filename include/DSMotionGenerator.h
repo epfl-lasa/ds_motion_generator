@@ -15,7 +15,7 @@
 
 
 #include <dynamic_reconfigure/server.h>
-#include <example_ds/SED_paramsConfig.h>
+#include <ds_motion_generator/SED_paramsConfig.h>
 
 class DSMotionGenerator {
 
@@ -61,8 +61,8 @@ private:
 
 
 	//dynamic reconfig settig
-	dynamic_reconfigure::Server<example_ds::SED_paramsConfig> dyn_rec_srv_;
-	dynamic_reconfigure::Server<example_ds::SED_paramsConfig>::CallbackType dyn_rec_f_;
+	dynamic_reconfigure::Server<ds_motion_generator::SED_paramsConfig> dyn_rec_srv_;
+	dynamic_reconfigure::Server<ds_motion_generator::SED_paramsConfig>::CallbackType dyn_rec_f_;
 
 
 	// Class variables
@@ -107,7 +107,7 @@ private:
 
 	void PublishDesiredVelocity();
 
-	void DynCallback(example_ds::SED_paramsConfig &config, uint32_t level);
+	void DynCallback(ds_motion_generator::SED_paramsConfig &config, uint32_t level);
 
 };
 

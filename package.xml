@@ -1,8 +1,8 @@
 <?xml version="1.0"?>
 <package>
-  <name>example_ds</name>
+  <name>ds_motion_generator</name>
   <version>0.0.0</version>
-  <description>The example_ds package</description>
+  <description>The ds_motion_generator package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag --> 
   <!-- Example:  -->
