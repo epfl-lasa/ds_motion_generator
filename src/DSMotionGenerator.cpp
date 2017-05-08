@@ -28,6 +28,7 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
 	  input_topic_name_(input_topic_name),
 	  output_topic_name_(output_topic_name),
 	  output_filtered_topic_name_(output_filtered_topic_name),
+	  Wn_(Wn),
 	  filter_VelLimits_(VelLimits),
 	  filter_AccLimits_(AccLimits),
 	  max_desired_vel_(max_desired_vel),
@@ -79,7 +80,7 @@ bool DSMotionGenerator::InitializeDS() {
 
 
 
-	CDDyn_filter_.reset (new CDDynamics(6, dt_, 1));
+	CDDyn_filter_.reset (new CDDynamics(6, dt_, Wn_));
 
 	// converting from standard vector to mathlib vectors
 	MathLib::Vector velLimits(filter_VelLimits_.size());
