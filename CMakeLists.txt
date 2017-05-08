@@ -97,7 +97,7 @@ find_package(catkin REQUIRED COMPONENTS
 #   cfg/DynReconf2.cfg
 # )
 
- generate_dynamic_reconfigure_options(cfg/CCDynamics_params.cfg)  
+ generate_dynamic_reconfigure_options(cfg/SED_params.cfg)  
 
 
 ###################################

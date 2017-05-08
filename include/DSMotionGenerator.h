@@ -15,18 +15,15 @@
 
 
 #include <dynamic_reconfigure/server.h>
-#include <example_ds/CCDynamics_paramsConfig.h>
+#include <example_ds/SED_paramsConfig.h>
 
 class DSMotionGenerator {
 
 
 private:
 
-	double max_desired_vel_;
-
-	std::string input_topic_name_;
-	std::string output_topic_name_;
-	std::string output_filtered_topic_name_;
+	// DS variables
+	std::unique_ptr<GMRDynamics> SED_GMM_;
 
 	int K_gmm_;
 	int dim_;
@@ -35,41 +32,51 @@ private:
 	std::vector<double> Sigma_;
 	double dt_;
 
+	double max_desired_vel_;
+
+	// Filter variables
+	std::unique_ptr<CDDynamics> CCDyn_filter_;
+
 	double Wn_;
-	std::vector<double> filter_VelLimits_;
-	std::vector<double> filter_AccLimits_;
+	MathLib::Vector accLimits_;
+	MathLib::Vector velLimits_;
 
 
-	std::mutex mutex_;
-
-
-	std::unique_ptr<GMRDynamics> SED_GMM_;
-	std::unique_ptr<CDDynamics> CDDyn_filter_;
-
-
-
-	// A handle to the node in ros
+	// ROS variables
 	ros::NodeHandle nh_;
-	// Rate of the run loop
 	ros::Rate loop_rate_;
 
 	ros::Subscriber sub_real_pose_;
 	ros::Publisher pub_desired_twist_;
 	ros::Publisher pub_desired_twist_filtered_;
 
-	MathLib::Vector real_pose_;
-	MathLib::Vector desired_velocity_;
-	MathLib::Vector desired_velocity_filtered_;
+	std::string input_topic_name_;
+	std::string output_topic_name_;
+	std::string output_filtered_topic_name_;
 
 	geometry_msgs::Pose msg_real_pose_;
 	geometry_msgs::Twist msg_desired_velocity_;
 	geometry_msgs::Twist msg_desired_velocity_filtered_;
 
-protected:
+
 
 	//dynamic reconfig settig
-	dynamic_reconfigure::Server<example_ds::CCDynamics_paramsConfig> dyn_rec_srv_;
-	dynamic_reconfigure::Server<example_ds::CCDynamics_paramsConfig>::CallbackType dyn_rec_f_;
+	dynamic_reconfigure::Server<example_ds::SED_paramsConfig> dyn_rec_srv_;
+	dynamic_reconfigure::Server<example_ds::SED_paramsConfig>::CallbackType dyn_rec_f_;
+
+
+	// Class variables
+	std::mutex mutex_;
+
+	MathLib::Vector real_pose_;
+	MathLib::Vector target_pose_;
+
+	MathLib::Vector desired_velocity_;
+	MathLib::Vector desired_velocity_filtered_;
+
+	double scaling_factor_;
+	double ds_vel_limit_;
+
 
 
 public:
@@ -82,11 +89,7 @@ public:
 	                  std::vector<double> Sigma,
 	                  std::string input_topic_name,
 	                  std::string output_topic_name,
-	                  std::string output_filtered_topic_name,
-	                  double Wn,
-                      std::vector<double> VelLimits,
-                      std::vector<double> AccLimits,
-	                  double max_desired_vel);
+	                  std::string output_filtered_topic_name);
 
 	bool Init();
 
@@ -104,8 +107,7 @@ private:
 
 	void PublishDesiredVelocity();
 
-	void DynCallback(example_ds::CCDynamics_paramsConfig &config, uint32_t level);
-
+	void DynCallback(example_ds::SED_paramsConfig &config, uint32_t level);
 
 };
 

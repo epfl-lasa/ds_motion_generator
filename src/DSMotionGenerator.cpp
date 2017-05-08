@@ -13,11 +13,7 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
                                      std::vector<double> Sigma,
                                      std::string input_topic_name,
                                      std::string output_topic_name,
-                                     std::string output_filtered_topic_name,
-                                     double Wn,
-                                     std::vector<double> VelLimits,
-                                     std::vector<double> AccLimits,
-                                     double max_desired_vel)
+                                     std::string output_filtered_topic_name)
 	: nh_(n),
 	  loop_rate_(frequency),
 	  K_gmm_(K_gmm),
@@ -28,11 +24,10 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
 	  input_topic_name_(input_topic_name),
 	  output_topic_name_(output_topic_name),
 	  output_filtered_topic_name_(output_filtered_topic_name),
-	  Wn_(Wn),
-	  filter_VelLimits_(VelLimits),
-	  filter_AccLimits_(AccLimits),
-	  max_desired_vel_(max_desired_vel),
-	  dt_(1 / frequency) {
+	  dt_(1 / frequency),
+	  Wn_(0),
+	  scaling_factor_(1),
+	  ds_vel_limit_(0.1) {
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -77,34 +72,26 @@ bool DSMotionGenerator::InitializeDS() {
 	SED_GMM_.reset (new GMRDynamics(K_gmm_, dim_, dt_, Priors_, Mu_, Sigma_ ));
 	SED_GMM_->initGMR(0, 2, 3, 5 );
 
+	target_pose_.Resize(6);
 
 
+	// initializing the filter
+	CCDyn_filter_.reset (new CDDynamics(6, dt_, Wn_));
 
-	CDDyn_filter_.reset (new CDDynamics(6, dt_, Wn_));
+	// we should set the size automagically
+	velLimits_.Resize(6);
+	CCDyn_filter_->SetVelocityLimits(velLimits_);
 
-	// converting from standard vector to mathlib vectors
-	MathLib::Vector velLimits(filter_VelLimits_.size());
-
-	for (int i = 0 ; i < filter_VelLimits_.size() ; i++) {
-		velLimits(i) = filter_VelLimits_[i];
-	}
-
-	MathLib::Vector accelLimits(filter_AccLimits_.size());
-
-	for (int i = 0 ; i < filter_AccLimits_.size() ; i++) {
-		accelLimits(i) = filter_AccLimits_[i];
-	}
-
-	CDDyn_filter_->SetVelocityLimits(velLimits);
-	CDDyn_filter_->SetAccelLimits(accelLimits);
+	accLimits_.Resize(6);
+	CCDyn_filter_->SetAccelLimits(accLimits_);
 
 
-	MathLib::Vector initial(filter_VelLimits_.size());
+	MathLib::Vector initial(6);
 
 	initial.Zero();
 
-	CDDyn_filter_->SetState(initial);
-	CDDyn_filter_->SetTarget(initial);
+	CCDyn_filter_->SetState(initial);
+	CCDyn_filter_->SetTarget(initial);
 
 
 	return true;
@@ -121,7 +108,7 @@ bool DSMotionGenerator::InitializeROS() {
 
 
 	dyn_rec_f_ = boost::bind(&DSMotionGenerator::DynCallback, this, _1, _2);
-	  dyn_rec_srv_.setCallback(dyn_rec_f_);
+	dyn_rec_srv_.setCallback(dyn_rec_f_);
 
 
 	if (nh_.ok()) { // Wait for poses being published
@@ -144,8 +131,6 @@ void DSMotionGenerator::Run() {
 		ComputeDesiredVelocity();
 
 		PublishDesiredVelocity();
-
-		ROS_INFO_STREAM_THROTTLE(5, "Spinning!");
 
 		ros::spinOnce();
 
@@ -182,12 +167,18 @@ void DSMotionGenerator::ComputeDesiredVelocity() {
 
 	mutex_.lock();
 
-	desired_velocity_ = SED_GMM_->getVelocity(real_pose_);
+	desired_velocity_ = SED_GMM_->getVelocity(real_pose_ - target_pose_);
 
-	// ROS_INFO_STREAM(real_pose_);
+	if(isnan(desired_velocity_.Norm2())){
+		ROS_WARN_THROTTLE(1,"DS is generating NaN. Setting the output to zero.");
+		desired_velocity_.Zero();		
+	}
 
-	// ROS_WARN_STREAM(desired_velocity_);
+	desired_velocity_ = desired_velocity_ * scaling_factor_;
 
+	if (desired_velocity_.Norm() > ds_vel_limit_){
+		desired_velocity_ = desired_velocity_ / desired_velocity_.Norm() * ds_vel_limit_;
+	}
 
 	msg_desired_velocity_.linear.x  = desired_velocity_(0);
 	msg_desired_velocity_.linear.y  = desired_velocity_(1);
@@ -196,13 +187,9 @@ void DSMotionGenerator::ComputeDesiredVelocity() {
 	msg_desired_velocity_.angular.y = desired_velocity_(4);
 	msg_desired_velocity_.angular.z = desired_velocity_(5);
 
-	// if new target is set
-	CDDyn_filter_->SetTarget(desired_velocity_);
-	// update dynamics
-	CDDyn_filter_->Update();
-	// get state
-	CDDyn_filter_->GetState(desired_velocity_filtered_);
-
+	CCDyn_filter_->SetTarget(desired_velocity_);
+	CCDyn_filter_->Update();
+	CCDyn_filter_->GetState(desired_velocity_filtered_);
 
 	msg_desired_velocity_filtered_.linear.x  = desired_velocity_filtered_(0);
 	msg_desired_velocity_filtered_.linear.y  = desired_velocity_filtered_(1);
@@ -226,13 +213,39 @@ void DSMotionGenerator::PublishDesiredVelocity() {
 }
 
 
-void DSMotionGenerator::DynCallback(example_ds::CCDynamics_paramsConfig &config, uint32_t level) {
+void DSMotionGenerator::DynCallback(example_ds::SED_paramsConfig &config, uint32_t level) {
 
 
 	double  Wn = config.Wn;
 
-  ROS_INFO("Reconfigure request. Updatig the filter ...");
-  Wn_= config.Wn;
-  CDDyn_filter_->SetWn(Wn_);
-  // do nothing for now
+	ROS_INFO("Reconfigure request. Updatig the parameters ...");
+
+
+	Wn_ = config.Wn;
+	CCDyn_filter_->SetWn(Wn_);
+
+	double vlim = config.fil_dx_lim;
+
+	velLimits_(0) = vlim;
+	velLimits_(1) = vlim;
+	velLimits_(2) = vlim;
+
+	CCDyn_filter_->SetVelocityLimits(velLimits_);
+
+
+	double alim = config.fil_ddx_lim;
+
+	accLimits_(0) = alim;
+	accLimits_(1) = alim;
+	accLimits_(2) = alim;
+
+	CCDyn_filter_->SetAccelLimits(accLimits_);
+
+	target_pose_(0) = config.target_x;
+	target_pose_(1) = config.target_y;
+	target_pose_(2) = config.target_z;
+
+	scaling_factor_ = config.scaling;
+	ds_vel_limit_   = config.trimming;
+
 }

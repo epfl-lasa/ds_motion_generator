@@ -71,26 +71,6 @@ int main(int argc, char **argv)
     // return -1;
   }
 
-  if (!nh.getParam("Wn", Wn))  {
-    ROS_ERROR("Couldn't retrieve Wn for the filter. ");
-    // return -1;
-  }
-
-  if (!nh.getParam("VelLimits", VelLimits))  {
-    ROS_ERROR("Couldn't retrieve the velocity limits for the filter. ");
-    // return -1;
-  }
-
-  if (!nh.getParam("AccLimits", AccLimits))  {
-    ROS_ERROR("Couldn't retrieve the accelerations limits for the filter. ");
-    // return -1;
-  }
-
-
-  if (!nh.getParam("max_des_vel", max_des_vel))  {
-    ROS_ERROR("Couldn't retrieve the maximum desired velocity max_des_vel. ");
-    // return -1;
-  }
 
   ROS_INFO("Starting the Motion generator...");
 
@@ -98,11 +78,7 @@ int main(int argc, char **argv)
                                         K_gmm, dim, Priors, Mu, Sigma,
                                         input_topic_name,
                                         output_topic_name,
-                                        output_filtered_topic_name,
-                                        Wn,
-                                        VelLimits,
-                                        AccLimits,
-                                        max_des_vel);
+                                        output_filtered_topic_name);
   if (!ds_motion_generator.Init()) {
     return -1;
   }

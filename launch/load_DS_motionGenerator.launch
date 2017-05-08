@@ -2,17 +2,22 @@
 <launch>
 
 
-
-
-  <group ns="DS_1">
-  	<param name="gmm_path" value="$(find example_ds)/data/DS1"/>
-  	<param name="max_des_vel" value=".2"/>
-  	<param name="input_topic_name" value="/real_position"/>
-  	<param name="output_topic_name" value="/ds1/desired_velocity"/>
-  	<param name="output_filtered_topic_name" value="/ds1/filter/desired_velocity"/>
-	<rosparam command="load" file="$(find example_ds)/config/DS1_params.yaml"/>
-	<node name="motionGenerator" pkg="example_ds" type="active_motionGenerator_node" output="screen"/>
+  <group ns="MotionGenerator_1">
+    <param name="input_topic_name" value="/real_position"/>
+    <param name="output_topic_name" value="/ds1/desired_velocity"/>
+    <param name="output_filtered_topic_name" value="/ds1/filter/desired_velocity"/>
+    <rosparam command="load" file="$(find example_ds)/config/DS1_params.yaml"/>
+    <node name="DS" pkg="example_ds" type="active_motionGenerator_node" output="screen"/>
   </group>
+
+  <!--group ns="DS_2">
+  	<param name="input_topic_name" value="/real_position"/>
+  	<param name="output_topic_name" value="/ds2/desired_velocity"/>
+  	<param name="output_filtered_topic_name" value="/ds2/filter/desired_velocity"/>
+	<rosparam command="load" file="$(find example_ds)/config/DS1_params.yaml"/>
+	<node name="DS_2" pkg="example_ds" type="active_motionGenerator_node" output="screen"/>
+  </group-->
+
 
   <!--group ns="DS_2">
   	<param name="gmm_path" value="$(find example_ds)/data/DS2"/>
