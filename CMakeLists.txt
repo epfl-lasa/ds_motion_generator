@@ -14,6 +14,7 @@ find_package(catkin REQUIRED COMPONENTS
   eigen_conversions
   mathlib
   sgaussians
+  dynamic_reconfigure
 )
 
 ## System dependencies are found with CMake's conventions
@@ -96,6 +97,9 @@ find_package(catkin REQUIRED COMPONENTS
 #   cfg/DynReconf2.cfg
 # )
 
+ generate_dynamic_reconfigure_options(cfg/CCDynamics_params.cfg)  
+
+
 ###################################
 ## catkin specific configuration ##
 ###################################
@@ -124,6 +128,8 @@ set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
 ## Your package locations should be listed before other locations
 # include_directories(include)
 include_directories(include ${catkin_INCLUDE_DIRS})
+
+include_directories(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
 
 ## Declare a C++ library
 # add_library(${PROJECT_NAME}
@@ -157,7 +163,10 @@ add_executable(active_motionGenerator_node
 ## same as for the library above
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
-add_dependencies(active_motionGenerator_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
+add_dependencies(active_motionGenerator_node 
+	${${PROJECT_NAME}_EXPORTED_TARGETS} 
+	${catkin_EXPORTED_TARGETS}
+	${PROJECT_NAME}_gencfg)
 
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node

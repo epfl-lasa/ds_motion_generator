@@ -14,6 +14,9 @@
 #include <mutex>
 
 
+#include <dynamic_reconfigure/server.h>
+#include <example_ds/CCDynamics_paramsConfig.h>
+
 class DSMotionGenerator {
 
 
@@ -62,6 +65,12 @@ private:
 	geometry_msgs::Twist msg_desired_velocity_;
 	geometry_msgs::Twist msg_desired_velocity_filtered_;
 
+protected:
+
+	//dynamic reconfig settig
+	dynamic_reconfigure::Server<example_ds::CCDynamics_paramsConfig> dyn_rec_srv_;
+	dynamic_reconfigure::Server<example_ds::CCDynamics_paramsConfig>::CallbackType dyn_rec_f_;
+
 
 public:
 	DSMotionGenerator(ros::NodeHandle &n,
@@ -94,6 +103,8 @@ private:
 	void ComputeDesiredVelocity();
 
 	void PublishDesiredVelocity();
+
+	void DynCallback(example_ds::CCDynamics_paramsConfig &config, uint32_t level);
 
 
 };

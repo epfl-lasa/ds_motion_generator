@@ -120,6 +120,10 @@ bool DSMotionGenerator::InitializeROS() {
 	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::Twist>(output_filtered_topic_name_, 1);
 
 
+	dyn_rec_f_ = boost::bind(&DSMotionGenerator::DynCallback, this, _1, _2);
+	  dyn_rec_srv_.setCallback(dyn_rec_f_);
+
+
 	if (nh_.ok()) { // Wait for poses being published
 		ros::spinOnce();
 		ROS_INFO("The Motion generator is ready.");
@@ -219,4 +223,16 @@ void DSMotionGenerator::PublishDesiredVelocity() {
 	pub_desired_twist_filtered_.publish(msg_desired_velocity_filtered_);
 
 
+}
+
+
+void DSMotionGenerator::DynCallback(example_ds::CCDynamics_paramsConfig &config, uint32_t level) {
+
+
+	double  Wn = config.Wn;
+
+  ROS_INFO("Reconfigure request. Updatig the filter ...");
+  Wn_= config.Wn;
+  CDDyn_filter_->SetWn(Wn_);
+  // do nothing for now
 }
