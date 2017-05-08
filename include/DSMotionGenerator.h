@@ -20,13 +20,16 @@ private:
 
 	double max_desired_vel_;
 
+	std::string input_topic_name_;
+	std::string output_topic_name_;
+
 	int K_gmm_;
 	int dim_;
 	std::vector<double> Priors_;
 	std::vector<double> Mu_;
 	std::vector<double> Sigma_;
 	double dt_;
-	
+
 	std::mutex mutex_;
 
 
@@ -59,6 +62,8 @@ public:
 	                  std::vector<double> Priors,
 	                  std::vector<double> Mu,
 	                  std::vector<double> Sigma,
+	                  std::string input_topic_name,
+	                  std::string output_topic_name,
 	                  double max_desired_vel);
 
 	bool Init();

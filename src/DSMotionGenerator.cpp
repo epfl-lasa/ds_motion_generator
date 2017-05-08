@@ -11,6 +11,8 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
                                      std::vector<double> Priors,
                                      std::vector<double> Mu,
                                      std::vector<double> Sigma,
+                                     std::string input_topic_name,
+                                     std::string output_topic_name,
                                      double max_desired_vel)
 	: nh_(n),
 	  loop_rate_(frequency),
@@ -19,6 +21,8 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
 	  Priors_(Priors),
 	  Mu_(Mu),
 	  Sigma_(Sigma),
+	  input_topic_name_(input_topic_name),
+	  output_topic_name_(output_topic_name),
 	  max_desired_vel_(max_desired_vel),
 	  dt_(1 / frequency) {
 
@@ -71,9 +75,10 @@ bool DSMotionGenerator::InitializeDS() {
 
 bool DSMotionGenerator::InitializeROS() {
 
-	pub_desired_twist_ = nh_.advertise<geometry_msgs::Twist>("/ds/desired_velocity", 1);
-	sub_real_pose_ = nh_.subscribe("/ds/real_position" , 1000,
-	                               &DSMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
+	sub_real_pose_ = nh_.subscribe( input_topic_name_ , 1000,
+	                                &DSMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
+	pub_desired_twist_ = nh_.advertise<geometry_msgs::Twist>(output_topic_name_, 1);
+
 
 	if (nh_.ok()) { // Wait for poses being published
 		ros::spinOnce();
@@ -93,10 +98,10 @@ void DSMotionGenerator::Run() {
 	while (nh_.ok()) {
 
 		ComputeDesiredVelocity();
-		
+
 		PublishDesiredVelocity();
 
-		ROS_INFO_STREAM_THROTTLE(1, "Spinning!");
+		ROS_INFO_STREAM_THROTTLE(5, "Spinning!");
 
 		ros::spinOnce();
 

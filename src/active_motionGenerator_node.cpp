@@ -14,7 +14,8 @@ int main(int argc, char **argv)
 
 
   // Parameters
-  std::string path_to_cds_gmm;
+  std::string input_topic_name;
+  std::string output_topic_name;
   double max_des_vel;
   int K_gmm;
   int dim;
@@ -23,8 +24,13 @@ int main(int argc, char **argv)
   std::vector<double> Sigma;
 
 
-  if (!nh.getParam("gmm_path", path_to_cds_gmm))   {
-    ROS_ERROR("Couldn't retrieve the gmm path. ");
+  if (!nh.getParam("input_topic_name", input_topic_name))   {
+    ROS_ERROR("Couldn't retrieve the topic name for the input. ");
+    // return -1;
+  }
+
+    if (!nh.getParam("output_topic_name", output_topic_name))   {
+    ROS_ERROR("Couldn't retrieve the topic name for the output. ");
     // return -1;
   }
 
@@ -65,6 +71,8 @@ int main(int argc, char **argv)
 
   DSMotionGenerator ds_motion_generator(nh, frequency,
                                         K_gmm, dim, Priors, Mu, Sigma,
+                                        input_topic_name,
+                                        output_topic_name,
                                         max_des_vel);
   if (!ds_motion_generator.Init()) {
     return -1;

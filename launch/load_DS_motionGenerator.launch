@@ -7,6 +7,8 @@
   <group ns="DS_1">
   	<param name="gmm_path" value="$(find example_ds)/data/DS1"/>
   	<param name="max_des_vel" value=".2"/>
+  	<param name="input_topic_name" value="/real_position"/>
+  	<param name="output_topic_name" value="/ds1/desired_velocity"/>
 	<rosparam command="load" file="$(find example_ds)/config/DS1_params.yaml"/>
 	<node name="motionGenerator" pkg="example_ds" type="active_motionGenerator_node" output="screen"/>
   </group>
