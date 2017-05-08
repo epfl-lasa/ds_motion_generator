@@ -11,7 +11,6 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
-  eigen_conversions
   mathlib
   sgaussians
   dynamic_reconfigure
