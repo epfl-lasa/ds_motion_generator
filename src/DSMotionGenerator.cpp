@@ -13,6 +13,10 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
                                      std::vector<double> Sigma,
                                      std::string input_topic_name,
                                      std::string output_topic_name,
+                                     std::string output_filtered_topic_name,
+                                     double Wn,
+                                     std::vector<double> VelLimits,
+                                     std::vector<double> AccLimits,
                                      double max_desired_vel)
 	: nh_(n),
 	  loop_rate_(frequency),
@@ -23,6 +27,9 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
 	  Sigma_(Sigma),
 	  input_topic_name_(input_topic_name),
 	  output_topic_name_(output_topic_name),
+	  output_filtered_topic_name_(output_filtered_topic_name),
+	  filter_VelLimits_(VelLimits),
+	  filter_AccLimits_(AccLimits),
 	  max_desired_vel_(max_desired_vel),
 	  dt_(1 / frequency) {
 
@@ -68,6 +75,37 @@ bool DSMotionGenerator::InitializeDS() {
 
 	SED_GMM_.reset (new GMRDynamics(K_gmm_, dim_, dt_, Priors_, Mu_, Sigma_ ));
 	SED_GMM_->initGMR(0, 2, 3, 5 );
+
+
+
+
+	CDDyn_filter_.reset (new CDDynamics(6, dt_, 1));
+
+	// converting from standard vector to mathlib vectors
+	MathLib::Vector velLimits(filter_VelLimits_.size());
+
+	for (int i = 0 ; i < filter_VelLimits_.size() ; i++) {
+		velLimits(i) = filter_VelLimits_[i];
+	}
+
+	MathLib::Vector accelLimits(filter_AccLimits_.size());
+
+	for (int i = 0 ; i < filter_AccLimits_.size() ; i++) {
+		accelLimits(i) = filter_AccLimits_[i];
+	}
+
+	CDDyn_filter_->SetVelocityLimits(velLimits);
+	CDDyn_filter_->SetAccelLimits(accelLimits);
+
+
+	MathLib::Vector initial(filter_VelLimits_.size());
+
+	initial.Zero();
+
+	CDDyn_filter_->SetState(initial);
+	CDDyn_filter_->SetTarget(initial);
+
+
 	return true;
 
 }
@@ -78,6 +116,7 @@ bool DSMotionGenerator::InitializeROS() {
 	sub_real_pose_ = nh_.subscribe( input_topic_name_ , 1000,
 	                                &DSMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
 	pub_desired_twist_ = nh_.advertise<geometry_msgs::Twist>(output_topic_name_, 1);
+	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::Twist>(output_filtered_topic_name_, 1);
 
 
 	if (nh_.ok()) { // Wait for poses being published
@@ -152,6 +191,22 @@ void DSMotionGenerator::ComputeDesiredVelocity() {
 	msg_desired_velocity_.angular.y = desired_velocity_(4);
 	msg_desired_velocity_.angular.z = desired_velocity_(5);
 
+	// if new target is set
+	CDDyn_filter_->SetTarget(desired_velocity_);
+	// update dynamics
+	CDDyn_filter_->Update();
+	// get state
+	CDDyn_filter_->GetState(desired_velocity_filtered_);
+
+
+	msg_desired_velocity_filtered_.linear.x  = desired_velocity_filtered_(0);
+	msg_desired_velocity_filtered_.linear.y  = desired_velocity_filtered_(1);
+	msg_desired_velocity_filtered_.linear.z  = desired_velocity_filtered_(2);
+	msg_desired_velocity_filtered_.angular.x = desired_velocity_filtered_(3);
+	msg_desired_velocity_filtered_.angular.y = desired_velocity_filtered_(4);
+	msg_desired_velocity_filtered_.angular.z = desired_velocity_filtered_(5);
+
+
 	mutex_.unlock();
 
 }
@@ -160,5 +215,7 @@ void DSMotionGenerator::ComputeDesiredVelocity() {
 void DSMotionGenerator::PublishDesiredVelocity() {
 
 	pub_desired_twist_.publish(msg_desired_velocity_);
+	pub_desired_twist_filtered_.publish(msg_desired_velocity_filtered_);
+
 
 }

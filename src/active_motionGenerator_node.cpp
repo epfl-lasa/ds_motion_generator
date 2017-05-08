@@ -16,6 +16,7 @@ int main(int argc, char **argv)
   // Parameters
   std::string input_topic_name;
   std::string output_topic_name;
+  std::string output_filtered_topic_name;
   double max_des_vel;
   int K_gmm;
   int dim;
@@ -23,14 +24,23 @@ int main(int argc, char **argv)
   std::vector<double> Mu;
   std::vector<double> Sigma;
 
+  double Wn;
+  std::vector<double> VelLimits;
+  std::vector<double> AccLimits;
+
 
   if (!nh.getParam("input_topic_name", input_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the input. ");
     // return -1;
   }
 
-    if (!nh.getParam("output_topic_name", output_topic_name))   {
+  if (!nh.getParam("output_topic_name", output_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the output. ");
+    // return -1;
+  }
+
+  if (!nh.getParam("output_filtered_topic_name", output_filtered_topic_name))   {
+    ROS_ERROR("Couldn't retrieve the topic name for the filtered output. ");
     // return -1;
   }
 
@@ -61,6 +71,21 @@ int main(int argc, char **argv)
     // return -1;
   }
 
+  if (!nh.getParam("Wn", Wn))  {
+    ROS_ERROR("Couldn't retrieve Wn for the filter. ");
+    // return -1;
+  }
+
+  if (!nh.getParam("VelLimits", VelLimits))  {
+    ROS_ERROR("Couldn't retrieve the velocity limits for the filter. ");
+    // return -1;
+  }
+
+  if (!nh.getParam("AccLimits", AccLimits))  {
+    ROS_ERROR("Couldn't retrieve the accelerations limits for the filter. ");
+    // return -1;
+  }
+
 
   if (!nh.getParam("max_des_vel", max_des_vel))  {
     ROS_ERROR("Couldn't retrieve the maximum desired velocity max_des_vel. ");
@@ -73,11 +98,15 @@ int main(int argc, char **argv)
                                         K_gmm, dim, Priors, Mu, Sigma,
                                         input_topic_name,
                                         output_topic_name,
+                                        output_filtered_topic_name,
+                                        Wn,
+                                        VelLimits,
+                                        AccLimits,
                                         max_des_vel);
   if (!ds_motion_generator.Init()) {
     return -1;
   }
-  else{
+  else {
     ds_motion_generator.Run();
   }
 
