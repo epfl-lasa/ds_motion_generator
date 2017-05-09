@@ -2,12 +2,12 @@
 <launch>
 
 
-  <group ns="MotionGenerator_1">
+  <group ns="ds1">
     <param name="input_topic_name" value="/real_position"/>
     <param name="output_topic_name" value="/ds1/desired_velocity"/>
     <param name="output_filtered_topic_name" value="/ds1/filter/desired_velocity"/>
     <rosparam command="load" file="$(find ds_motion_generator)/config/DS1_params.yaml"/>
-    <node name="DS" pkg="ds_motion_generator" type="active_motionGenerator_node" output="screen"/>
+    <node name="ds_node" pkg="ds_motion_generator" type="active_motionGenerator_node" output="screen"/>
   </group>
 
   <!--group ns="DS_2">

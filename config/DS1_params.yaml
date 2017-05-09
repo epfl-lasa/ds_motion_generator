@@ -1,4 +1,11 @@
 # Parameters for SED
+# things need to be improved here,
+# the dimension is for GMM the dimenstion of \xi and \xi\dot 
+# however, for the sed the dimenstion of input would be dimension of \xi and the output dimension \xi\dot
+# for example the following GMM are of 6 dimensions. the first 3 for x-y-z (as input) and 3 for their velocities (as output).
+
+
+
 K: 4
 
 dim: 6
@@ -42,4 +49,6 @@ Sigma: [ 0.0001695148, 0.0000000052, 0.0000000981 ,-0.0002130465, 0.0000131910, 
 -0.0000410471, -0.0000007767 ,-0.0000561037 ,0.0000000000 ,0.0000000000, 0.0000000000  ]
 
 
+# this is the attractor of the dynamical system that lives in the input space (x-y-z)
+attractor: [0 , 0, 0 , 0 , 0 ,0]
 

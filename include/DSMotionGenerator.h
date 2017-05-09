@@ -30,6 +30,7 @@ private:
 	std::vector<double> Priors_;
 	std::vector<double> Mu_;
 	std::vector<double> Sigma_;
+	std::vector<double> attractor_;
 	double dt_;
 
 	double max_desired_vel_;
@@ -70,6 +71,8 @@ private:
 
 	MathLib::Vector real_pose_;
 	MathLib::Vector target_pose_;
+	MathLib::Vector target_offset_;
+
 
 	MathLib::Vector desired_velocity_;
 	MathLib::Vector desired_velocity_filtered_;
@@ -87,6 +90,7 @@ public:
 	                  std::vector<double> Priors,
 	                  std::vector<double> Mu,
 	                  std::vector<double> Sigma,
+	                  std::vector<double> attractor,
 	                  std::string input_topic_name,
 	                  std::string output_topic_name,
 	                  std::string output_filtered_topic_name);

@@ -11,6 +11,7 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
                                      std::vector<double> Priors,
                                      std::vector<double> Mu,
                                      std::vector<double> Sigma,
+                                     std::vector<double> attractor,
                                      std::string input_topic_name,
                                      std::string output_topic_name,
                                      std::string output_filtered_topic_name)
@@ -21,6 +22,7 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
 	  Priors_(Priors),
 	  Mu_(Mu),
 	  Sigma_(Sigma),
+	  attractor_(attractor),
 	  input_topic_name_(input_topic_name),
 	  output_topic_name_(output_topic_name),
 	  output_filtered_topic_name_(output_filtered_topic_name),
@@ -69,10 +71,24 @@ bool DSMotionGenerator::InitializeDS() {
 		return false;
 	}
 
+	if (attractor_.size() != 6) {
+		ROS_ERROR_STREAM("InitializeDS: Please provide 6 elements for the attractor. It has " << attractor_.size() << " elements.");
+		return false;
+	}
+
+
 	SED_GMM_.reset (new GMRDynamics(K_gmm_, dim_, dt_, Priors_, Mu_, Sigma_ ));
 	SED_GMM_->initGMR(0, 2, 3, 5 );
 
+
+	target_offset_.Resize(6);
 	target_pose_.Resize(6);
+
+	for (int i=0; i < attractor_.size(); i++){
+		target_pose_(i) = attractor_[i];
+	}
+
+	// to do: the dimension for the filter should be equal to dimension of the output space.
 
 
 	// initializing the filter
@@ -167,7 +183,7 @@ void DSMotionGenerator::ComputeDesiredVelocity() {
 
 	mutex_.lock();
 
-	desired_velocity_ = SED_GMM_->getVelocity(real_pose_ - target_pose_);
+	desired_velocity_ = SED_GMM_->getVelocity(real_pose_ - target_pose_ - target_offset_);
 
 	if(isnan(desired_velocity_.Norm2())){
 		ROS_WARN_THROTTLE(1,"DS is generating NaN. Setting the output to zero.");
@@ -241,9 +257,9 @@ void DSMotionGenerator::DynCallback(ds_motion_generator::SED_paramsConfig &confi
 
 	CCDyn_filter_->SetAccelLimits(accLimits_);
 
-	target_pose_(0) = config.target_x;
-	target_pose_(1) = config.target_y;
-	target_pose_(2) = config.target_z;
+	target_offset_(0) = config.offset_x;
+	target_offset_(1) = config.offset_y;
+	target_offset_(2) = config.offset_z;
 
 	scaling_factor_ = config.scaling;
 	ds_vel_limit_   = config.trimming;

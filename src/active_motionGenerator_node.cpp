@@ -17,12 +17,13 @@ int main(int argc, char **argv)
   std::string input_topic_name;
   std::string output_topic_name;
   std::string output_filtered_topic_name;
-  double max_des_vel;
+  
   int K_gmm;
   int dim;
   std::vector<double> Priors;
   std::vector<double> Mu;
   std::vector<double> Sigma;
+  std::vector<double> attractor;
 
   double Wn;
   std::vector<double> VelLimits;
@@ -71,11 +72,16 @@ int main(int argc, char **argv)
     // return -1;
   }
 
+  if (!nh.getParam("attractor", attractor))  {
+    ROS_ERROR("Couldn't retrieve the attractor for the DS. ");
+    // return -1;
+  }
+
 
   ROS_INFO("Starting the Motion generator...");
 
   DSMotionGenerator ds_motion_generator(nh, frequency,
-                                        K_gmm, dim, Priors, Mu, Sigma,
+                                        K_gmm, dim, Priors, Mu, Sigma, attractor,
                                         input_topic_name,
                                         output_topic_name,
                                         output_filtered_topic_name);
