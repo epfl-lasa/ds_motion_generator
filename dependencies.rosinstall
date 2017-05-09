@@ -1,7 +1,8 @@
 - git:
+    local-name: mathlib
+    uri: git@github.com:epfl-lasa/mathlib.git
+    
+- git:
     local-name: fast-gmm
     uri: git@github.com:epfl-lasa/fast-gmm.git
     version: devel
-- git:
-    local-name: mathlib
-    uri: git@github.com:epfl-lasa/mathlib.git
