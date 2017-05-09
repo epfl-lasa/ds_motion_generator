@@ -1,4 +1,8 @@
-filename = 'mySEDSModel.txt';
+close all
+clear all
+clc
+
+filename = 's3_roll_GMM.txt';
 
 data = dlmread(filename);
 
@@ -9,22 +13,22 @@ k_rec   = data(1,2);
 data(1,:) = [];
 
 % reconstructing the priors
-Priors_rec = data(1:k,1);
+Priors_rec = data(1:k_rec,1);
 
-data(1:k,:) = [];
+data(1:k_rec,:) = [];
 
 % reconstructing the Mu
-Mu_rec = data(1,1:dim*k);
-Mu_rec = reshape(Mu_rec,dim,k);
+Mu_rec = data(1,1:dim_rec*k_rec);
+Mu_rec = reshape(Mu_rec,dim_rec,k_rec);
 
 data(1,:) = [];
 
 % reconstructing the Sigma
-Sigma_rec = zeros(dim,dim,k);
+Sigma_rec = zeros(dim_rec,dim_rec,k_rec);
 
-for n = 1: k
+for n = 1: k_rec
     
-    Sigma_rec(:,:,n) = transpose(reshape(data(n,:),dim,dim));
+    Sigma_rec(:,:,n) = transpose(reshape(data(n,:),dim_rec,dim_rec));
         
 end
 
@@ -43,15 +47,17 @@ end
 
 
 Priors_vec = Priors_rec(1:end);
-Mu_vec = Mu(1:end);
+
+Mu_vec = Mu_rec(1:end);
 
 Sigma_vec = Sigma_rec(1:end);
+
 Attractor = zeros(1,6);
 
 
-Priors_rec = round((Priors_rec.*1e6)./1e6);
-Mu_vec = round((Mu_vec.*1e6)./1e6);
-Sigma_vec = round((Sigma_vec.*1e6)./1e6);
+Priors_rec = round((Priors_rec.*1e6))./1e6;
+Mu_vec = round((Mu_vec.*1e6))./1e6;
+Sigma_vec = round((Sigma_vec.*1e6))./1e6;
 
 SED_struc = struct('K',         k_rec,...
                    'dim',       dim_rec,...
@@ -64,7 +70,7 @@ SED_struc = struct('K',         k_rec,...
 SED_dump = YAML.dump(SED_struc);
 disp(SED_dump);
 
-YAML.write('mySED.yml',SED_struc)
+YAML.write('s3_roll_GMM.yml',SED_struc)
 
 % you can go head and clean up a bit your yaml file, 
 % but be carefull that tab (\t) is not ok 

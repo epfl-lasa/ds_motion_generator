@@ -57,7 +57,7 @@ int main(int argc, char **argv)
 
 
   if (!nh.getParam("Priors", Priors))   {
-    ROS_ERROR("Couldn't retrieve Priors. ");
+    ROS_ERROR("Couldn't retrieve Priors. Maybe you need to use [] in case of k=1");
     // return -1;
   }
 
