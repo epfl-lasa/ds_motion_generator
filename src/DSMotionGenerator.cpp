@@ -185,7 +185,7 @@ void DSMotionGenerator::ComputeDesiredVelocity() {
 
 	desired_velocity_ = SED_GMM_->getVelocity(real_pose_ - target_pose_ - target_offset_);
 
-	if(isnan(desired_velocity_.Norm2())){
+	if(std::isnan(desired_velocity_.Norm2())){
 		ROS_WARN_THROTTLE(1,"DS is generating NaN. Setting the output to zero.");
 		desired_velocity_.Zero();		
 	}
