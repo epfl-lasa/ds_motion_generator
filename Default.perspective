@@ -5,7 +5,7 @@
       "keys": {
         "running-plugins": {
           "type": "repr", 
-          "repr": "{u'rqt_reconfigure/Param': [1], u'rqt_ez_publisher/EzPublisher': [1], u'rqt_plot/Plot': [1], u'rqt_graph/RosGraph': [1]}"
+          "repr": "{u'rqt_reconfigure/Param': [1], u'rqt_plot/Plot': [1], u'rqt_graph/RosGraph': [1]}"
         }
       }, 
       "groups": {
@@ -33,13 +33,13 @@
               "keys": {
                 "splitter": {
                   "type": "repr(QByteArray.hex)", 
-                  "repr(QByteArray.hex)": "QtCore.QByteArray('000000ff0000000100000002000000ae0000006401ffffffff010000000100')", 
-                  "pretty-print": "         d     "
+                  "repr(QByteArray.hex)": "QtCore.QByteArray('000000ff0000000000000002000001120000029a01000000060100000001')", 
+                  "pretty-print": "               "
                 }, 
                 "_splitter": {
                   "type": "repr(QByteArray.hex)", 
-                  "repr(QByteArray.hex)": "QtCore.QByteArray('000000ff00000001000000020000012c000000640100000009010000000200')", 
-                  "pretty-print": "       , d     "
+                  "repr(QByteArray.hex)": "QtCore.QByteArray('000000ff000000000000000200000142000000c001000000090100000002')", 
+                  "pretty-print": "       B       "
                 }
               }, 
               "groups": {}
@@ -78,7 +78,7 @@
                 }, 
                 "topics": {
                   "type": "repr", 
-                  "repr": "[u'/ds1/filter/desired_velocity/linear/x', u'/ds1/desired_velocity/linear/x']"
+                  "repr": "u'/ds1/desired_velocity/linear/x'"
                 }, 
                 "y_limits": {
                   "type": "repr", 
@@ -86,7 +86,7 @@
                 }, 
                 "x_limits": {
                   "type": "repr", 
-                  "repr": "[102.31667399406433, 103.31667399406433]"
+                  "repr": "[24.630897998809814, 25.630897998809814]"
                 }
               }, 
               "groups": {}
@@ -133,7 +133,7 @@
                 }, 
                 "unreachable_check_box_state": {
                   "type": "repr", 
-                  "repr": "True"
+                  "repr": "u'true'"
                 }, 
                 "actionlib_check_box_state": {
                   "type": "repr", 
@@ -171,11 +171,11 @@
               "keys": {
                 "texts": {
                   "type": "repr", 
-                  "repr": "[]"
+                  "repr": "None"
                 }, 
                 "publish_interval": {
                   "type": "repr", 
-                  "repr": "100"
+                  "repr": "u'100'"
                 }
               }, 
               "groups": {}
@@ -243,7 +243,7 @@
               "keys": {
                 "dockable": {
                   "type": "repr", 
-                  "repr": "True"
+                  "repr": "u'true'"
                 }, 
                 "parent": {
                   "type": "repr", 
@@ -260,7 +260,7 @@
               "keys": {
                 "texts": {
                   "type": "repr", 
-                  "repr": "[u'/real_position/position/x', u'/real_position/position/y', u'/real_position/position/z', u'/real_position/orientation']"
+                  "repr": "[]"
                 }, 
                 "publish_interval": {
                   "type": "repr", 
@@ -272,7 +272,7 @@
                   "keys": {
                     "orientation_is_repeat": {
                       "type": "repr", 
-                      "repr": "True"
+                      "repr": "u'true'"
                     }, 
                     "orientation_range": {
                       "type": "repr", 
@@ -288,15 +288,15 @@
                         }, 
                         "z_is_repeat": {
                           "type": "repr", 
-                          "repr": "True"
+                          "repr": "u'true'"
                         }, 
                         "y_is_repeat": {
                           "type": "repr", 
-                          "repr": "True"
+                          "repr": "u'true'"
                         }, 
                         "x_is_repeat": {
                           "type": "repr", 
-                          "repr": "True"
+                          "repr": "u'true'"
                         }, 
                         "y_range": {
                           "type": "repr", 
@@ -321,13 +321,13 @@
       "keys": {
         "geometry": {
           "type": "repr(QByteArray.hex)", 
-          "repr(QByteArray.hex)": "QtCore.QByteArray('01d9d0cb0002000000000d2000000018000013af0000041900000d2000000018000013af0000041900000001000000000690')", 
-          "pretty-print": "                         "
+          "repr(QByteArray.hex)": "QtCore.QByteArray('01d9d0cb00010000000000410000001800000a13000005cf0000004100000018000009ff0000059f000000000000')", 
+          "pretty-print": "     A       A         "
         }, 
         "state": {
           "type": "repr(QByteArray.hex)", 
-          "repr(QByteArray.hex)": "QtCore.QByteArray('000000ff00000000fd000000010000000300000690000003ecfc0100000004fc00000000000003e9000003e900fffffffc0200000002fb0000006a007200710074005f0065007a005f007000750062006c00690073006800650072005f005f0045007a005000750062006c00690073006800650072005f005f0031005f005f0045007a005000750062006c006900730068006500720050006c007500670069006e005500690100000000000001ea0000019400fffffffb00000044007200710074005f00670072006100700068005f005f0052006f007300470072006100700068005f005f0031005f005f0052006f0073004700720061007000680055006901000001f0000001fc000000d500fffffffc000003ef000002a10000018500fffffffc0200000002fb00000042007200710074005f0070006c006f0074005f005f0050006c006f0074005f005f0031005f005f00440061007400610050006c006f00740057006900640067006500740100000000000002420000008e00fffffffb0000006c007200710074005f007200650063006f006e006600690067007500720065005f005f0050006100720061006d005f005f0031005f005f005f0070006c007500670069006e0063006f006e007400610069006e00650072005f0074006f0070005f0077006900640067006500740100000248000001a40000010f00fffffffb00000050007200710074005f006400650070005f005f0052006f0073005000610063006b00470072006100700068005f005f0031005f005f0052006f0073005000610063006b004700720061007000680055006901000004e10000030c0000000000000000fb0000006a007200710074005f0065007a005f007000750062006c00690073006800650072005f005f0045007a005000750062006c00690073006800650072005f005f0032005f005f0045007a005000750062006c006900730068006500720050006c007500670069006e005500690100000acc0000058d0000000000000000000006900000000000000004000000040000000800000008fc00000001000000030000000100000036004d0069006e0069006d0069007a006500640044006f0063006b00570069006400670065007400730054006f006f006c0062006100720000000000ffffffff0000000000000000')", 
-          "pretty-print": "                                                                                                                                                     Brqt_plot__Plot__1__DataPlotWidget          lrqt_reconfigure__Param__1___plugincontainer_top_widget          Prqt_dep__RosPackGraph__1__RosPackGraphUi          jrqt_ez_publisher__EzPublisher__2__EzPublisherPluginUi                            6MinimizedDockWidgetsToolbar        "
+          "repr(QByteArray.hex)": "QtCore.QByteArray('000000ff00000000fd0000000100000003000009bf00000559fc0100000004fc00000000000003770000033900fffffffc0200000002fb0000006a007200710074005f0065007a005f007000750062006c00690073006800650072005f005f0045007a005000750062006c00690073006800650072005f005f0031005f005f0045007a005000750062006c006900730068006500720050006c007500670069006e0055006901000000190000029e0000000000000000fb00000044007200710074005f00670072006100700068005f005f0052006f007300470072006100700068005f005f0031005f005f0052006f00730047007200610070006800550069010000001900000559000000b400fffffffc0000037d000006420000017700fffffffc0200000002fb00000042007200710074005f0070006c006f0074005f005f0050006c006f0074005f005f0031005f005f00440061007400610050006c006f00740057006900640067006500740100000019000002090000008c00fffffffb0000006c007200710074005f007200650063006f006e006600690067007500720065005f005f0050006100720061006d005f005f0031005f005f005f0070006c007500670069006e0063006f006e007400610069006e00650072005f0074006f0070005f00770069006400670065007401000002280000034a0000010f00fffffffb00000050007200710074005f006400650070005f005f0052006f0073005000610063006b00470072006100700068005f005f0031005f005f0052006f0073005000610063006b004700720061007000680055006901000004e10000030c0000000000000000fb0000006a007200710074005f0065007a005f007000750062006c00690073006800650072005f005f0045007a005000750062006c00690073006800650072005f005f0032005f005f0045007a005000750062006c006900730068006500720050006c007500670069006e005500690100000acc0000058d0000000000000000000009bf0000000000000004000000040000000800000008fc00000001000000030000000100000036004d0069006e0069006d0069007a006500640044006f0063006b00570069006400670065007400730054006f006f006c0062006100720000000000ffffffff0000000000000000')", 
+          "pretty-print": "                   w 9                                                                                                             Y                 Brqt_plot__Plot__1__DataPlotWidget          lrqt_reconfigure__Param__1___plugincontainer_top_widget          Prqt_dep__RosPackGraph__1__RosPackGraphUi          jrqt_ez_publisher__EzPublisher__2__EzPublisherPluginUi                            6MinimizedDockWidgetsToolbar        "
         }
       }, 
       "groups": {
