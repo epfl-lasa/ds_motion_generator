@@ -12,8 +12,8 @@
     <rosparam command="load" file="$(find ds_motion_generator)/config/s4_back_GMM.yml"/>
     <node name="ds_node" pkg="ds_motion_generator" type="active_motionGenerator_node" output="screen"/>
 
-    # doesn't work yet, but I should follow this style
-    <remap from="/ds1/filter/desired_velocity" to="/lwr/joint_controllers/passive_ds_command_vel" />
+    <!-- # doesn't work yet, but I should follow this style -->
+    <!-- <remap from="/ds1/filter/desired_velocity" to="/lwr/joint_controllers/passive_ds_command_vel" /> -->
 
   </group>
 

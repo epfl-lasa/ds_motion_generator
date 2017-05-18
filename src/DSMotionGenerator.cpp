@@ -1,5 +1,5 @@
 #include "DSMotionGenerator.h"
-#include <tf/transform_datatypes.h>
+// #include <tf/transform_datatypes.h>
 
 
 
@@ -37,8 +37,8 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
 
 bool DSMotionGenerator::Init() {
 
-	real_pose_.Resize(6);
-	desired_velocity_.Resize(6);
+	real_pose_.Resize(3);
+	desired_velocity_.Resize(3);
 
 	if (!InitializeDS()) {
 		ROS_ERROR_STREAM("ERROR intializing the DS");
@@ -81,28 +81,26 @@ bool DSMotionGenerator::InitializeDS() {
 	SED_GMM_->initGMR(0, 2, 3, 5 );
 
 
-	target_offset_.Resize(6);
-	target_pose_.Resize(6);
+	target_offset_.Resize(3);
+	target_pose_.Resize(3);
 
-	for (int i=0; i < attractor_.size(); i++){
+	for (int i = 0; i < attractor_.size(); i++) {
 		target_pose_(i) = attractor_[i];
 	}
 
-	// to do: the dimension for the filter should be equal to dimension of the output space.
-
 
 	// initializing the filter
-	CCDyn_filter_.reset (new CDDynamics(6, dt_, Wn_));
+	CCDyn_filter_.reset (new CDDynamics(3, dt_, Wn_));
 
 	// we should set the size automagically
-	velLimits_.Resize(6);
+	velLimits_.Resize(3);
 	CCDyn_filter_->SetVelocityLimits(velLimits_);
 
-	accLimits_.Resize(6);
+	accLimits_.Resize(3);
 	CCDyn_filter_->SetAccelLimits(accLimits_);
 
 
-	MathLib::Vector initial(6);
+	MathLib::Vector initial(3);
 
 	initial.Zero();
 
@@ -119,8 +117,8 @@ bool DSMotionGenerator::InitializeROS() {
 
 	sub_real_pose_ = nh_.subscribe( input_topic_name_ , 1000,
 	                                &DSMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
-	pub_desired_twist_ = nh_.advertise<geometry_msgs::Twist>(output_topic_name_, 1);
-	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::Twist>(output_filtered_topic_name_, 1);
+	pub_desired_twist_ = nh_.advertise<geometry_msgs::TwistStamped>(output_topic_name_, 1);
+	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::TwistStamped>(output_filtered_topic_name_, 1);
 
 
 	dyn_rec_f_ = boost::bind(&DSMotionGenerator::DynCallback, this, _1, _2);
@@ -162,19 +160,19 @@ void DSMotionGenerator::UpdateRealPosition(const geometry_msgs::Pose::ConstPtr& 
 	real_pose_(1) = msg_real_pose_.position.y;
 	real_pose_(2) = msg_real_pose_.position.z;
 
-	double qtx = msg_real_pose_.orientation.x;
-	double qty = msg_real_pose_.orientation.y;
-	double qtz = msg_real_pose_.orientation.z;
-	double qtw = msg_real_pose_.orientation.w;
+	// double qtx = msg_real_pose_.orientation.x;
+	// double qty = msg_real_pose_.orientation.y;
+	// double qtz = msg_real_pose_.orientation.z;
+	// double qtw = msg_real_pose_.orientation.w;
 
-	tf::Quaternion q(qtx, qty, qtz, qtw);
-	tf::Matrix3x3 m(q);
-	double roll, pitch, yaw;
-	m.getRPY(roll, pitch, yaw);
+	// tf::Quaternion q(qtx, qty, qtz, qtw);
+	// tf::Matrix3x3 m(q);
+	// double roll, pitch, yaw;
+	// m.getRPY(roll, pitch, yaw);
 
-	real_pose_(3) = roll;
-	real_pose_(4) = pitch;
-	real_pose_(5) = yaw;
+	// real_pose_(3?) = roll;
+	// real_pose_(4?) = pitch;
+	// real_pose_(5?) = yaw;
 
 }
 
@@ -185,34 +183,42 @@ void DSMotionGenerator::ComputeDesiredVelocity() {
 
 	desired_velocity_ = SED_GMM_->getVelocity(real_pose_ - target_pose_ - target_offset_);
 
-	if(std::isnan(desired_velocity_.Norm2())){
-		ROS_WARN_THROTTLE(1,"DS is generating NaN. Setting the output to zero.");
-		desired_velocity_.Zero();		
+	if (std::isnan(desired_velocity_.Norm2())) {
+		ROS_WARN_THROTTLE(1, "DS is generating NaN. Setting the output to zero.");
+		desired_velocity_.Zero();
 	}
 
 	desired_velocity_ = desired_velocity_ * scaling_factor_;
 
-	if (desired_velocity_.Norm() > ds_vel_limit_){
+	if (desired_velocity_.Norm() > ds_vel_limit_) {
 		desired_velocity_ = desired_velocity_ / desired_velocity_.Norm() * ds_vel_limit_;
 	}
 
-	msg_desired_velocity_.linear.x  = desired_velocity_(0);
-	msg_desired_velocity_.linear.y  = desired_velocity_(1);
-	msg_desired_velocity_.linear.z  = desired_velocity_(2);
-	msg_desired_velocity_.angular.x = desired_velocity_(3);
-	msg_desired_velocity_.angular.y = desired_velocity_(4);
-	msg_desired_velocity_.angular.z = desired_velocity_(5);
+	msg_desired_velocity_.header.stamp = ros::Time::now();
+	msg_desired_velocity_.twist.linear.x  = desired_velocity_(0);
+	msg_desired_velocity_.twist.linear.y  = desired_velocity_(1);
+	msg_desired_velocity_.twist.linear.z  = desired_velocity_(2);
+	// msg_desired_velocity_.angular.x = desired_velocity_(3?);
+	// msg_desired_velocity_.angular.y = desired_velocity_(4?);
+	// msg_desired_velocity_.angular.z = desired_velocity_(5?);
+	msg_desired_velocity_.twist.angular.x = 0;
+	msg_desired_velocity_.twist.angular.y = 0;
+	msg_desired_velocity_.twist.angular.z = 0;
 
 	CCDyn_filter_->SetTarget(desired_velocity_);
 	CCDyn_filter_->Update();
 	CCDyn_filter_->GetState(desired_velocity_filtered_);
 
-	msg_desired_velocity_filtered_.linear.x  = desired_velocity_filtered_(0);
-	msg_desired_velocity_filtered_.linear.y  = desired_velocity_filtered_(1);
-	msg_desired_velocity_filtered_.linear.z  = desired_velocity_filtered_(2);
-	msg_desired_velocity_filtered_.angular.x = desired_velocity_filtered_(3);
-	msg_desired_velocity_filtered_.angular.y = desired_velocity_filtered_(4);
-	msg_desired_velocity_filtered_.angular.z = desired_velocity_filtered_(5);
+	msg_desired_velocity_filtered_.header.stamp = ros::Time::now();
+	msg_desired_velocity_filtered_.twist.linear.x  = desired_velocity_filtered_(0);
+	msg_desired_velocity_filtered_.twist.linear.y  = desired_velocity_filtered_(1);
+	msg_desired_velocity_filtered_.twist.linear.z  = desired_velocity_filtered_(2);
+	// msg_desired_velocity_filtered_.angular.x = desired_velocity_filtered_(3?);
+	// msg_desired_velocity_filtered_.angular.y = desired_velocity_filtered_(4?);
+	// msg_desired_velocity_filtered_.angular.z = desired_velocity_filtered_(5?);
+	msg_desired_velocity_filtered_.twist.angular.x = 0;
+	msg_desired_velocity_filtered_.twist.angular.y = 0;
+	msg_desired_velocity_filtered_.twist.angular.z = 0;
 
 
 	mutex_.unlock();
@@ -225,12 +231,10 @@ void DSMotionGenerator::PublishDesiredVelocity() {
 	pub_desired_twist_.publish(msg_desired_velocity_);
 	pub_desired_twist_filtered_.publish(msg_desired_velocity_filtered_);
 
-
 }
 
 
 void DSMotionGenerator::DynCallback(ds_motion_generator::SED_paramsConfig &config, uint32_t level) {
-
 
 	double  Wn = config.Wn;
 

@@ -3,7 +3,9 @@
 
 #include "ros/ros.h"
 #include "geometry_msgs/Pose.h"
-#include "geometry_msgs/Twist.h"
+// #include "geometry_msgs/Twist.h"
+#include "geometry_msgs/TwistStamped.h"
+
 
 #include <vector>
 
@@ -56,8 +58,8 @@ private:
 	std::string output_filtered_topic_name_;
 
 	geometry_msgs::Pose msg_real_pose_;
-	geometry_msgs::Twist msg_desired_velocity_;
-	geometry_msgs::Twist msg_desired_velocity_filtered_;
+	geometry_msgs::TwistStamped msg_desired_velocity_;
+	geometry_msgs::TwistStamped msg_desired_velocity_filtered_;
 
 
 
