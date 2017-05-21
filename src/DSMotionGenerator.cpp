@@ -4,6 +4,8 @@
 
 
 
+
+
 DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
                                      double frequency,
                                      int K_gmm,
@@ -120,9 +122,14 @@ bool DSMotionGenerator::InitializeROS() {
 	pub_desired_twist_ = nh_.advertise<geometry_msgs::TwistStamped>(output_topic_name_, 1);
 	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::TwistStamped>(output_filtered_topic_name_, 1);
 
+	pub_target_ = nh_.advertise<geometry_msgs::PointStamped>("DS/target", 1);
+	pub_DesiredPath_ = nh_.advertise<nav_msgs::Path>("DS/DesiredPath", 1);
+	
+	msg_DesiredPath_.poses.resize(MAX_FRAME);
 
 	dyn_rec_f_ = boost::bind(&DSMotionGenerator::DynCallback, this, _1, _2);
 	dyn_rec_srv_.setCallback(dyn_rec_f_);
+
 
 
 	if (nh_.ok()) { // Wait for poses being published
@@ -145,6 +152,8 @@ void DSMotionGenerator::Run() {
 		ComputeDesiredVelocity();
 
 		PublishDesiredVelocity();
+
+		PublishFuturePath();
 
 		ros::spinOnce();
 
@@ -267,5 +276,62 @@ void DSMotionGenerator::DynCallback(ds_motion_generator::SED_paramsConfig &confi
 
 	scaling_factor_ = config.scaling;
 	ds_vel_limit_   = config.trimming;
+
+}
+
+
+void DSMotionGenerator::PublishFuturePath() {
+
+	geometry_msgs::PointStamped msg;
+
+	msg.header.frame_id = "world";
+	msg.header.stamp = ros::Time::now();
+	msg.point.x = target_pose_[0] + target_offset_[0];
+	msg.point.y = target_pose_[1] + target_offset_[1];
+	msg.point.z = target_pose_[2] + target_offset_[2];
+
+	pub_target_.publish(msg);
+
+	// create a temporary message
+
+
+	// setting the header of the path
+	msg_DesiredPath_.header.stamp = ros::Time::now();
+	msg_DesiredPath_.header.frame_id = "world";
+
+
+
+
+	MathLib::Vector simulated_pose = real_pose_;
+	MathLib::Vector simulated_vel;
+
+
+	for (int frame = 0; frame < MAX_FRAME; frame++)
+	{
+		// computing the next step based on the SED model
+		// DesiredPos = Active_GMR->getNextState();
+
+		simulated_vel = SED_GMM_->getVelocity(simulated_pose - target_pose_ - target_offset_);
+
+		simulated_pose[0] +=  simulated_vel[0] * dt_ * 10;
+		simulated_pose[1] +=  simulated_vel[1] * dt_ * 10;
+		simulated_pose[2] +=  simulated_vel[2] * dt_ * 10;
+
+		msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
+		msg_DesiredPath_.poses[frame].header.frame_id = "world";
+		msg_DesiredPath_.poses[frame].pose.position.x = simulated_pose[0];
+		msg_DesiredPath_.poses[frame].pose.position.y = simulated_pose[1];
+		msg_DesiredPath_.poses[frame].pose.position.z = simulated_pose[2];
+
+		pub_DesiredPath_.publish(msg_DesiredPath_);
+
+
+	}
+
+
+
+
+
+	// publisher.publish(msg_DesiredPath);
 
 }

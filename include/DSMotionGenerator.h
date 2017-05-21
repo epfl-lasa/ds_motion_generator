@@ -5,6 +5,8 @@
 #include "geometry_msgs/Pose.h"
 // #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/TwistStamped.h"
+#include "geometry_msgs/PointStamped.h"
+#include "nav_msgs/Path.h"
 
 
 #include <vector>
@@ -52,6 +54,8 @@ private:
 	ros::Subscriber sub_real_pose_;
 	ros::Publisher pub_desired_twist_;
 	ros::Publisher pub_desired_twist_filtered_;
+	ros::Publisher pub_target_;
+	ros::Publisher pub_DesiredPath_;
 
 	std::string input_topic_name_;
 	std::string output_topic_name_;
@@ -60,6 +64,9 @@ private:
 	geometry_msgs::Pose msg_real_pose_;
 	geometry_msgs::TwistStamped msg_desired_velocity_;
 	geometry_msgs::TwistStamped msg_desired_velocity_filtered_;
+
+	nav_msgs::Path msg_DesiredPath_;
+	int MAX_FRAME = 100;
 
 
 
@@ -112,6 +119,9 @@ private:
 	void ComputeDesiredVelocity();
 
 	void PublishDesiredVelocity();
+
+	void PublishFuturePath();
+
 
 	void DynCallback(ds_motion_generator::SED_paramsConfig &config, uint32_t level);
 
