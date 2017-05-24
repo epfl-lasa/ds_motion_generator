@@ -97,7 +97,10 @@ find_package(catkin REQUIRED COMPONENTS
 #   cfg/DynReconf2.cfg
 # )
 
- generate_dynamic_reconfigure_options(cfg/SED_params.cfg)  
+ generate_dynamic_reconfigure_options(
+  cfg/SED_params.cfg
+  cfg/SWIPE_params.cfg
+)  
 
 
 ###################################
@@ -153,6 +156,11 @@ add_executable(active_motionGenerator_node
 	${INCLUDE_DIR}/DSMotionGenerator.h)
 
 
+add_executable(swipe_motionGenerator_node 
+  ${SRC_DIR}/swipe_motionGenerator_node.cpp
+  ${SRC_DIR}/SwipeMotionGenerator.cpp
+  ${INCLUDE_DIR}/SwipeMotionGenerator.h)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -168,12 +176,18 @@ add_dependencies(active_motionGenerator_node
 	${catkin_EXPORTED_TARGETS}
 	${PROJECT_NAME}_gencfg)
 
+add_dependencies(swipe_motionGenerator_node 
+  ${${PROJECT_NAME}_EXPORTED_TARGETS} 
+  ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_gencfg)
+
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
 
 target_link_libraries(active_motionGenerator_node ${catkin_LIBRARIES} )
+target_link_libraries(swipe_motionGenerator_node ${catkin_LIBRARIES} )
 
 #############
 ## Install ##
