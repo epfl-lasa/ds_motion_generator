@@ -304,7 +304,8 @@ void DSMotionGenerator::PublishFuturePath() {
 
 	MathLib::Vector simulated_pose = real_pose_;
 	MathLib::Vector simulated_vel;
-
+	
+	simulated_vel.Resize(3);
 
 	for (int frame = 0; frame < MAX_FRAME; frame++)
 	{
@@ -328,10 +329,5 @@ void DSMotionGenerator::PublishFuturePath() {
 
 	}
 
-
-
-
-
-	// publisher.publish(msg_DesiredPath);
 
 }

@@ -25,9 +25,9 @@ int main(int argc, char **argv)
   std::vector<double> Sigma;
   std::vector<double> attractor;
 
-  double Wn;
-  std::vector<double> VelLimits;
-  std::vector<double> AccLimits;
+  // double Wn;
+  // std::vector<double> VelLimits;
+  // std::vector<double> AccLimits;
 
 
   if (!nh.getParam("input_topic_name", input_topic_name))   {
