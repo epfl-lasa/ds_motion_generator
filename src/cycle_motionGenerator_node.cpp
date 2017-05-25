@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "SwipeMotionGenerator.h"
+#include "CycleMotionGenerator.h"
 
 
 #include <vector>
@@ -7,7 +7,7 @@
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "swipe_motion_genrator_node");
+  ros::init(argc, argv, "cycle_motion_genrator_node");
 
   ros::NodeHandle nh;
   double frequency = 300.0;
@@ -18,13 +18,10 @@ int main(int argc, char **argv)
   std::string output_topic_name;
   std::string output_filtered_topic_name;
 
-  int SwipeDirection;
-  double SwipeVelocity;
-  double OrthogonalDamping;
-  double OrthVelLim;
-  std::vector<double>  SwipeTarget;
-
-
+  std::vector<double> CenterRotation;
+  double radius;
+  double RotationSpeed;
+  double ConvergenceRate;
 
 
   if (!nh.getParam("input_topic_name", input_topic_name))   {
@@ -42,23 +39,23 @@ int main(int argc, char **argv)
     // return -1;
   }
 
-  if (!nh.getParam("SwipeDirection", SwipeDirection))   {
-    ROS_ERROR("Couldn't retrieve the swiping velocity. ");
+  if (!nh.getParam("CenterRotation", CenterRotation))   {
+    ROS_ERROR("Couldn't retrieve the center of rotation. ");
     // return -1;
   }
 
-  if (!nh.getParam("SwipeVelocity", SwipeVelocity))   {
-    ROS_ERROR("Couldn't retrieve the swiping velocity. ");
+  if (!nh.getParam("radius", radius))   {
+    ROS_ERROR("Couldn't retrieve the radius of the rotation. ");
     // return -1;
   }
 
-  if (!nh.getParam("OrthogonalDamping", OrthogonalDamping))  {
-    ROS_ERROR("Couldn't retrieve the orthogonal damping ");
+  if (!nh.getParam("RotationSpeed", RotationSpeed))  {
+    ROS_ERROR("Couldn't retrieve the rotation speed.");
     // return -1;
   }
 
-  if (!nh.getParam("SwipeTarget", SwipeTarget)) {
-  ROS_ERROR("Couldn't retrieve the swiping target. ");
+  if (!nh.getParam("ConvergenceRate", ConvergenceRate)) {
+    ROS_ERROR("Couldn't retrieve the convergence speed. ");
     // return -1;
   }
 
@@ -66,21 +63,21 @@ int main(int argc, char **argv)
   ROS_INFO("Starting the Motion generator...");
 
 
-  SwipeMotionGenerator swipe_motion_generator(nh,
+  CycleMotionGenerator cycle_motion_generator(nh,
       frequency,
       input_topic_name,
       output_topic_name,
       output_filtered_topic_name,
-      SwipeDirection,
-      SwipeVelocity,
-      OrthogonalDamping,
-      SwipeTarget);
+      CenterRotation,
+      radius,
+      RotationSpeed,
+      ConvergenceRate);
 
-  if (!swipe_motion_generator.Init()) {
+  if (!cycle_motion_generator.Init()) {
     return -1;
   }
   else {
-    swipe_motion_generator.Run();
+    cycle_motion_generator.Run();
   }
 
 
