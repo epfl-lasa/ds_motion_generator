@@ -314,9 +314,9 @@ void DSMotionGenerator::PublishFuturePath() {
 
 		simulated_vel = SED_GMM_->getVelocity(simulated_pose - target_pose_ - target_offset_);
 
-		simulated_pose[0] +=  simulated_vel[0] * dt_ * 10;
-		simulated_pose[1] +=  simulated_vel[1] * dt_ * 10;
-		simulated_pose[2] +=  simulated_vel[2] * dt_ * 10;
+		simulated_pose[0] +=  simulated_vel[0] * dt_ * 20;
+		simulated_pose[1] +=  simulated_vel[1] * dt_ * 20;
+		simulated_pose[2] +=  simulated_vel[2] * dt_ * 20;
 
 		msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
 		msg_DesiredPath_.poses[frame].header.frame_id = "world";

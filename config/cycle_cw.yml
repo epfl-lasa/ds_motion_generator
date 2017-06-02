@@ -1,4 +1,4 @@
 CenterRotation: [-0.5 ,0 ,0.15]
-radius: 0.04
-RotationSpeed:  5 # this is in rad/s
-ConvergenceRate: 4
+radius: 0.02
+RotationSpeed:  2 # this is in rad/s
+ConvergenceRate: 2

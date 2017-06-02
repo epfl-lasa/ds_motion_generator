@@ -290,9 +290,9 @@ void SwipeMotionGenerator::PublishFuturePath() {
 
 
 
-		simulated_pose[0] +=  simulated_vel[0] * dt_ * 10;
-		simulated_pose[1] +=  simulated_vel[1] * dt_ * 10;
-		simulated_pose[2] +=  simulated_vel[2] * dt_ * 10;
+		simulated_pose[0] +=  simulated_vel[0] * dt_ * 20;
+		simulated_pose[1] +=  simulated_vel[1] * dt_ * 20;
+		simulated_pose[2] +=  simulated_vel[2] * dt_ * 20;
 
 		msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
 		msg_DesiredPath_.poses[frame].header.frame_id = "world";

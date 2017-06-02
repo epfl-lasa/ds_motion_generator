@@ -62,7 +62,7 @@ private:
 	geometry_msgs::TwistStamped msg_desired_velocity_filtered_;
 
 	nav_msgs::Path msg_DesiredPath_;
-	int MAX_FRAME = 100;
+	int MAX_FRAME = 200;
 
 
 
