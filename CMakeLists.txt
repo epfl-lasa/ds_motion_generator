@@ -101,6 +101,7 @@ find_package(catkin REQUIRED COMPONENTS
   cfg/SED_params.cfg
   cfg/SWIPE_params.cfg
   cfg/CYCLE_params.cfg
+  cfg/PPOscilate_params.cfg
 )  
 
 
@@ -167,6 +168,14 @@ add_executable(cycle_motionGenerator_node
   ${SRC_DIR}/CycleMotionGenerator.cpp
   ${INCLUDE_DIR}/CycleMotionGenerator.h)
 
+
+
+add_executable(PPOscilate_motionGenerator_node 
+  ${SRC_DIR}/PPOscilate_motionGenerator_node.cpp
+  ${SRC_DIR}/PPOscilateMotionGenerator.cpp
+  ${INCLUDE_DIR}/PPOscilateMotionGenerator.h)
+
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -192,6 +201,11 @@ add_dependencies(cycle_motionGenerator_node
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_gencfg)
 
+add_dependencies(PPOscilate_motionGenerator_node 
+  ${${PROJECT_NAME}_EXPORTED_TARGETS} 
+  ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_gencfg)
+
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
@@ -200,6 +214,7 @@ add_dependencies(cycle_motionGenerator_node
 target_link_libraries(active_motionGenerator_node ${catkin_LIBRARIES} )
 target_link_libraries(swipe_motionGenerator_node ${catkin_LIBRARIES} )
 target_link_libraries(cycle_motionGenerator_node ${catkin_LIBRARIES} )
+target_link_libraries(PPOscilate_motionGenerator_node ${catkin_LIBRARIES} )
 
 
 #############
