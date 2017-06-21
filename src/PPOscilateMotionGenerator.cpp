@@ -190,7 +190,7 @@ void PPOscilateMotionGenerator::ComputeDesiredVelocity() {
 	MathLib::Vector vel_on_line = pose_on_line / pose_on_line.Norm() * ( - SwipeVelocity_ - SwipeVel_offset_);
 
 
-	MathLib::Vector vel_ortho_line =   pose_ortho_line * (OrthogonalDamping_ * Orth_damp_scaling_) ;
+	MathLib::Vector vel_ortho_line =   pose_ortho_line * -(OrthogonalDamping_ * Orth_damp_scaling_) ;
 
 	desired_velocity_ = vel_on_line + vel_ortho_line;
 
@@ -200,7 +200,7 @@ void PPOscilateMotionGenerator::ComputeDesiredVelocity() {
 		desired_velocity_ = desired_velocity_ / desired_velocity_.Norm() * vel_limit_;
 	}
 
-	if (pose.Norm() < line.Norm() / 20) {
+	if (pose.Norm() < line.Norm() / 10) {
 		if (TARGET_id == 1) {
 			TARGET_id = 2;
 		}
