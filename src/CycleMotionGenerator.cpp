@@ -103,7 +103,7 @@ bool CycleMotionGenerator::InitializeROS() {
 
 	///////
 	pub_desiredOrientation_ = nh_.advertise<geometry_msgs::Quaternion>("/lwr/joint_controllers/passive_ds_command_orient", 1);
-	sub_object_state_ = nh_.subscribe("test_kuka/object_state", 1000, &CycleMotionGenerator::UpdateObjectState, this, ros::TransportHints().reliable().tcpNoDelay());
+	sub_object_state_ = nh_.subscribe("test_polishing/object_state", 1000, &CycleMotionGenerator::UpdateObjectState, this, ros::TransportHints().reliable().tcpNoDelay());
 
 	msg_DesiredPath_.poses.resize(MAX_FRAME);
 
