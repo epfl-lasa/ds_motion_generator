@@ -9,8 +9,8 @@
     <param name="input_topic_name" value="/lwr/ee_pose"/>
     <param name="output_topic_name" value="/ds1/desired_velocity"/>
     <param name="output_filtered_topic_name" value="/lwr/joint_controllers/passive_ds_command_vel"/>
-    <rosparam command="load" file="$(find ds_motion_generator)/config/s4_back_GMM.yml"/>
-    <node name="ds_node" pkg="ds_motion_generator" type="active_motionGenerator_node" output="screen"/>
+    <rosparam command="load" file="$(find ds_motion_generator)/config/linear_motion.yml"/>
+    <node name="ds_node" pkg="ds_motion_generator" type="Linear_motionGenerator_node" output="screen"/>
 
     <!-- # doesn't work yet, but I should follow this style -->
     <!-- <remap from="/ds1/filter/desired_velocity" to="/lwr/joint_controllers/passive_ds_command_vel" /> -->

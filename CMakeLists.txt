@@ -116,10 +116,9 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
-#  INCLUDE_DIRS include
-#  LIBRARIES example_ds
-#  CATKIN_DEPENDS roscpp rospy std_msgs
-#  DEPENDS system_lib
+ INCLUDE_DIRS include
+ CATKIN_DEPENDS roscpp rospy std_msgs nav_msgs mathlib sgaussians dynamic_reconfigure
+ LIBRARIES ${PROJECT_NAME}
 )
 
 ###########
@@ -152,36 +151,39 @@ include_directories(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/example_ds_node.cpp)
 
+set(SRCS
+    ${SRC_DIR}/DSMotionGenerator.cpp
+    ${SRC_DIR}/SwipeMotionGenerator.cpp
+    ${SRC_DIR}/CycleMotionGenerator.cpp
+    ${SRC_DIR}/PPOscilateMotionGenerator.cpp
+    ${SRC_DIR}/LinearMotionGenerator.cpp)
+
+
+add_library(${PROJECT_NAME} ${SRCS})
 
 add_executable(active_motionGenerator_node 
-	${SRC_DIR}/active_motionGenerator_node.cpp
-	${SRC_DIR}/DSMotionGenerator.cpp
-	${INCLUDE_DIR}/DSMotionGenerator.h)
+	${SRC_DIR}/active_motionGenerator_node.cpp)
+target_link_libraries(active_motionGenerator_node ${PROJECT_NAME})
 
 
 add_executable(swipe_motionGenerator_node 
-  ${SRC_DIR}/swipe_motionGenerator_node.cpp
-  ${SRC_DIR}/SwipeMotionGenerator.cpp
-  ${INCLUDE_DIR}/SwipeMotionGenerator.h)
+  ${SRC_DIR}/swipe_motionGenerator_node.cpp)
+target_link_libraries(swipe_motionGenerator_node ${PROJECT_NAME})
 
 add_executable(cycle_motionGenerator_node 
-  ${SRC_DIR}/cycle_motionGenerator_node.cpp
-  ${SRC_DIR}/CycleMotionGenerator.cpp
-  ${INCLUDE_DIR}/CycleMotionGenerator.h)
-
+  ${SRC_DIR}/cycle_motionGenerator_node.cpp)
+target_link_libraries(cycle_motionGenerator_node ${PROJECT_NAME})
 
 
 add_executable(PPOscilate_motionGenerator_node 
-  ${SRC_DIR}/PPOscilate_motionGenerator_node.cpp
-  ${SRC_DIR}/PPOscilateMotionGenerator.cpp
-  ${INCLUDE_DIR}/PPOscilateMotionGenerator.h)
+  ${SRC_DIR}/PPOscilate_motionGenerator_node.cpp)
+target_link_libraries(PPOscilate_motionGenerator_node ${PROJECT_NAME})
 
 
 
 add_executable(Linear_motionGenerator_node 
-  ${SRC_DIR}/Linear_motionGenerator_node.cpp
-  ${SRC_DIR}/LinearMotionGenerator.cpp
-  ${INCLUDE_DIR}/LinearMotionGenerator.h)
+  ${SRC_DIR}/Linear_motionGenerator_node.cpp)
+target_link_libraries(Linear_motionGenerator_node ${PROJECT_NAME})
 
 
 ## Rename C++ executable without prefix

@@ -41,6 +41,12 @@ bool CycleMotionGenerator::Init() {
 	target_pose_(1) = Cycle_Target_[1];
 	target_pose_(2) = Cycle_Target_[2];
 
+	object_position_.Resize(3);
+	object_speed_.Resize(3);
+
+	object_position_.Zero();
+	object_speed_.Zero();
+
 	target_offset_.Resize(3);
 
 
@@ -88,11 +94,16 @@ bool CycleMotionGenerator::InitializeROS() {
 
 	sub_real_pose_ = nh_.subscribe( input_topic_name_ , 1000,
 	                                &CycleMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
-	pub_desired_twist_ = nh_.advertise<geometry_msgs::TwistStamped>(output_topic_name_, 1);
-	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::TwistStamped>(output_filtered_topic_name_, 1);
+
+	pub_desired_twist_ = nh_.advertise<geometry_msgs::Twist>(output_topic_name_, 1);
+	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::Twist>(output_filtered_topic_name_, 1);
 
 	pub_target_ = nh_.advertise<geometry_msgs::PointStamped>("DS/target", 1);
 	pub_DesiredPath_ = nh_.advertise<nav_msgs::Path>("DS/DesiredPath", 1);
+
+	///////
+	pub_desiredOrientation_ = nh_.advertise<geometry_msgs::Quaternion>("/lwr/joint_controllers/passive_ds_command_orient", 1);
+	sub_object_state_ = nh_.subscribe("test_kuka/object_state", 1000, &CycleMotionGenerator::UpdateObjectState, this, ros::TransportHints().reliable().tcpNoDelay());
 
 	msg_DesiredPath_.poses.resize(MAX_FRAME);
 
@@ -113,6 +124,10 @@ bool CycleMotionGenerator::InitializeROS() {
 
 }
 
+void CycleMotionGenerator::setDesiredOrientation(geometry_msgs::Quaternion msg) 
+{
+	msg_desired_orientation = msg;
+}
 
 void CycleMotionGenerator::Run() {
 
@@ -141,6 +156,17 @@ void CycleMotionGenerator::UpdateRealPosition(const geometry_msgs::Pose::ConstPt
 }
 
 
+void CycleMotionGenerator::UpdateObjectState(const std_msgs::Float64MultiArray::ConstPtr& msg) {
+
+	target_pose_(0) = msg->data[0];
+	target_pose_(1) = msg->data[1];
+	target_pose_(2) = msg->data[2];
+	object_speed_(3) = msg->data[0];
+	object_speed_(4) = msg->data[1];
+	object_speed_(5) = msg->data[2];
+}
+
+
 void CycleMotionGenerator::ComputeDesiredVelocity() {
 
 	mutex_.lock();
@@ -158,12 +184,20 @@ void CycleMotionGenerator::ComputeDesiredVelocity() {
 	double Tdot = Cycle_speed_ + Cycle_speed_offset_;
 
 
-	x_vel = Rdot * cos(T) - R * Tdot * sin(T);
-	y_vel = Rdot * sin(T) + R * Tdot * cos(T);
+	// x_vel = Rdot * cos(T) - R * Tdot * sin(T);
+	// y_vel = Rdot * sin(T) + R * Tdot * cos(T);
 
-	desired_velocity_(0) = x_vel;
-	desired_velocity_(1) = y_vel;
-	desired_velocity_(2) = z_vel;
+	double alpha = Convergence_Rate_ * Convergence_Rate_scale_;
+	double omega = Cycle_speed_ + Cycle_speed_offset_;
+	double r = Cycle_radius_ * Cycle_radius_scale_;
+
+
+	x_vel = -alpha*(R-r) * cos(T) - r * omega * sin(T);
+	y_vel = -alpha*(R-r) * sin(T) + r * omega * cos(T);
+
+	desired_velocity_(0) = x_vel+object_speed_(0);
+	desired_velocity_(1) = y_vel+object_speed_(1);
+	desired_velocity_(2) = z_vel+object_speed_(2);
 
 	if (std::isnan(desired_velocity_.Norm2())) {
 		ROS_WARN_THROTTLE(1, "DS is generating NaN. Setting the output to zero.");
@@ -205,8 +239,9 @@ void CycleMotionGenerator::ComputeDesiredVelocity() {
 
 void CycleMotionGenerator::PublishDesiredVelocity() {
 
-	pub_desired_twist_.publish(msg_desired_velocity_);
-	pub_desired_twist_filtered_.publish(msg_desired_velocity_filtered_);
+	pub_desired_twist_.publish(msg_desired_velocity_.twist);
+	pub_desired_twist_filtered_.publish(msg_desired_velocity_filtered_.twist);
+	pub_desiredOrientation_.publish(msg_desired_orientation);
 
 }
 
@@ -301,8 +336,20 @@ void CycleMotionGenerator::PublishFuturePath() {
 		double Rdot = - Convergence_Rate_ * Convergence_Rate_scale_ * (R - Cycle_radius_ * Cycle_radius_scale_);
 		double Tdot = Cycle_speed_ + Cycle_speed_offset_;
 
-		simulated_vel(0) = Rdot * cos(T) - R * Tdot * sin(T);
-		simulated_vel(1) = Rdot * sin(T) + R * Tdot * cos(T);
+		// simulated_vel(0) = Rdot * cos(T) - R * Tdot * sin(T);
+		// simulated_vel(1) = Rdot * sin(T) + R * Tdot * cos(T);
+
+
+
+	double alpha = Convergence_Rate_ * Convergence_Rate_scale_;
+	double omega = Cycle_speed_ + Cycle_speed_offset_;
+	double r = Cycle_radius_ * Cycle_radius_scale_;
+
+
+	simulated_vel(0) = -alpha*(R-r) * cos(T) - r * omega * sin(T);
+	simulated_vel(1) = -alpha*(R-r) * sin(T) + r * omega * cos(T);
+
+
 		simulated_vel(2) = - Convergence_Rate_ * Convergence_Rate_scale_ * pose(2);;
 
 		if (simulated_vel.Norm() > Velocity_limit_) {

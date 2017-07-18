@@ -6,7 +6,9 @@
 // #include "geometry_msgs/Twist.h"
 #include "geometry_msgs/TwistStamped.h"
 #include "geometry_msgs/PointStamped.h"
+#include "geometry_msgs/Quaternion.h"
 #include "nav_msgs/Path.h"
+#include "std_msgs/Float64MultiArray.h"
 
 
 #include <vector>
@@ -56,6 +58,8 @@ private:
 	ros::Publisher pub_desired_twist_filtered_;
 	ros::Publisher pub_target_;
 	ros::Publisher pub_DesiredPath_;
+	ros::Publisher pub_desiredOrientation_;
+	ros::Subscriber sub_object_state_;
 
 	std::string input_topic_name_;
 	std::string output_topic_name_;
@@ -64,6 +68,7 @@ private:
 	geometry_msgs::Pose msg_real_pose_;
 	geometry_msgs::TwistStamped msg_desired_velocity_;
 	geometry_msgs::TwistStamped msg_desired_velocity_filtered_;
+	geometry_msgs::Quaternion msg_desired_orientation;
 
 	nav_msgs::Path msg_DesiredPath_;
 	int MAX_FRAME = 200;
@@ -85,6 +90,9 @@ private:
 	MathLib::Vector desired_velocity_;
 	MathLib::Vector desired_velocity_filtered_;
 
+	MathLib::Vector object_position_;
+	MathLib::Vector object_speed_;
+
 
 
 
@@ -103,6 +111,9 @@ public:
 
 	void Run();
 
+	void setDesiredOrientation(geometry_msgs::Quaternion msg); 
+
+
 private:
 
 	bool InitializeDS();
@@ -110,6 +121,8 @@ private:
 	bool InitializeROS();
 
 	void UpdateRealPosition(const geometry_msgs::Pose::ConstPtr& msg);
+	void UpdateObjectState(const std_msgs::Float64MultiArray::ConstPtr& msg);
+
 
 	void ComputeDesiredVelocity();
 

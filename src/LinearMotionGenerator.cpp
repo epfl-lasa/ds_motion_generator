@@ -62,8 +62,8 @@ bool LinearMotionGenerator::InitializeROS() {
 
 	sub_real_pose_ = nh_.subscribe( input_topic_name_ , 1000,
 	                                &LinearMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
-	pub_desired_twist_ = nh_.advertise<geometry_msgs::TwistStamped>(output_topic_name_, 1);
-	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::TwistStamped>(output_filtered_topic_name_, 1);
+	pub_desired_twist_ = nh_.advertise<geometry_msgs::Twist>(output_topic_name_, 1);
+	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::Twist>(output_filtered_topic_name_, 1);
 
 	pub_target_ = nh_.advertise<geometry_msgs::PointStamped>("DS/target", 1);
 	pub_DesiredPath_ = nh_.advertise<nav_msgs::Path>("DS/DesiredPath", 1);
@@ -186,8 +186,8 @@ void LinearMotionGenerator::ComputeDesiredVelocity() {
 
 void LinearMotionGenerator::PublishDesiredVelocity() {
 
-	pub_desired_twist_.publish(msg_desired_velocity_);
-	pub_desired_twist_filtered_.publish(msg_desired_velocity_filtered_);
+	pub_desired_twist_.publish(msg_desired_velocity_.twist);
+	pub_desired_twist_filtered_.publish(msg_desired_velocity_filtered_.twist);
 
 }
 
