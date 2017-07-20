@@ -159,7 +159,15 @@ set(SRCS
     ${SRC_DIR}/LinearMotionGenerator.cpp)
 
 
-add_library(${PROJECT_NAME} ${SRCS})
+set(HDRS
+    ${INCLUDE_DIR}/DSMotionGenerator.h
+    ${INCLUDE_DIR}/SwipeMotionGenerator.h
+    ${INCLUDE_DIR}/CycleMotionGenerator.h
+    ${INCLUDE_DIR}/PPOscilateMotionGenerator.h
+    ${INCLUDE_DIR}/LinearMotionGenerator.h)
+
+add_library(${PROJECT_NAME} ${HDRS} ${SRCS})
+target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
 add_executable(active_motionGenerator_node 
 	${SRC_DIR}/active_motionGenerator_node.cpp)
