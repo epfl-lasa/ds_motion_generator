@@ -66,6 +66,7 @@ private:
 	std::string output_filtered_topic_name_;
 
 	geometry_msgs::Pose msg_real_pose_;
+	geometry_msgs::Pose msg_desired_pose_;
 	geometry_msgs::TwistStamped msg_desired_velocity_;
 	geometry_msgs::TwistStamped msg_desired_velocity_filtered_;
 	geometry_msgs::Quaternion msg_desired_orientation;
@@ -84,6 +85,7 @@ private:
 	std::mutex mutex_;
 
 	MathLib::Vector real_pose_;
+	MathLib::Vector desired_pose_;
 	MathLib::Vector target_pose_;
 	MathLib::Vector target_offset_;
 
@@ -92,6 +94,10 @@ private:
 
 	MathLib::Vector object_position_;
 	MathLib::Vector object_speed_;
+
+	bool _first = false;
+
+	bool _outputVelocity = false;
 
 
 
