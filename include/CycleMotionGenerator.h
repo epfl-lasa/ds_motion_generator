@@ -17,7 +17,7 @@
 #include "CDDynamics.h"
 
 #include <mutex>
-
+#include <pthread.h>
 
 #include <dynamic_reconfigure/server.h>
 #include <ds_motion_generator/CYCLE_paramsConfig.h>
@@ -83,6 +83,8 @@ private:
 
 	// Class variables
 	std::mutex mutex_;
+    pthread_t _thread;
+    bool _startThread;
 
 	MathLib::Vector real_pose_;
 	MathLib::Vector desired_pose_;
@@ -95,11 +97,12 @@ private:
 	MathLib::Vector object_position_;
 	MathLib::Vector object_speed_;
 
-	bool _first = false;
+	bool _firstPosition = false;
+	bool _firstObject = false;
 
-	bool _outputVelocity = false;
+	bool _outputVelocity = true;
 
-
+	double Alpha;
 
 
 public:
@@ -138,6 +141,13 @@ private:
 
 
 	void DynCallback(ds_motion_generator::CYCLE_paramsConfig &config, uint32_t level);
+
+
+ 	static void* startPathPublishingLoop(void* ptr);
+
+    void pathPublishingLoop();   
+
+    MathLib::Vector getDesiredVelocity(MathLib::Vector pose);
 
 };
 

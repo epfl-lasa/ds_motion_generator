@@ -81,6 +81,14 @@ bool CycleMotionGenerator::Init() {
 	CCDyn_filter_->SetState(initial);
 	CCDyn_filter_->SetTarget(initial);
 
+	_startThread = true;
+    if(pthread_create(&_thread, NULL, &CycleMotionGenerator::startPathPublishingLoop, this))
+    {
+        throw std::runtime_error("Cannot create reception thread");  
+    }
+
+
+
 	if (!InitializeROS()) {
 		ROS_ERROR_STREAM("ERROR intializing the DS");
 		return false;
@@ -93,7 +101,7 @@ bool CycleMotionGenerator::Init() {
 
 bool CycleMotionGenerator::InitializeROS() {
 
-	sub_real_pose_ = nh_.subscribe( input_topic_name_ , 1000,
+	sub_real_pose_ = nh_.subscribe( input_topic_name_ , 1,
 	                                &CycleMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
 
 	if(_outputVelocity)
@@ -142,19 +150,23 @@ void CycleMotionGenerator::Run() {
 
 	while (nh_.ok()) {
 
-		if(_first)
+		if(_firstPosition && _firstObject)
 		{
 			ComputeDesiredVelocity();
 
 			PublishDesiredVelocity();
 
-			PublishFuturePath();			
+			// PublishFuturePath();			
 		}
 
 		ros::spinOnce();
 
 		loop_rate_.sleep();
 	}
+
+	_startThread = false;
+	pthread_join(_thread,NULL);
+
 }
 
 void CycleMotionGenerator::UpdateRealPosition(const geometry_msgs::Pose::ConstPtr& msg) {
@@ -166,10 +178,12 @@ void CycleMotionGenerator::UpdateRealPosition(const geometry_msgs::Pose::ConstPt
 	real_pose_(2) = msg_real_pose_.position.z;
 
 
-	if(!_first)
+	if(!_firstPosition)
 	{
 		desired_pose_ = real_pose_;
-		_first = true;
+		std:cerr << desired_pose_(2) << " " <<  real_pose_(2) << std::endl;
+
+		_firstPosition = true;
 	}
 }
 
@@ -182,6 +196,14 @@ void CycleMotionGenerator::UpdateObjectState(const std_msgs::Float64MultiArray::
 	object_speed_(0) = msg->data[3];
 	object_speed_(1) = msg->data[4];
 	object_speed_(2) = msg->data[5];
+
+	if(!_firstObject)
+	{
+		// desired_pose_ = real_pose_;
+		// std:cerr << desired_pose_(2) << " " <<  real_pose_(2) << std::endl;
+
+		_firstObject= true;
+	}
 }
 
 
@@ -189,51 +211,24 @@ void CycleMotionGenerator::ComputeDesiredVelocity() {
 
 	mutex_.lock();
 
-	MathLib::Vector pose;
+	MathLib::Vector pose, desired_velocity_des;
 	pose.Resize(3);
+	desired_velocity_des.Resize(3);
 	if(_outputVelocity)
 	{
-		pose = real_pose_ - target_pose_  - target_offset_;
+		desired_velocity_ = getDesiredVelocity(real_pose_);
 	}
 	else
 	{
-		pose = desired_pose_ - target_pose_  - target_offset_;
+		desired_velocity_ = getDesiredVelocity(desired_pose_);
 	}
 
-	double x_vel = 0;
-	double y_vel = 0;
-	double z_vel = - Convergence_Rate_ * Convergence_Rate_scale_ * pose(2);
 
-	double R = sqrt(pose(0) * pose(0) + pose(1) * pose(1));
-	double T = atan2(pose(1), pose(0));
-
-	double Rdot = - Convergence_Rate_ * Convergence_Rate_scale_ * (R - Cycle_radius_ * Cycle_radius_scale_);
-	double Tdot = Cycle_speed_ + Cycle_speed_offset_;
-
-
-	x_vel = Rdot * cos(T) - R * Tdot * sin(T);
-	y_vel = Rdot * sin(T) + R * Tdot * cos(T);
-
-	// double alpha = Convergence_Rate_ * Convergence_Rate_scale_;
-	// double omega = Cycle_speed_ + Cycle_speed_offset_;
-	// double r = Cycle_radius_ * Cycle_radius_scale_;
-
-
-	// x_vel = -alpha*(R-r) * cos(T) - R * omega * sin(T);
-	// y_vel = -alpha*(R-r) * sin(T) + R * omega * cos(T);
-
-	desired_velocity_(0) = x_vel+object_speed_(0);
-	desired_velocity_(1) = y_vel+object_speed_(1);
-	desired_velocity_(2) = z_vel+object_speed_(2);
+	desired_velocity_des = getDesiredVelocity(desired_pose_);
 
 	if (std::isnan(desired_velocity_.Norm2())) {
 		ROS_WARN_THROTTLE(1, "DS is generating NaN. Setting the output to zero.");
 		desired_velocity_.Zero();
-	}
-
-	for(int k =0; k < 3;k++)
-	{
-		desired_pose_(k) += dt_*desired_velocity_(k);
 	}
 
 
@@ -241,14 +236,59 @@ void CycleMotionGenerator::ComputeDesiredVelocity() {
 		desired_velocity_ = desired_velocity_ / desired_velocity_.Norm() * Velocity_limit_;
 	}
 
+
+	if (desired_velocity_des.Norm() > Velocity_limit_) {
+		desired_velocity_des = desired_velocity_des / desired_velocity_des.Norm() * Velocity_limit_;
+	}
+
+	// if(_outputVelocity)
+	// {
+
+	float alpha = 0.5f;
+
+	MathLib::Vector error;
+	error.Resize(3);
+	error = desired_pose_-real_pose_;
+
+	// desired_velocity_ = desired_velocity_des;
+
+	// std::cerr << error.Norm() <<  " " << Alpha  << std::endl; 
+	// if(error.Norm()< 0.1)
+	// {	
+		for(int k =0; k < 3;k++)
+		{
+			desired_pose_(k) += dt_*((1-Alpha)*desired_velocity_(k)+Alpha*desired_velocity_des(k));
+			// desired_pose_(k) += dt_*desired_velocity_des(k);
+			// desired_pose_(k) = real_pose_(k)+dt_*((1-Alpha)*desired_velocity_(k)+Alpha*desired_velocity_des(k));
+			// desired_pose_(k) = real_pose_(k)+dt_*(desired_velocity_(k));
+			// desired_pose_(k) += dt_*desired_velocity_des(k);
+		}
+	// }
+
+
+	// }
+	// else
+	// {
+		// for(int k =0; k < 3;k++)
+		// {
+		// 	desired_pose_(k) = real_pose_(k)+dt_*desired_velocity_(k);
+		// }
+	// }
+
+
+
 	msg_desired_velocity_.header.stamp = ros::Time::now();
 	msg_desired_velocity_.twist.linear.x  = desired_velocity_(0);
 	msg_desired_velocity_.twist.linear.y  = desired_velocity_(1);
 	msg_desired_velocity_.twist.linear.z  = desired_velocity_(2);
 
-	msg_desired_velocity_.twist.angular.x = 0;
-	msg_desired_velocity_.twist.angular.y = 0;
-	msg_desired_velocity_.twist.angular.z = 0;
+	// msg_desired_velocity_.twist.linear.x  = (1-Alpha)*desired_velocity_(0)+Alpha*desired_velocity_des(0);
+	// msg_desired_velocity_.twist.linear.y  = (1-Alpha)*desired_velocity_(1)+Alpha*desired_velocity_des(1);
+	// msg_desired_velocity_.twist.linear.z  = (1-Alpha)*desired_velocity_(2)+Alpha*desired_velocity_des(2);
+
+	msg_desired_velocity_.twist.angular.x = desired_pose_(0);
+	msg_desired_velocity_.twist.angular.y = desired_pose_(1);
+	msg_desired_velocity_.twist.angular.z = desired_pose_(2);
 
 	msg_desired_pose_.position.x = desired_pose_(0);
 	msg_desired_pose_.position.y = desired_pose_(1);
@@ -275,6 +315,170 @@ void CycleMotionGenerator::ComputeDesiredVelocity() {
 	mutex_.unlock();
 
 }
+
+
+MathLib::Vector CycleMotionGenerator::getDesiredVelocity(MathLib::Vector pose)
+{
+	MathLib::Vector velocity;
+	velocity.Resize(3);
+
+	pose = pose-target_pose_-target_offset_;
+
+	double x_vel = 0;
+	double y_vel = 0;
+	double z_vel = - Convergence_Rate_ * Convergence_Rate_scale_ * pose(2);
+
+	double R = sqrt(pose(0) * pose(0) + pose(1) * pose(1));
+	double T = atan2(pose(1), pose(0));
+
+	double Rdot = - Convergence_Rate_ * Convergence_Rate_scale_ * (R - Cycle_radius_ * Cycle_radius_scale_);
+	double Tdot = Cycle_speed_ * (1+Cycle_speed_offset_);
+
+
+	x_vel = Rdot * cos(T) - R * Tdot * sin(T);
+	y_vel = Rdot * sin(T) + R * Tdot * cos(T);
+
+	velocity(0) = x_vel+object_speed_(0);
+	velocity(1) = y_vel+object_speed_(1);
+	velocity(2) = z_vel+object_speed_(2);
+
+	return velocity;
+}
+
+
+// void CycleMotionGenerator::ComputeDesiredVelocity() {
+
+// 	mutex_.lock();
+
+// 	MathLib::Vector pose;
+// 	pose.Resize(3);
+// 	if(_outputVelocity)
+// 	{
+// 		pose = real_pose_ - target_pose_  - target_offset_;
+// 	}
+// 	else
+// 	{
+// 		pose = desired_pose_ - target_pose_  - target_offset_;
+// 	}
+
+// 	double x_vel = 0;
+// 	double y_vel = 0;
+// 	double z_vel = - Convergence_Rate_ * Convergence_Rate_scale_ * pose(2) *0.5f;
+
+// 	double R = sqrt(pose(0) * pose(0) + pose(1) * pose(1));
+// 	double T = atan2(pose(1), pose(0));
+
+// 	double Rdot = - Convergence_Rate_ * Convergence_Rate_scale_ * (R - Cycle_radius_ * Cycle_radius_scale_);
+// 	double Tdot = Cycle_speed_ + Cycle_speed_offset_;
+
+
+// 	x_vel = Rdot * cos(T) - R * Tdot * sin(T);
+// 	y_vel = Rdot * sin(T) + R * Tdot * cos(T);
+
+// 	// double alpha = Convergence_Rate_ * Convergence_Rate_scale_;
+// 	// double omega = Cycle_speed_ + Cycle_speed_offset_;
+// 	// double r = Cycle_radius_ * Cycle_radius_scale_;
+
+
+// 	// x_vel = -alpha*(R-r) * cos(T) - R * omega * sin(T);
+// 	// y_vel = -alpha*(R-r) * sin(T) + R * omega * cos(T);
+
+// 	desired_velocity_(0) = x_vel+object_speed_(0);
+// 	desired_velocity_(1) = y_vel+object_speed_(1);
+// 	desired_velocity_(2) = z_vel+object_speed_(2);
+
+// 	// desired pose
+// 	MathLib::Vector ref_velocity;
+// 	ref_velocity.Resize(3);
+
+// 	if(_outputVelocity)
+// 	{
+// 		pose = desired_pose_ - target_pose_  - target_offset_;
+// 		R = sqrt(pose(0) * pose(0) + pose(1) * pose(1));
+// 		T = atan2(pose(1), pose(0));
+// 		Rdot = - Convergence_Rate_ * Convergence_Rate_scale_ * (R - Cycle_radius_ * Cycle_radius_scale_);
+// 		Tdot = Cycle_speed_ * (1+Cycle_speed_offset_);
+// 		ref_velocity(0) = Rdot * cos(T) - R * Tdot * sin(T)+object_speed_(0);
+// 		ref_velocity(1) = Rdot * sin(T) + R * Tdot * cos(T)+object_speed_(1);
+// 		ref_velocity(2) = - Convergence_Rate_ * Convergence_Rate_scale_ * pose(2)+object_speed_(2);	
+
+// 		// std::cerr << pose(0) << " " << pose(1) << " " << pose(2) << std::endl;
+
+// 		if (ref_velocity.Norm() > Velocity_limit_) {
+// 		ref_velocity = ref_velocity / ref_velocity.Norm() * Velocity_limit_;
+// 		}
+
+// 	}
+
+// 	if (std::isnan(desired_velocity_.Norm2())) {
+// 		ROS_WARN_THROTTLE(1, "DS is generating NaN. Setting the output to zero.");
+// 		desired_velocity_.Zero();
+// 	}
+
+// 	if (desired_velocity_.Norm() > Velocity_limit_) {
+// 		desired_velocity_ = desired_velocity_ / desired_velocity_.Norm() * Velocity_limit_;
+// 	}
+
+
+// 	// MathLib::Vector error_velocity;
+// 	// error_velocity.Resize(3);
+// 	// error_velocity.Norm();
+// 	for(int k =0; k < 3;k++)
+// 	{
+// 		desired_pose_(k) += dt_*desired_velocity_(k);
+// 	}
+
+// 	// if(_outputVelocity)
+// 	// {
+// 	// 	for(int k =0; k < 3;k++)
+// 	// 	{
+// 	// 		desired_pose_(k) += dt_*ref_velocity(k);
+// 	// 	}
+// 	// }
+// 	// else
+// 	// {
+// 	// 	for(int k =0; k < 3;k++)
+// 	// 	{
+// 	// 		desired_pose_(k) += dt_*desired_velocity_(k);
+// 	// 	}
+// 	// }
+
+
+
+// 	msg_desired_velocity_.header.stamp = ros::Time::now();
+// 	msg_desired_velocity_.twist.linear.x  = desired_velocity_(0);
+// 	msg_desired_velocity_.twist.linear.y  = desired_velocity_(1);
+// 	msg_desired_velocity_.twist.linear.z  = desired_velocity_(2);
+
+// 	msg_desired_velocity_.twist.angular.x = desired_pose_(0);
+// 	msg_desired_velocity_.twist.angular.y = desired_pose_(1);
+// 	msg_desired_velocity_.twist.angular.z = desired_pose_(2);
+
+// 	msg_desired_pose_.position.x = desired_pose_(0);
+// 	msg_desired_pose_.position.y = desired_pose_(1);
+// 	msg_desired_pose_.position.z = desired_pose_(2);
+// 	msg_desired_pose_.orientation.x = msg_desired_orientation.x;
+// 	msg_desired_pose_.orientation.y = msg_desired_orientation.y;
+// 	msg_desired_pose_.orientation.z = msg_desired_orientation.z;
+// 	msg_desired_pose_.orientation.w = msg_desired_orientation.w;
+
+// 	CCDyn_filter_->SetTarget(desired_velocity_);
+// 	CCDyn_filter_->Update();
+// 	CCDyn_filter_->GetState(desired_velocity_filtered_);
+
+// 	msg_desired_velocity_filtered_.header.stamp = ros::Time::now();
+// 	msg_desired_velocity_filtered_.twist.linear.x  = desired_velocity_filtered_(0);
+// 	msg_desired_velocity_filtered_.twist.linear.y  = desired_velocity_filtered_(1);
+// 	msg_desired_velocity_filtered_.twist.linear.z  = desired_velocity_filtered_(2);
+
+// 	msg_desired_velocity_filtered_.twist.angular.x = 0;
+// 	msg_desired_velocity_filtered_.twist.angular.y = 0;
+// 	msg_desired_velocity_filtered_.twist.angular.z = 0;
+
+
+// 	mutex_.unlock();
+
+// }
 
 
 void CycleMotionGenerator::PublishDesiredVelocity() {
@@ -329,6 +533,7 @@ void CycleMotionGenerator::DynCallback(ds_motion_generator::CYCLE_paramsConfig &
 	Convergence_Rate_scale_ = config.ConvergenceSpeed;
 	Velocity_limit_ = config.vel_trimming;
 
+	Alpha = config.Alpha;
 	if (Cycle_radius_scale_ < 0) {
 		ROS_ERROR("RECONFIGURE: The scaling factor for radius cannot be negative!");
 	}
@@ -343,6 +548,23 @@ void CycleMotionGenerator::DynCallback(ds_motion_generator::CYCLE_paramsConfig &
 
 }
 
+void* CycleMotionGenerator::startPathPublishingLoop(void* ptr)
+{
+    reinterpret_cast<CycleMotionGenerator *>(ptr)->pathPublishingLoop(); 
+}
+
+
+void CycleMotionGenerator::pathPublishingLoop()
+{
+    while(_startThread)
+    {
+        if(_firstPosition)
+        {
+            PublishFuturePath();   
+        }
+    }
+    std::cerr << "END path publishing thread" << std::endl;
+}
 
 void CycleMotionGenerator::PublishFuturePath() {
 
