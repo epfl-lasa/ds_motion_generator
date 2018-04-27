@@ -163,11 +163,15 @@ void DSMotionGenerator::Run() {
 
 void DSMotionGenerator::UpdateRealPosition(const geometry_msgs::Pose::ConstPtr& msg) {
 
-	msg_real_pose_ = *msg;
+	// msg_real_pose_ = *msg;
 
-	real_pose_(0) = msg_real_pose_.position.x;
-	real_pose_(1) = msg_real_pose_.position.y;
-	real_pose_(2) = msg_real_pose_.position.z;
+	real_pose_(0) = msg->position.x;
+	real_pose_(1) = msg->position.y;
+	real_pose_(2) = msg->position.z;
+
+	// ROS_INFO_STREAM_THROTTLE(1,"pose is : " << real_pose_(0) << "\t" 
+	// 	<< real_pose_(1) << "\t" 
+	// 	<< real_pose_(2)  );
 
 	// double qtx = msg_real_pose_.orientation.x;
 	// double qty = msg_real_pose_.orientation.y;
