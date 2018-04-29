@@ -2,9 +2,6 @@
 <launch>
 
 
-# input_topic name should contatin: geometry_msgs::Pose
-# output_topic_name will write geometry_msgs::Twist
-
   <group ns="ds1">
     <param name="input_topic_name" value="/ur5/ur5_cartesian_velocity_controller_sim/ee_state_pose"/>
     <param name="output_topic_name" value="/ds_desired_velocity"/>
