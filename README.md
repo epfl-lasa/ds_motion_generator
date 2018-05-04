@@ -8,7 +8,7 @@ This package provides a nodified version of DS motion generators. Type of DS:
 - analyitic limit cycle
 - Learned non-linear DS with SEDS parametrization
 - Learned non-linear DS with LPV-OPT parametrization
-- Learned Locally Active Globally Stable DS with LPV-OPT parametrization
+- Learned Locally Active Globally Stable (LAGS) DS with LPV-OPT parametrization
 
 # Installation
 Do the following steps:
