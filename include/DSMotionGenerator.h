@@ -3,8 +3,8 @@
 
 #include "ros/ros.h"
 #include "geometry_msgs/Pose.h"
-// #include "geometry_msgs/Twist.h"
-#include "geometry_msgs/TwistStamped.h"
+#include "geometry_msgs/Twist.h"
+// #include "geometry_msgs/TwistStamped.h"
 #include "geometry_msgs/PointStamped.h"
 #include "nav_msgs/Path.h"
 
@@ -62,8 +62,10 @@ private:
 	std::string output_filtered_topic_name_;
 
 	geometry_msgs::Pose msg_real_pose_;
-	geometry_msgs::TwistStamped msg_desired_velocity_;
-	geometry_msgs::TwistStamped msg_desired_velocity_filtered_;
+	// geometry_msgs::TwistStamped msg_desired_velocity_;
+	// geometry_msgs::TwistStamped msg_desired_velocity_filtered_;
+	geometry_msgs::Twist msg_desired_velocity_;
+	geometry_msgs::Twist msg_desired_velocity_filtered_;
 
 	nav_msgs::Path msg_DesiredPath_;
 	int MAX_FRAME = 200;

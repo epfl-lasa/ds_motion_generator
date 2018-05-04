@@ -119,8 +119,11 @@ bool DSMotionGenerator::InitializeROS() {
 
 	sub_real_pose_ = nh_.subscribe( input_topic_name_ , 1000,
 	                                &DSMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
-	pub_desired_twist_ = nh_.advertise<geometry_msgs::TwistStamped>(output_topic_name_, 1);
-	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::TwistStamped>(output_filtered_topic_name_, 1);
+	// pub_desired_twist_ = nh_.advertise<geometry_msgs::TwistStamped>(output_topic_name_, 1);
+	// pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::TwistStamped>(output_filtered_topic_name_, 1);
+	pub_desired_twist_ = nh_.advertise<geometry_msgs::Twist>(output_topic_name_, 1);
+	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::Twist>(output_filtered_topic_name_, 1);
+
 
 	pub_target_ = nh_.advertise<geometry_msgs::PointStamped>("DS/target", 1);
 	pub_DesiredPath_ = nh_.advertise<nav_msgs::Path>("DS/DesiredPath", 1);
@@ -203,31 +206,31 @@ void DSMotionGenerator::ComputeDesiredVelocity() {
 		desired_velocity_ = desired_velocity_ / desired_velocity_.Norm() * ds_vel_limit_;
 	}
 
-	msg_desired_velocity_.header.stamp = ros::Time::now();
-	msg_desired_velocity_.twist.linear.x  = desired_velocity_(0);
-	msg_desired_velocity_.twist.linear.y  = desired_velocity_(1);
-	msg_desired_velocity_.twist.linear.z  = desired_velocity_(2);
+	// msg_desired_velocity_.header.stamp = ros::Time::now();
+	msg_desired_velocity_.linear.x  = desired_velocity_(0);
+	msg_desired_velocity_.linear.y  = desired_velocity_(1);
+	msg_desired_velocity_.linear.z  = desired_velocity_(2);
 	// msg_desired_velocity_.angular.x = desired_velocity_(3?);
 	// msg_desired_velocity_.angular.y = desired_velocity_(4?);
 	// msg_desired_velocity_.angular.z = desired_velocity_(5?);
-	msg_desired_velocity_.twist.angular.x = 0;
-	msg_desired_velocity_.twist.angular.y = 0;
-	msg_desired_velocity_.twist.angular.z = 0;
+	msg_desired_velocity_.angular.x = 0;
+	msg_desired_velocity_.angular.y = 0;
+	msg_desired_velocity_.angular.z = 0;
 
 	CCDyn_filter_->SetTarget(desired_velocity_);
 	CCDyn_filter_->Update();
 	CCDyn_filter_->GetState(desired_velocity_filtered_);
 
-	msg_desired_velocity_filtered_.header.stamp = ros::Time::now();
-	msg_desired_velocity_filtered_.twist.linear.x  = desired_velocity_filtered_(0);
-	msg_desired_velocity_filtered_.twist.linear.y  = desired_velocity_filtered_(1);
-	msg_desired_velocity_filtered_.twist.linear.z  = desired_velocity_filtered_(2);
+	// msg_desired_velocity_filtered_.header.stamp = ros::Time::now();
+	msg_desired_velocity_filtered_.linear.x  = desired_velocity_filtered_(0);
+	msg_desired_velocity_filtered_.linear.y  = desired_velocity_filtered_(1);
+	msg_desired_velocity_filtered_.linear.z  = desired_velocity_filtered_(2);
 	// msg_desired_velocity_filtered_.angular.x = desired_velocity_filtered_(3?);
 	// msg_desired_velocity_filtered_.angular.y = desired_velocity_filtered_(4?);
 	// msg_desired_velocity_filtered_.angular.z = desired_velocity_filtered_(5?);
-	msg_desired_velocity_filtered_.twist.angular.x = 0;
-	msg_desired_velocity_filtered_.twist.angular.y = 0;
-	msg_desired_velocity_filtered_.twist.angular.z = 0;
+	msg_desired_velocity_filtered_.angular.x = 0;
+	msg_desired_velocity_filtered_.angular.y = 0;
+	msg_desired_velocity_filtered_.angular.z = 0;
 
 
 	mutex_.unlock();

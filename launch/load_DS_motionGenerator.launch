@@ -1,35 +1,30 @@
 <?xml version="1.0" ?>
 <launch>
-
+ 
+ <arg name="motion-1"   default="true"/>
+ <arg name="motion-2"   default="false"/>
 
 # input_topic name should contatin: geometry_msgs::Pose
 # output_topic_name will write geometry_msgs::Twist
-
+<group if="$(arg motion-1)">
   <group ns="ds1">
     <param name="input_topic_name" value="/lwr/ee_pose"/>
     <param name="output_topic_name" value="/ds1/desired_velocity"/>
     <param name="output_filtered_topic_name" value="/lwr/joint_controllers/passive_ds_command_vel"/>
-    <rosparam command="load" file="$(find ds_motion_generator)/config/linear_motion.yml"/>
-    <node name="ds_node" pkg="ds_motion_generator" type="Linear_motionGenerator_node" output="screen"/>
-
-    <!-- # doesn't work yet, but I should follow this style -->
-    <!-- <remap from="/ds1/filter/desired_velocity" to="/lwr/joint_controllers/passive_ds_command_vel" /> -->
-
+    <rosparam command="load" file="$(find ds_motion_generator)/config/free_ws.yml"/>
+    <node name="ds_node" pkg="ds_motion_generator" type="active_motionGenerator_node" output="screen"/>
   </group>
+</group>
 
-  <!--group ns="DS_2">
-  	<param name="input_topic_name" value="/real_position"/>
-  	<param name="output_topic_name" value="/ds2/desired_velocity"/>
-  	<param name="output_filtered_topic_name" value="/ds2/filter/desired_velocity"/>
-	<rosparam command="load" file="$(find ds_motion_generator)/config/DS1_params.yaml"/>
-	<node name="DS_2" pkg="ds_motion_generator" type="active_motionGenerator_node" output="screen"/>
-  </group-->
-
-
-  <!--group ns="DS_2">
-  	<param name="gmm_path" value="$(find ds_motion_generator)/data/DS2"/>
-  	<param name="max_des_vel" value=".3"/>
-  	<node name="motionGenerator" pkg="ds_motion_generator" type="active_motionGenerator_node" output="screen"/>
-  </group-->
+ <!-- Startup RVIZ with given config -->
+<group if="$(arg motion-2)">
+  <group ns="ds1">
+    <param name="input_topic_name" value="/lwr/ee_pose"/>
+    <param name="output_topic_name" value="/ds1/desired_velocity"/>
+    <param name="output_filtered_topic_name" value="/lwr/joint_controllers/passive_ds_command_vel"/>
+    <rosparam command="load" file="$(find ds_motion_generator)/config/Curve_go_right.yml"/>
+<node name="ds_node" pkg="ds_motion_generator" type="active_motionGenerator_node" output="screen"/>
+  </group>
+</group>
 
 </launch>

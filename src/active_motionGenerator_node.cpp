@@ -10,7 +10,7 @@ int main(int argc, char **argv)
   ros::init(argc, argv, "active_motion_genrator_node");
 
   ros::NodeHandle nh;
-  double frequency = 300.0;
+  double frequency = 500.0;
 
 
   // Parameters
