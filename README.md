@@ -50,3 +50,4 @@ These are the components that you need to run a proper "DS motion generator":
    1. trimmit : simply a threshold to limit the computed velocities based on SED.
    
    
+# Examples
