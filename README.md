@@ -3,7 +3,31 @@
 # ds_motion_generator
 ---
 
-This package provides a nodified version of DS motion generators.
+This package provides a nodified version of DS motion generators. Type of DS:
+- analytical point-to-point motion
+- analyitic limit cycle
+- Learned non-linear DS with SEDS parametrization
+- Learned non-linear DS with LPV-OPT parametrization
+- Learned Locally Active Globally Stable DS with LPV-OPT parametrization
+
+# Installation
+Do the following steps:
+* In your catkin src directory clone the repository
+```
+$ git clone https://github.com/epfl-lasa/kuka-lwr-ros.git
+```
+* wstool gets all other git repository dependencies, after the following steps you should see extra catkin 
+  packages in your src directory.
+```
+$  wstool init
+$  wstool merge ds_motion_generator/dependencies.rosinstall 
+$  wstool up 
+```
+* Query and installs all libraries and packages 
+```
+$ rosdep install --from-paths . --ignore-src --rosdistro indigo 
+```
+
 
 These are the components that you need to run a proper "DS motion generator":
 
