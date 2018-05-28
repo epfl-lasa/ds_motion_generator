@@ -4,6 +4,8 @@
 #include "ros/ros.h"
 #include "geometry_msgs/Pose.h"
 #include "geometry_msgs/PoseStamped.h"
+#include "geometry_msgs/Twist.h"
+
 
 #include <vector>
 
@@ -22,9 +24,16 @@ private:
 
 	ros::Publisher pub_target1_pose_;
 	ros::Publisher pub_target2_pose_;
+	ros::Publisher pub_target1_velocity_;
+	ros::Publisher pub_target2_velocity_;
 
 	std::vector<double> base_position_;
 
+	std::vector<double> target_1_position_;
+	std::vector<double> target_2_position_;
+
+	std::vector<double> target_1_velocity_;
+	std::vector<double> target_2_velocity_;
 
 public:
 	TargetTracker(ros::NodeHandle &n,
@@ -33,7 +42,9 @@ public:
 	              std::string object1_topic_name,
 	              std::string object2_topic_name,
 	              std::string target1_topic_name,
-	              std::string target2_topic_name);
+	              std::string target2_topic_name,
+	              std::string topic_target1_vel,
+	              std::string topic_target2_vel);
 
 	void Run();
 

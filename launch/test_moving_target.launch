@@ -21,8 +21,10 @@
     <param name="base_topic_name" value="/mocap/kuka_base/pose"/>
     <param name="object_1_topic_name" value="/mocap/kuka_ee/pose"/>
     <param name="object_2_topic_name" value="/mocap/fake_target/pose"/>
-    <param name="target_1_topic_name" value="/tracking/target1"/>
-    <param name="target_2_topic_name" value="/tracking/target2"/>
+    <param name="target_1_topic_name" value="/tracking/target1_position"/>
+    <param name="target_2_topic_name" value="/tracking/target2_position"/>
+    <param name="topic_target1_vel" value="/tracking/target1_velocity"/>
+    <param name="topic_target2_vel" value="/tracking/target2_velocity"/>
     <node name="tracking_node" pkg="ds_motion_generator" type="target_tracker_node" output="screen"/>
 
     <!-- # doesn't work yet, but I should follow this style -->
@@ -32,7 +34,7 @@
 
   <group ns="ds1">
     <param name="input_topic_name" value="/lwr/ee_pose"/>
-    <param name="target_topic_name" value="/tracking/target1"/>
+    <param name="target_topic_name" value="/tracking/target1_position"/>
     <param name="output_topic_name" value="/ds1/desired_velocity"/>
     <param name="output_filtered_topic_name" value="/lwr/joint_controllers/passive_ds_command_vel"/>
     <rosparam command="load" file="$(find ds_motion_generator)/config/simple_ds.yml"/>
@@ -41,7 +43,7 @@
 
   <group ns="ds2">
     <param name="input_topic_name" value="/lwr/ee_pose"/>
-    <param name="target_topic_name" value="/tracking/target2"/>
+    <param name="target_topic_name" value="/tracking/target2_position"/>
     <param name="output_topic_name" value="/ds2/desired_velocity"/>
     <param name="output_filtered_topic_name" value="/lwr/joint_controllers/passive_ds_command_vel"/>
     <rosparam command="load" file="$(find ds_motion_generator)/config/simple_ds.yml"/>

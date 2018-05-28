@@ -19,7 +19,8 @@ int main(int argc, char **argv)
   std::string object_2_topic_name;
   std::string target_1_topic_name;
   std::string target_2_topic_name;
-
+  std::string topic_target1_vel;
+  std::string topic_target2_vel;
 
   if (!nh.getParam("base_topic_name", base_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the base. ");
@@ -36,7 +37,7 @@ int main(int argc, char **argv)
     // return -1;
   }
 
-    if (!nh.getParam("target_1_topic_name", target_1_topic_name))   {
+  if (!nh.getParam("target_1_topic_name", target_1_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the first target. ");
     // return -1;
   }
@@ -45,6 +46,17 @@ int main(int argc, char **argv)
     ROS_ERROR("Couldn't retrieve the topic name for the second target. ");
     // return -1;
   }
+
+  if (!nh.getParam("topic_target1_vel", topic_target1_vel))   {
+    ROS_ERROR("Couldn't retrieve the topic name for the first target velocity. ");
+    // return -1;
+  }
+
+  if (!nh.getParam("topic_target2_vel", topic_target2_vel))   {
+    ROS_ERROR("Couldn't retrieve the topic name for the second target velocity. ");
+    // return -1;
+  }
+
 
 
 
@@ -55,7 +67,9 @@ int main(int argc, char **argv)
                                 object_1_topic_name,
                                 object_2_topic_name,
                                 target_1_topic_name,
-                                target_2_topic_name);
+                                target_2_topic_name,
+                                topic_target1_vel,
+                                topic_target2_vel);
 
   myTargetTracker.Run();
 
