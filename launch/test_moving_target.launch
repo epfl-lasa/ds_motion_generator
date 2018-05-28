@@ -1,0 +1,54 @@
+<?xml version="1.0" ?>
+<launch>
+
+
+  <!-- Pass in mocap_config_file:=/path/to/config.yaml to change options. -->
+  <arg name="mocap_config_file"
+       default="$(find cpr_mocap_tracking)/config/mocap_cpr.yml" />
+
+  <node name="mocap_node"
+          pkg="mocap_optitrack"
+          type="mocap_node"
+          respawn="false"
+          output="screen"
+          launch-prefix=""
+          required="true">
+      <rosparam file="$(find ds_motion_generator)/config/mocap/mocap.yml" command="load" />
+  </node>
+
+
+  <group ns="tracking">
+    <param name="base_topic_name" value="/mocap/kuka_base/pose"/>
+    <param name="object_1_topic_name" value="/mocap/kuka_ee/pose"/>
+    <param name="object_2_topic_name" value="/mocap/fake_target/pose"/>
+    <param name="target_1_topic_name" value="/tracking/target1"/>
+    <param name="target_2_topic_name" value="/tracking/target2"/>
+    <node name="tracking_node" pkg="ds_motion_generator" type="target_tracker_node" output="screen"/>
+
+    <!-- # doesn't work yet, but I should follow this style -->
+    <!-- <remap from="/ds1/filter/desired_velocity" to="/lwr/joint_controllers/passive_ds_command_vel" /> -->
+
+  </group>
+
+  <group ns="ds1">
+    <param name="input_topic_name" value="/lwr/ee_pose"/>
+    <param name="target_topic_name" value="/tracking/target1"/>
+    <param name="output_topic_name" value="/ds1/desired_velocity"/>
+    <param name="output_filtered_topic_name" value="/lwr/joint_controllers/passive_ds_command_vel"/>
+    <rosparam command="load" file="$(find ds_motion_generator)/config/simple_ds.yml"/>
+    <node name="ds_node" pkg="ds_motion_generator" type="active_motionGenerator_node" output="screen"/>
+  </group>
+
+  <group ns="ds2">
+    <param name="input_topic_name" value="/lwr/ee_pose"/>
+    <param name="target_topic_name" value="/tracking/target2"/>
+    <param name="output_topic_name" value="/ds2/desired_velocity"/>
+    <param name="output_filtered_topic_name" value="/lwr/joint_controllers/passive_ds_command_vel"/>
+    <rosparam command="load" file="$(find ds_motion_generator)/config/simple_ds.yml"/>
+    <node name="ds_node" pkg="ds_motion_generator" type="active_motionGenerator_node" output="screen"/>
+  </group>
+
+
+
+
+</launch>

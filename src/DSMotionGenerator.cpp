@@ -15,6 +15,7 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
                                      std::vector<double> Sigma,
                                      std::vector<double> attractor,
                                      std::string input_topic_name,
+                                     std::string target_topic_name,
                                      std::string output_topic_name,
                                      std::string output_filtered_topic_name)
 	: nh_(n),
@@ -26,6 +27,7 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
 	  Sigma_(Sigma),
 	  attractor_(attractor),
 	  input_topic_name_(input_topic_name),
+	  target_topic_name_(target_topic_name),
 	  output_topic_name_(output_topic_name),
 	  output_filtered_topic_name_(output_filtered_topic_name),
 	  dt_(1 / frequency),
@@ -119,6 +121,8 @@ bool DSMotionGenerator::InitializeROS() {
 
 	sub_real_pose_ = nh_.subscribe( input_topic_name_ , 1000,
 	                                &DSMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
+	sub_target_pose_ = nh_.subscribe( target_topic_name_ , 1000,
+	                                &DSMotionGenerator::UpdateTargetPosition, this, ros::TransportHints().reliable().tcpNoDelay());
 	pub_desired_twist_ = nh_.advertise<geometry_msgs::TwistStamped>(output_topic_name_, 1);
 	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::TwistStamped>(output_filtered_topic_name_, 1);
 
@@ -182,6 +186,15 @@ void DSMotionGenerator::UpdateRealPosition(const geometry_msgs::Pose::ConstPtr& 
 	// real_pose_(3?) = roll;
 	// real_pose_(4?) = pitch;
 	// real_pose_(5?) = yaw;
+
+}
+
+void DSMotionGenerator::UpdateTargetPosition(const geometry_msgs::Pose::ConstPtr& msg) {
+
+	target_pose_(0) = msg->position.x;
+	target_pose_(1) = msg->position.y;
+	target_pose_(2) = msg->position.z;
+
 
 }
 

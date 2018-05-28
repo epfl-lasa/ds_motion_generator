@@ -1,0 +1,27 @@
+# Definition of all trackable objects (rigid bodies) and their respective
+# pose topics and TF frame name (child_frame_id).
+#
+# The marker ID corresponds to the *User Data* field in the Motive
+#  configuration.
+
+rigid_bodies:
+    '1':
+        pose: mocap/kuka_base/pose
+        pose2d: mocap/kuka_base/ground_pose
+        child_frame_id: mocap_kuka_base
+        parent_frame_id: mocap_world
+    '2':
+        pose: mocap/kuka_ee/pose
+        pose2d: mocap/kuka_ee/ground_pose
+        child_frame_id: mocap_kuka_ee
+        parent_frame_id: mocap_world
+    '3':
+        pose: mocap/fake_target/pose
+        pose2d: mocap/fake_target/ground_pose
+        child_frame_id: mocap_fake_target
+        parent_frame_id: mocap_world
+
+
+# Configuration options at EPFL
+optitrack_config:
+        multicast_address: 239.255.42.99

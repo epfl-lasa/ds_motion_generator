@@ -52,12 +52,15 @@ private:
 	ros::Rate loop_rate_;
 
 	ros::Subscriber sub_real_pose_;
+	ros::Subscriber sub_target_pose_;
+	
 	ros::Publisher pub_desired_twist_;
 	ros::Publisher pub_desired_twist_filtered_;
 	ros::Publisher pub_target_;
 	ros::Publisher pub_DesiredPath_;
 
 	std::string input_topic_name_;
+	std::string target_topic_name_;
 	std::string output_topic_name_;
 	std::string output_filtered_topic_name_;
 
@@ -101,6 +104,7 @@ public:
 	                  std::vector<double> Sigma,
 	                  std::vector<double> attractor,
 	                  std::string input_topic_name,
+	                  std::string target_topic_name,
 	                  std::string output_topic_name,
 	                  std::string output_filtered_topic_name);
 
@@ -115,6 +119,8 @@ private:
 	bool InitializeROS();
 
 	void UpdateRealPosition(const geometry_msgs::Pose::ConstPtr& msg);
+	
+	void UpdateTargetPosition(const geometry_msgs::Pose::ConstPtr& msg);
 
 	void ComputeDesiredVelocity();
 

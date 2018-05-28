@@ -15,9 +15,10 @@ int main(int argc, char **argv)
 
   // Parameters
   std::string input_topic_name;
+  std::string target_topic_name;
   std::string output_topic_name;
   std::string output_filtered_topic_name;
-  
+
   int K_gmm;
   int dim;
   std::vector<double> Priors;
@@ -32,6 +33,11 @@ int main(int argc, char **argv)
 
   if (!nh.getParam("input_topic_name", input_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the input. ");
+    // return -1;
+  }
+
+  if (!nh.getParam("target_topic_name", target_topic_name))   {
+    ROS_ERROR("Couldn't retrieve the topic name for the target. ");
     // return -1;
   }
 
@@ -83,6 +89,7 @@ int main(int argc, char **argv)
   DSMotionGenerator ds_motion_generator(nh, frequency,
                                         K_gmm, dim, Priors, Mu, Sigma, attractor,
                                         input_topic_name,
+                                        target_topic_name,
                                         output_topic_name,
                                         output_filtered_topic_name);
   if (!ds_motion_generator.Init()) {

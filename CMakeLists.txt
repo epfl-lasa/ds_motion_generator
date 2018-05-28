@@ -184,6 +184,11 @@ add_executable(Linear_motionGenerator_node
   ${INCLUDE_DIR}/LinearMotionGenerator.h)
 
 
+add_executable(target_tracker_node 
+  ${SRC_DIR}/target_tracking_node.cpp
+  ${SRC_DIR}/target_tracker.cpp
+  ${INCLUDE_DIR}/targetTracker.h)
+
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -219,6 +224,11 @@ add_dependencies(Linear_motionGenerator_node
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_gencfg)
 
+add_dependencies(target_tracker_node 
+  ${${PROJECT_NAME}_EXPORTED_TARGETS} 
+  ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_gencfg)
+
 ## Specify libraries to link a library or executable target against
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
@@ -229,6 +239,8 @@ target_link_libraries(swipe_motionGenerator_node ${catkin_LIBRARIES} )
 target_link_libraries(cycle_motionGenerator_node ${catkin_LIBRARIES} )
 target_link_libraries(PPOscilate_motionGenerator_node ${catkin_LIBRARIES} )
 target_link_libraries(Linear_motionGenerator_node ${catkin_LIBRARIES} )
+target_link_libraries(target_tracker_node ${catkin_LIBRARIES} )
+
 
 
 #############
