@@ -32,8 +32,14 @@ private:
 	std::vector<double> target_1_position_;
 	std::vector<double> target_2_position_;
 
+	ros::Time  target_1_received_time_;
+	ros::Time  target_2_received_time_;
+
 	std::vector<double> target_1_velocity_;
 	std::vector<double> target_2_velocity_;
+
+	double filter_factor_;
+	double v_max_;
 
 public:
 	TargetTracker(ros::NodeHandle &n,
@@ -44,7 +50,9 @@ public:
 	              std::string target1_topic_name,
 	              std::string target2_topic_name,
 	              std::string topic_target1_vel,
-	              std::string topic_target2_vel);
+	              std::string topic_target2_vel,
+	              double filter_factor,
+	              double v_max);
 
 	void Run();
 

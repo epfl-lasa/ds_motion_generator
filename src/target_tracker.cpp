@@ -9,9 +9,13 @@ TargetTracker::TargetTracker(ros::NodeHandle &n,
                              std::string target_1_topic_name,
                              std::string target_2_topic_name,
                              std::string topic_target1_vel,
-                             std::string topic_target2_vel)
+                             std::string topic_target2_vel,
+                             double filter_factor,
+                             double v_max)
 	: nh_(n),
-	  loop_rate_(frequency) {
+	  loop_rate_(frequency),
+	  filter_factor_(filter_factor),
+	  v_max_(v_max) {
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 
@@ -35,6 +39,14 @@ TargetTracker::TargetTracker(ros::NodeHandle &n,
 	target_2_position_.resize(3);
 	target_1_velocity_.resize(3);
 	target_2_velocity_.resize(3);
+
+
+	target_1_received_time_ = ros::Time::now();
+	target_2_received_time_ = ros::Time::now();
+
+	filter_factor = (filter_factor > 1) ? 1 : filter_factor;
+	filter_factor = (filter_factor < 0) ? 0 : filter_factor;
+
 
 	while (nh_.ok()) {
 		ros::spinOnce();
@@ -69,12 +81,13 @@ void TargetTracker::UpdateTarget_1_Position(const geometry_msgs::PoseStamped::Co
 	geometry_msgs::PoseStamped msg_new;
 
 	std::vector<double> target_old = target_1_position_;
-
-
+	ros::Time time_old = target_1_received_time_;
 
 	target_1_position_[0] = msg->pose.position.x - base_position_[0];
 	target_1_position_[1] = msg->pose.position.y - base_position_[1];
 	target_1_position_[2] = msg->pose.position.z - base_position_[2];
+
+	target_1_received_time_ = msg->header.stamp;
 
 	msg_new.pose.position.x = target_1_position_[0];
 	msg_new.pose.position.y = target_1_position_[1];
@@ -84,11 +97,15 @@ void TargetTracker::UpdateTarget_1_Position(const geometry_msgs::PoseStamped::Co
 	pub_target1_pose_.publish(msg_new.pose);
 
 
-	ros::Duration duration = loop_rate_.expectedCycleTime();
+	// ros::Duration duration = loop_rate_.expectedCycleTime();
+	ros::Duration duration = target_1_received_time_ - time_old;
+
 	for (int i = 0; i < 3; i++) {
 
 		double v = (target_1_position_[i] - target_old[i]) / duration.toSec();
-		target_1_velocity_[i] += 0.03 * (v - target_1_velocity_[i]);
+		v = (v >  v_max_) ?  v_max_ : v;
+		v = (v < -v_max_) ? -v_max_ : v;
+		target_1_velocity_[i] += filter_factor_ * (v - target_1_velocity_[i]);
 	}
 
 
@@ -107,12 +124,13 @@ void TargetTracker::UpdateTarget_2_Position(const geometry_msgs::PoseStamped::Co
 	geometry_msgs::PoseStamped msg_new;
 
 	std::vector<double> target_old = target_2_position_;
-
-
+	ros::Time time_old = target_2_received_time_;
 
 	target_2_position_[0] = msg->pose.position.x - base_position_[0];
 	target_2_position_[1] = msg->pose.position.y - base_position_[1];
 	target_2_position_[2] = msg->pose.position.z - base_position_[2];
+
+	target_2_received_time_ = msg->header.stamp;
 
 	msg_new.pose.position.x = target_2_position_[0];
 	msg_new.pose.position.y = target_2_position_[1];
@@ -122,11 +140,15 @@ void TargetTracker::UpdateTarget_2_Position(const geometry_msgs::PoseStamped::Co
 	pub_target2_pose_.publish(msg_new.pose);
 
 
-	ros::Duration duration = loop_rate_.expectedCycleTime();
+	// ros::Duration duration = loop_rate_.expectedCycleTime();
+	ros::Duration duration = target_2_received_time_ - time_old;
+
 	for (int i = 0; i < 3; i++) {
 
 		double v = (target_2_position_[i] - target_old[i]) / duration.toSec();
-		target_2_velocity_[i] += 0.03 * (v - target_2_velocity_[i]);
+		v = (v >  v_max_) ?  v_max_ : v;
+		v = (v < -v_max_) ? -v_max_ : v;
+		target_2_velocity_[i] += filter_factor_ * (v - target_2_velocity_[i]);
 	}
 
 

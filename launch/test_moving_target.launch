@@ -25,6 +25,8 @@
     <param name="target_2_topic_name" value="/tracking/target2_position"/>
     <param name="topic_target1_vel" value="/tracking/target1_velocity"/>
     <param name="topic_target2_vel" value="/tracking/target2_velocity"/>
+    <param name="filter_factor" value="0.05"/>
+    <param name="v_max" value="0.5"/>
     <node name="tracking_node" pkg="ds_motion_generator" type="target_tracker_node" output="screen"/>
 
     <!-- # doesn't work yet, but I should follow this style -->

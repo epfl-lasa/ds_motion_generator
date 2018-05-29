@@ -21,6 +21,8 @@ int main(int argc, char **argv)
   std::string target_2_topic_name;
   std::string topic_target1_vel;
   std::string topic_target2_vel;
+  double filter_factor;
+  double v_max;
 
   if (!nh.getParam("base_topic_name", base_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the base. ");
@@ -57,6 +59,15 @@ int main(int argc, char **argv)
     // return -1;
   }
 
+  if (!nh.getParam("filter_factor", filter_factor))   {
+    ROS_ERROR("Couldn't retrieve the filter_factor. ");
+    // return -1;
+  }
+
+  if (!nh.getParam("v_max", v_max))   {
+    ROS_ERROR("Couldn't retrieve the maximum velocity tracking. ");
+    // return -1;
+  }
 
 
 
@@ -69,7 +80,9 @@ int main(int argc, char **argv)
                                 target_1_topic_name,
                                 target_2_topic_name,
                                 topic_target1_vel,
-                                topic_target2_vel);
+                                topic_target2_vel,
+                                filter_factor,
+                                v_max);
 
   myTargetTracker.Run();
 
