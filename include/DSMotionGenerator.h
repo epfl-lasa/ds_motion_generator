@@ -7,7 +7,7 @@
 #include "geometry_msgs/TwistStamped.h"
 #include "geometry_msgs/PointStamped.h"
 #include "nav_msgs/Path.h"
-
+#include "tf/tf.h"
 
 #include <vector>
 
@@ -53,7 +53,7 @@ private:
 
 	ros::Subscriber sub_real_pose_;
 	ros::Subscriber sub_target_pose_;
-	
+
 	ros::Publisher pub_desired_twist_;
 	ros::Publisher pub_desired_twist_filtered_;
 	ros::Publisher pub_target_;
@@ -92,6 +92,11 @@ private:
 	double scaling_factor_;
 	double ds_vel_limit_;
 
+	std::vector<double> ee_tool_offset_;
+	tf::Vector3    tool_offset_v_;
+
+
+
 
 
 public:
@@ -103,6 +108,7 @@ public:
 	                  std::vector<double> Mu,
 	                  std::vector<double> Sigma,
 	                  std::vector<double> attractor,
+	                  std::vector<double> ee_tool_offset,
 	                  std::string input_topic_name,
 	                  std::string target_topic_name,
 	                  std::string output_topic_name,
@@ -119,7 +125,7 @@ private:
 	bool InitializeROS();
 
 	void UpdateRealPosition(const geometry_msgs::Pose::ConstPtr& msg);
-	
+
 	void UpdateTargetPosition(const geometry_msgs::Pose::ConstPtr& msg);
 
 	void ComputeDesiredVelocity();

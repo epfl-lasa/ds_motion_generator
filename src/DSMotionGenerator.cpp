@@ -14,6 +14,7 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
                                      std::vector<double> Mu,
                                      std::vector<double> Sigma,
                                      std::vector<double> attractor,
+                                     std::vector<double> ee_tool_offset,
                                      std::string input_topic_name,
                                      std::string target_topic_name,
                                      std::string output_topic_name,
@@ -26,6 +27,7 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
 	  Mu_(Mu),
 	  Sigma_(Sigma),
 	  attractor_(attractor),
+	  ee_tool_offset_(ee_tool_offset),
 	  input_topic_name_(input_topic_name),
 	  target_topic_name_(target_topic_name),
 	  output_topic_name_(output_topic_name),
@@ -36,6 +38,10 @@ DSMotionGenerator::DSMotionGenerator(ros::NodeHandle &n,
 	  ds_vel_limit_(0.1) {
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
+
+	tool_offset_v_[0] = ee_tool_offset[0];
+	tool_offset_v_[1] = ee_tool_offset[1];
+	tool_offset_v_[2] = ee_tool_offset[2];
 }
 
 
@@ -122,13 +128,13 @@ bool DSMotionGenerator::InitializeROS() {
 	sub_real_pose_ = nh_.subscribe( input_topic_name_ , 1000,
 	                                &DSMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
 	sub_target_pose_ = nh_.subscribe( target_topic_name_ , 1000,
-	                                &DSMotionGenerator::UpdateTargetPosition, this, ros::TransportHints().reliable().tcpNoDelay());
+	                                  &DSMotionGenerator::UpdateTargetPosition, this, ros::TransportHints().reliable().tcpNoDelay());
 	pub_desired_twist_ = nh_.advertise<geometry_msgs::TwistStamped>(output_topic_name_, 1);
 	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::TwistStamped>(output_filtered_topic_name_, 1);
 
 	pub_target_ = nh_.advertise<geometry_msgs::PointStamped>("DS/target", 1);
 	pub_DesiredPath_ = nh_.advertise<nav_msgs::Path>("DS/DesiredPath", 1);
-	
+
 	msg_DesiredPath_.poses.resize(MAX_FRAME);
 
 	dyn_rec_f_ = boost::bind(&DSMotionGenerator::DynCallback, this, _1, _2);
@@ -173,7 +179,22 @@ void DSMotionGenerator::UpdateRealPosition(const geometry_msgs::Pose::ConstPtr& 
 	real_pose_(1) = msg_real_pose_.position.y;
 	real_pose_(2) = msg_real_pose_.position.z;
 
-	// double qtx = msg_real_pose_.orientation.x;
+
+	tf::Quaternion ee_q_(msg_real_pose_.orientation.x,
+	                     msg_real_pose_.orientation.y,
+	                     msg_real_pose_.orientation.z,
+	                     msg_real_pose_.orientation.w);
+
+	ee_q_.normalize();
+
+	tf::Vector3 tool_offset_v_rotated = tf::quatRotate(ee_q_, tool_offset_v_);
+
+
+	real_pose_(0) += tool_offset_v_rotated[0];
+	real_pose_(1) += tool_offset_v_rotated[1];
+	real_pose_(2) += tool_offset_v_rotated[2];
+
+	// double qtx = msg_real_pose_.orientation.x;s
 	// double qty = msg_real_pose_.orientation.y;
 	// double qtz = msg_real_pose_.orientation.z;
 	// double qtw = msg_real_pose_.orientation.w;
@@ -317,7 +338,7 @@ void DSMotionGenerator::PublishFuturePath() {
 
 	MathLib::Vector simulated_pose = real_pose_;
 	MathLib::Vector simulated_vel;
-	
+
 	simulated_vel.Resize(3);
 
 	for (int frame = 0; frame < MAX_FRAME; frame++)

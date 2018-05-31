@@ -25,6 +25,7 @@ int main(int argc, char **argv)
   std::vector<double> Mu;
   std::vector<double> Sigma;
   std::vector<double> attractor;
+  std::vector<double> ee_tool_offset;
 
   // double Wn;
   // std::vector<double> VelLimits;
@@ -83,11 +84,18 @@ int main(int argc, char **argv)
     // return -1;
   }
 
+  if (!nh.getParam("ee_tool_offset", ee_tool_offset))  {
+    ROS_ERROR("Couldn't retrieve the offset for the tool. ");
+    // return -1;
+  }
+
+
+
 
   ROS_INFO("Starting the Motion generator...");
 
   DSMotionGenerator ds_motion_generator(nh, frequency,
-                                        K_gmm, dim, Priors, Mu, Sigma, attractor,
+                                        K_gmm, dim, Priors, Mu, Sigma, attractor,ee_tool_offset,
                                         input_topic_name,
                                         target_topic_name,
                                         output_topic_name,
