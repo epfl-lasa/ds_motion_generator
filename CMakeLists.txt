@@ -127,6 +127,7 @@ catkin_package(
 
 set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
+set(NODES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/nodes)
 
 
 ## Specify additional locations of header files
@@ -169,30 +170,29 @@ set(HDRS
 add_library(${PROJECT_NAME} ${HDRS} ${SRCS})
 target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
 
-add_executable(active_motionGenerator_node 
-	${SRC_DIR}/active_motionGenerator_node.cpp)
-target_link_libraries(active_motionGenerator_node ${PROJECT_NAME})
-
-
+#### Analytically Parametrized DS
 add_executable(swipe_motionGenerator_node 
-  ${SRC_DIR}/swipe_motionGenerator_node.cpp)
+  ${NODES_DIR}/swipe_motionGenerator_node.cpp)
 target_link_libraries(swipe_motionGenerator_node ${PROJECT_NAME})
 
 add_executable(cycle_motionGenerator_node 
-  ${SRC_DIR}/cycle_motionGenerator_node.cpp)
+  ${NODES_DIR}/cycle_motionGenerator_node.cpp)
 target_link_libraries(cycle_motionGenerator_node ${PROJECT_NAME})
 
 
 add_executable(PPOscilate_motionGenerator_node 
-  ${SRC_DIR}/PPOscilate_motionGenerator_node.cpp)
+  ${NODES_DIR}/PPOscilate_motionGenerator_node.cpp)
 target_link_libraries(PPOscilate_motionGenerator_node ${PROJECT_NAME})
 
 
-
 add_executable(Linear_motionGenerator_node 
-  ${SRC_DIR}/Linear_motionGenerator_node.cpp)
+  ${NODES_DIR}/Linear_motionGenerator_node.cpp)
 target_link_libraries(Linear_motionGenerator_node ${PROJECT_NAME})
 
+#### DS learned via se-DS
+add_executable(active_motionGenerator_node 
+	${NODES_DIR}/active_motionGenerator_node.cpp)
+target_link_libraries(active_motionGenerator_node ${PROJECT_NAME})
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -234,12 +234,11 @@ add_dependencies(Linear_motionGenerator_node
 #   ${catkin_LIBRARIES}
 # )
 
-target_link_libraries(active_motionGenerator_node ${catkin_LIBRARIES} )
 target_link_libraries(swipe_motionGenerator_node ${catkin_LIBRARIES} )
 target_link_libraries(cycle_motionGenerator_node ${catkin_LIBRARIES} )
 target_link_libraries(PPOscilate_motionGenerator_node ${catkin_LIBRARIES} )
 target_link_libraries(Linear_motionGenerator_node ${catkin_LIBRARIES} )
-
+target_link_libraries(active_motionGenerator_node ${catkin_LIBRARIES} )
 
 #############
 ## Install ##
