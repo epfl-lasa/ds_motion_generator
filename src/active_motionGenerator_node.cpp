@@ -92,6 +92,5 @@ int main(int argc, char **argv)
     ds_motion_generator.Run();
   }
 
-
   return 0;
 }

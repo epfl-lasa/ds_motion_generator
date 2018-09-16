@@ -1,8 +1,8 @@
 <?xml version="1.0" ?>
 <launch>
  
- <arg name="motion-1"   default="true"/>
- <arg name="motion-2"   default="false"/>
+ <arg name="motion-1"   default="false"/>
+ <arg name="motion-2"   default="true"/>
 
 # input_topic name should contatin: geometry_msgs::Pose
 # output_topic_name will write geometry_msgs::Twist
