@@ -9,9 +9,9 @@ This package provides a nodified version of DS motion generators. Type of DS:
   - point-to-point motion
   - cyclic motion
 - Non-linear DS learned from demonstrations with the following approaches  
-  - se-DS parametrization [2]**(Clean-up)**
-  - lpv-DS parametrization [3]**(TODO)**
-  - lags-DS parametrization [4]**(TODO)**
+  - se-DS parametrization [2]**(Cleaning-up ...)**
+  - lpv-DS parametrization [3]**(Working on ...)**
+  - lags-DS parametrization [4] **(TODO)**
   
 # Examples
 
