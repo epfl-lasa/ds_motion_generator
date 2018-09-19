@@ -40,8 +40,7 @@ You should begin by filling in the **DS configuration** file, which is a ```.yam
    indicates a guassian, and each column indicates a dimension.
 
 Once you have your DS configuration file, you can test the DS by running a launch file as the ones found in the ```launch/``` folder.
-1.
-   1. the name of the input topic (potentially a position signal)
+1. the name of the input topic (potentially a position signal)
    1. the name of the output topic (potentially a desired velocity signal)
    1. the name of the topic for the filtered output.
    1. If DS is se-DS: the location of the GMM paramaters 
@@ -51,7 +50,7 @@ Once you have your DS configuration file, you can test the DS by running a launc
 
 #### Dynamic re-configuration of DS/filter parameters
 You can modify the filtering and some of the DS parameters dynamically (cfg folder)
-   1. Wn : speed of the filter
+1. Wn : speed of the filter
    1. fil_dx_lim : the limit on the velocity of the filter. (Note this is not the limit of the real velocity).
    1. fil_ddx_lim : the limit on the accelarion of the filter. (Same note)
    1. target_{x,y,z} : the position of the attractor.
