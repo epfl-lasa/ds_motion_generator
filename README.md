@@ -34,13 +34,15 @@ $ rosdep install --from-paths . --ignore-src --rosdistro indigo
 
 
 ## Usage
-You should begin by filling in the DS configuration file, which should be stored in ```config/``` folder. 
-- For analytic DS, 
-
+You should begin by filling in the **DS configuration** file, which should be stored in ```config/``` folder. 
+- For analytic DS, ...
+- For learned DS,
    1. where you provide the conventional Priors, Mu, Sigma,
    1. In addition, K (number of guassian) and dim (the dimenstion input-output space)
-   1. WARNING: There is a transpose compared the previous version. In this version, each row (in Priors and Mu) indicates a guassian, and each column indicates a dimension.
+   1. WARNING: There is a transpose compared the previous version. In this version, each row (in Priors and Mu) 
+   indicates a guassian, and each column indicates a dimension.
 
+Once you have your DS configuration file, you can test the DS by running a launch file 
 1. Launch file (launch folder)
    1. the name of the input topic (potentially a position signal)
    1. the name of the output topic (potentially a desired velocity signal)
