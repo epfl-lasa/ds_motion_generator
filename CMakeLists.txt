@@ -116,94 +116,53 @@ find_package(catkin REQUIRED COMPONENTS
 ## CATKIN_DEPENDS: catkin_packages dependent projects also need
 ## DEPENDS: system dependencies of this project that dependent projects also need
 catkin_package(
- INCLUDE_DIRS include
- CATKIN_DEPENDS roscpp rospy std_msgs nav_msgs mathlib sgaussians dynamic_reconfigure
- LIBRARIES ${PROJECT_NAME}
+ INCLUDE_DIRS include/analytic_DS include/learned_DS
+ LIBRARIES ds_motion_generator
+ CATKIN_DEPENDS roscpp rospy std_msgs nav_msgs mathlib sgaussians dynamic_reconfigure 
 )
 
 ###########
 ## Build ##
 ###########
 
-set(INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
-set(SRC_DIR ${CMAKE_CURRENT_SOURCE_DIR}/src)
-set(NODES_DIR ${CMAKE_CURRENT_SOURCE_DIR}/nodes)
-
-
-## Specify additional locations of header files
+## Specify locations of header files
 ## Your package locations should be listed before other locations
-# include_directories(include)
-include_directories(include ${catkin_INCLUDE_DIRS})
-
+include_directories(include/analytic_DS include/learned_DS ${catkin_INCLUDE_DIRS})
 include_directories(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
 
-## Declare a C++ library
-# add_library(${PROJECT_NAME}
-#   src/${PROJECT_NAME}/example_ds.cpp
-# )
-
-## Add cmake target dependencies of the library
-## as an example, code may need to be generated before libraries
-## either from message generation or dynamic reconfigure
-# add_dependencies(${PROJECT_NAME} ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Declare a C++ executable
-## With catkin_make all packages are built within a single CMake context
-## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/example_ds_node.cpp)
-
 set(SRCS
-    ${SRC_DIR}/DSMotionGenerator.cpp
-    ${SRC_DIR}/SwipeMotionGenerator.cpp
-    ${SRC_DIR}/CycleMotionGenerator.cpp
-    ${SRC_DIR}/PPOscilateMotionGenerator.cpp
-    ${SRC_DIR}/LinearMotionGenerator.cpp)
+    src/learned_DS/DSMotionGenerator.cpp
+    src/analytic_DS/SwipeMotionGenerator.cpp
+    src/analytic_DS/CycleMotionGenerator.cpp
+    src/analytic_DS/PPOscilateMotionGenerator.cpp
+    src/analytic_DS/LinearMotionGenerator.cpp)
 
-
-set(HDRS
-    ${INCLUDE_DIR}/DSMotionGenerator.h
-    ${INCLUDE_DIR}/SwipeMotionGenerator.h
-    ${INCLUDE_DIR}/CycleMotionGenerator.h
-    ${INCLUDE_DIR}/PPOscilateMotionGenerator.h
-    ${INCLUDE_DIR}/LinearMotionGenerator.h)
-
-add_library(${PROJECT_NAME} ${HDRS} ${SRCS})
-target_link_libraries(${PROJECT_NAME} ${catkin_LIBRARIES})
+add_library(ds_motion_generator ${SRCS})
+target_link_libraries(ds_motion_generator ${catkin_LIBRARIES})
 
 #### Analytically Parametrized DS
-add_executable(swipe_motionGenerator_node 
-  ${NODES_DIR}/swipe_motionGenerator_node.cpp)
-target_link_libraries(swipe_motionGenerator_node ${PROJECT_NAME})
+add_executable(swipe_motionGenerator_node src/swipe_motionGenerator_node.cpp)
+target_link_libraries(swipe_motionGenerator_node ds_motion_generator)
 
-add_executable(cycle_motionGenerator_node 
-  ${NODES_DIR}/cycle_motionGenerator_node.cpp)
-target_link_libraries(cycle_motionGenerator_node ${PROJECT_NAME})
+add_executable(cycle_motionGenerator_node  src/cycle_motionGenerator_node.cpp)
+#target_link_libraries(cycle_motionGenerator_node ds_motion_generator)
 
 
-add_executable(PPOscilate_motionGenerator_node 
-  ${NODES_DIR}/PPOscilate_motionGenerator_node.cpp)
-target_link_libraries(PPOscilate_motionGenerator_node ${PROJECT_NAME})
+add_executable(PPOscilate_motionGenerator_node src/PPOscilate_motionGenerator_node.cpp)
+target_link_libraries(PPOscilate_motionGenerator_node ds_motion_generator)
 
 
-add_executable(Linear_motionGenerator_node 
-  ${NODES_DIR}/Linear_motionGenerator_node.cpp)
-target_link_libraries(Linear_motionGenerator_node ${PROJECT_NAME})
+add_executable(Linear_motionGenerator_node src/Linear_motionGenerator_node.cpp)
+target_link_libraries(Linear_motionGenerator_node ds_motion_generator)
 
 #### DS learned via se-DS
-add_executable(active_motionGenerator_node 
-	${NODES_DIR}/active_motionGenerator_node.cpp)
-target_link_libraries(active_motionGenerator_node ${PROJECT_NAME})
+add_executable(active_motionGenerator_node src/active_motionGenerator_node.cpp)
+target_link_libraries(active_motionGenerator_node ds_motion_generator)
 
-## Rename C++ executable without prefix
-## The above recommended prefix causes long target names, the following renames the
-## target back to the shorter version for ease of user use
-## e.g. "rosrun someones_pkg node" instead of "rosrun someones_pkg someones_pkg_node"
-# set_target_properties(${PROJECT_NAME}_node PROPERTIES OUTPUT_NAME node PREFIX "")
 
-## Add cmake target dependencies of the executable
-## same as for the library above
-# add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
-
+### ADD Nodes that use the library
 add_dependencies(active_motionGenerator_node 
 	${${PROJECT_NAME}_EXPORTED_TARGETS} 
 	${catkin_EXPORTED_TARGETS}
@@ -234,11 +193,11 @@ add_dependencies(Linear_motionGenerator_node
 #   ${catkin_LIBRARIES}
 # )
 
-target_link_libraries(swipe_motionGenerator_node ${catkin_LIBRARIES} )
-target_link_libraries(cycle_motionGenerator_node ${catkin_LIBRARIES} )
-target_link_libraries(PPOscilate_motionGenerator_node ${catkin_LIBRARIES} )
-target_link_libraries(Linear_motionGenerator_node ${catkin_LIBRARIES} )
-target_link_libraries(active_motionGenerator_node ${catkin_LIBRARIES} )
+target_link_libraries(swipe_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
+target_link_libraries(cycle_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
+target_link_libraries(PPOscilate_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
+target_link_libraries(Linear_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
+target_link_libraries(active_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
 
 #############
 ## Install ##
