@@ -4,11 +4,16 @@
 ---
 
 This package provides a nodified version of DS motion generators. Type of DS:
-- analytic point-to-point motion
-- analytic limit cycle
-- Learned non-linear DS with se-DS parametrization **(Clean-up)**
-- Learned non-linear DS with lpv-DS parametrization **(TODO)**
-- Learned Locally Active Globally Stable (LAGS) DS parametrization **(TODO)**
+- Analytically parameterized DS for simple motions used in [1], such as
+  - linear motion
+  - point-to-point motion
+  - cyclic motion
+- Non-linear DS learned from demonstrations with the following approaches  
+  - se-DS parametrization [2]**(Clean-up)**
+  - lpv-DS parametrization [3]**(TODO)**
+  - lags-DS parametrization [4]**(TODO)**
+  
+# Examples
 
 # Installation
 Do the following steps:
@@ -50,5 +55,13 @@ These are the components that you need to run a proper "DS motion generator":
    1. scaling : simply a multiplier to scale the computed velocities based on the DS of choice.
    1. trimmit : simply a threshold to limit the computed velocities based on the DS of choice.
    
-   
-# Examples
+  
+
+**References**     
+> [1] Khoramshahi, M. and Billard, A. (2018) A Dynamical System Approach to Task-Adaptation in Physical Human-Robot Interaction. Under review in Autonomous Robots.    
+> [2] Khansari Zadeh, S. M. and Billard, A. (2011) Learning Stable Non-Linear Dynamical Systems with Gaussian Mixture Models. IEEE Transaction on Robotics, vol. 27, num 5, p. 943-957.  
+> [3] Figueroa, N. and Billard, A. (2018) A Physically-Consistent Bayesian Non-Parametric Mixture Model for Dynamical System Learning. In Proceedings of the 2nd Conference on Robot Learning (CoRL). Accepted.     
+> [4] Figueroa, N. and Billard, A. (2018) Locally Active Globally Stable Dynamical Systems: Theory, Learning and Experiments. In preparation.
+
+**Contact**: [Nadia Figueroa](http://lasa.epfl.ch/people/member.php?SCIPER=238387) (nadia.figueroafernandez AT epfl dot ch)
+
