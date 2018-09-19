@@ -2,7 +2,6 @@
 
 # ds_motion_generator
 ---
-
 This package provides a nodified version of DS motion generators. Type of DS:
 - Analytically parameterized DS for simple motions used in [1], such as
   - linear motion
@@ -12,8 +11,10 @@ This package provides a nodified version of DS motion generators. Type of DS:
   - se-DS parametrization [2]**(Cleaning-up ...)**
   - lpv-DS parametrization [3]**(Working on ...)**
   - lags-DS parametrization [4] **(TODO)**
+  
+This package was initially implemented by [Mahdi Khoramshahi](http://lasa.epfl.ch/people/member.php?SCIPER=217217) and has been extended and modified by [Nadia Figueroa](http://lasa.epfl.ch/people/member.php?SCIPER=238387).  
 
-# Installation
+## Installation
 Do the following steps:
 * In your catkin src directory clone the repository
 ```
@@ -30,12 +31,13 @@ $  wstool up
 ```
 $ rosdep install --from-paths . --ignore-src --rosdistro indigo 
 ```
-# Examples
+## Examples
 
 
-# Usage
-These are the components that you need to run a proper "DS motion generator":
 
+## Usage
+
+## Run a desired DS
 1. Launch file: where you can define  
    1. the name of the input topic (potentially a position signal)
    1. the name of the output topic (potentially a desired velocity signal)
@@ -47,8 +49,9 @@ These are the components that you need to run a proper "DS motion generator":
    1. where you provide the conventional Prior, Mu, Sigma,
    1. In addition, K (number of guassian) and dim (the dimenstion input-output space)
    1. WARNING: There is a transpose compared the previous version. In this version, each row (in Priors and Mu) indicates a guassian, and each column indicates a dimension. 
-   
-1. Dynamic parameters (cfg folder)
+
+## Dynamic Re-configuration of DS Parameter
+You can modify the filtering and scaling parameters dynamically (cfg folder)
    1. Wn : speed of the filter
    1. fil_dx_lim : the limit on the velocity of the filter. (Note this is not the limit of the real velocity).
    1. fil_ddx_lim : the limit on the accelarion of the filter. (Same note)
