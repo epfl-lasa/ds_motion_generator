@@ -3,7 +3,7 @@
 This package provides a nodified version of DS motion generators. Type of DS:
 - Analytically parameterized DS for simple motions used in [1], such as
   - linear motion
-  - point-to-point motion
+  - point-to-point oscillatory motion
   - cyclic motion
 - Non-linear DS learned from demonstrations with the following approaches  
   - se-DS parametrization [2]**(Cleaning-up ...)**
@@ -34,21 +34,21 @@ $ rosdep install --from-paths . --ignore-src --rosdistro indigo
 
 
 ## Usage
+You should begin by filling in the DS configuration file, which should be stored in ```config/``` folder. 
+- For analytic DS, 
 
-### Run a desired DS
+   1. where you provide the conventional Priors, Mu, Sigma,
+   1. In addition, K (number of guassian) and dim (the dimenstion input-output space)
+   1. WARNING: There is a transpose compared the previous version. In this version, each row (in Priors and Mu) indicates a guassian, and each column indicates a dimension.
+
 1. Launch file (launch folder)
    1. the name of the input topic (potentially a position signal)
    1. the name of the output topic (potentially a desired velocity signal)
    1. the name of the topic for the filtered output.
    1. If DS is se-DS: the location of the GMM paramaters 
-   (i.e., a yaml file contating Prior, Mu, and Sigma)
+   (i.e., a yaml file containing Priors, Mu's, Sigma's)
    1. If DS is lpv-DS: the location of the GMM paramaters and system parameters 
-   (i.e., a yaml file contating Prior, Mu, and Sigma, A's and b's)
-   
-1. DS configuration file (config folder)
-   1. where you provide the conventional Prior, Mu, Sigma,
-   1. In addition, K (number of guassian) and dim (the dimenstion input-output space)
-   1. WARNING: There is a transpose compared the previous version. In this version, each row (in Priors and Mu) indicates a guassian, and each column indicates a dimension. 
+   (i.e., a yaml file contating Prior, Mu, and Sigma, A's and b's)   
 
 #### Dynamic re-configuration of DS/filter parameters
 You can modify the filtering and some of the DS parameters dynamically (cfg folder)
