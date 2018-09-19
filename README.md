@@ -40,6 +40,7 @@ You should begin by filling in the **DS configuration** file, which is a ```.yam
    indicates a guassian, and each column indicates a dimension.
 
 Once you have your DS configuration file, you can test the DS by running a launch file as the ones found in the ```launch/``` folder.
+1.
    1. the name of the input topic (potentially a position signal)
    1. the name of the output topic (potentially a desired velocity signal)
    1. the name of the topic for the filtered output.
