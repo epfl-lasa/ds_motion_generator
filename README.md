@@ -48,15 +48,14 @@ $ rosdep install --from-paths . --ignore-src --rosdistro indigo
    1. In addition, K (number of guassian) and dim (the dimenstion input-output space)
    1. WARNING: There is a transpose compared the previous version. In this version, each row (in Priors and Mu) indicates a guassian, and each column indicates a dimension. 
 
-### Dynamic Re-configuration of DS Parameter
-You can modify the filtering and scaling parameters dynamically (cfg folder)
+#### Dynamic re-configuration of DS/filter parameters
+You can modify the filtering and some of the DS parameters dynamically (cfg folder)
    1. Wn : speed of the filter
    1. fil_dx_lim : the limit on the velocity of the filter. (Note this is not the limit of the real velocity).
    1. fil_ddx_lim : the limit on the accelarion of the filter. (Same note)
    1. target_{x,y,z} : the position of the attractor.
    1. scaling : simply a multiplier to scale the computed velocities based on the DS of choice.
-   1. trimmit : simply a threshold to limit the computed velocities based on the DS of choice.
-   
+   1. trimmit : simply a threshold to limit the computed velocities based on the DS of choice.   
 
 **References**     
 > [1] Khoramshahi, M. and Billard, A. (2018) A Dynamical System Approach to Task-Adaptation in Physical Human-Robot Interaction. Under review in Autonomous Robots.    
