@@ -29,13 +29,10 @@ $  wstool up
 ```
 $ rosdep install --from-paths . --ignore-src --rosdistro indigo 
 ```
-## Examples
-
-
 
 ## Usage
 You should begin by filling in the **DS configuration** file, which is a ```.yaml``` file that should be stored in ```config/``` folder. 
-- For analytic DS, ...
+- For analytic DS, you can find example parametrizations of linear, cyclic and point-to-point oscillations in the ```config/analytic_DS``` folder. 
 - For learned DS,
    1. where you provide the conventional Priors, Mu, Sigma,
    1. In addition, K (number of guassian) and dim (the dimenstion input-output space)
