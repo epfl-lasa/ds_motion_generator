@@ -12,8 +12,6 @@ This package provides a nodified version of DS motion generators. Type of DS:
   - se-DS parametrization [2]**(Cleaning-up ...)**
   - lpv-DS parametrization [3]**(Working on ...)**
   - lags-DS parametrization [4] **(TODO)**
-  
-# Examples
 
 # Installation
 Do the following steps:
@@ -32,6 +30,9 @@ $  wstool up
 ```
 $ rosdep install --from-paths . --ignore-src --rosdistro indigo 
 ```
+# Examples
+
+
 # Usage
 These are the components that you need to run a proper "DS motion generator":
 
