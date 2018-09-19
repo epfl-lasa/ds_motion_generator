@@ -34,7 +34,7 @@ $ rosdep install --from-paths . --ignore-src --rosdistro indigo
 
 
 ## Usage
-You should begin by filling in the **DS configuration** file, which should be stored in ```config/``` folder. 
+You should begin by filling in the **DS configuration** file, which is a ```.yaml``` file that should be stored in ```config/``` folder. 
 - For analytic DS, ...
 - For learned DS,
    1. where you provide the conventional Priors, Mu, Sigma,
