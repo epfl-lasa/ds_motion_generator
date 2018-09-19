@@ -1,5 +1,3 @@
-[![Build Status](https://travis-ci.org/epfl-lasa/ds_motion_generator.svg?branch=master)](https://travis-ci.org/epfl-lasa/ds_motion_generator)
-
 # ds_motion_generator
 ---
 This package provides a nodified version of DS motion generators. Type of DS:
