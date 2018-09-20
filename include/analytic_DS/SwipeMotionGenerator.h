@@ -3,8 +3,7 @@
 
 #include "ros/ros.h"
 #include "geometry_msgs/Pose.h"
-// #include "geometry_msgs/Twist.h"
-#include "geometry_msgs/TwistStamped.h"
+#include "geometry_msgs/Twist.h"
 #include "geometry_msgs/PointStamped.h"
 #include "nav_msgs/Path.h"
 
@@ -33,6 +32,7 @@ private:
 
 	double SwipeVel_offset_;
 	double Orth_damp_scaling_;
+    bool bPublish_DS_path_;
 
 	// Filter variables
 	std::unique_ptr<CDDynamics> CCDyn_filter_;
@@ -58,8 +58,8 @@ private:
 	std::string output_filtered_topic_name_;
 
 	geometry_msgs::Pose msg_real_pose_;
-	geometry_msgs::TwistStamped msg_desired_velocity_;
-	geometry_msgs::TwistStamped msg_desired_velocity_filtered_;
+    geometry_msgs::Twist msg_desired_velocity_;
+    geometry_msgs::Twist msg_desired_velocity_filtered_;
 
 	nav_msgs::Path msg_DesiredPath_;
 	int MAX_FRAME = 200;
@@ -98,7 +98,8 @@ public:
 	                     int SwipeDirection,
 	                     double SwipeVelocity,
 	                     double OrthogonalDamping,
-	                     std::vector<double> SwipeTarget);
+                         std::vector<double> SwipeTarget,
+                         bool bPublish_DS_path);
 
 	bool Init();
 

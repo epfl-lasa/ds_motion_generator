@@ -1,5 +1,4 @@
 #include "SwipeMotionGenerator.h"
-// #include <tf/transform_datatypes.h>
 
 
 SwipeMotionGenerator::SwipeMotionGenerator(ros::NodeHandle &n,
@@ -10,7 +9,8 @@ SwipeMotionGenerator::SwipeMotionGenerator(ros::NodeHandle &n,
         int SwipeDirection,
         double SwipeVelocity,
         double OrthogonalDamping,
-        std::vector<double> SwipeTarget)
+        std::vector<double> SwipeTarget,
+        bool bPublish_DS_path)
 	: nh_(n),
 	  loop_rate_(frequency),
 	  input_topic_name_(input_topic_name),
@@ -24,7 +24,8 @@ SwipeMotionGenerator::SwipeMotionGenerator(ros::NodeHandle &n,
 	  OrthVelLim_(0.1),
 	  SwipeTarget_(SwipeTarget),
 	  SwipeVel_offset_(0),
-	  Orth_damp_scaling_(1){
+      Orth_damp_scaling_(1),
+      bPublish_DS_path_(bPublish_DS_path){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -73,8 +74,8 @@ bool SwipeMotionGenerator::InitializeROS() {
 
 	sub_real_pose_ = nh_.subscribe( input_topic_name_ , 1000,
 	                                &SwipeMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
-	pub_desired_twist_ = nh_.advertise<geometry_msgs::TwistStamped>(output_topic_name_, 1);
-	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::TwistStamped>(output_filtered_topic_name_, 1);
+    pub_desired_twist_ = nh_.advertise<geometry_msgs::Twist>(output_topic_name_, 1);
+    pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::Twist>(output_filtered_topic_name_, 1);
 
 	pub_target_ = nh_.advertise<geometry_msgs::PointStamped>("DS/target", 1);
 	pub_DesiredPath_ = nh_.advertise<nav_msgs::Path>("DS/DesiredPath", 1);
@@ -147,10 +148,6 @@ void SwipeMotionGenerator::ComputeDesiredVelocity() {
 		y_vel = SwipeDirection_ * (SwipeVelocity_ + SwipeVel_offset_);
 	}
 
-
-	// y_vel /= 1 + std::max(0, z_vel);
-	// std::cout << x_vel << "\t" << y_vel << "\t" << z_vel << std::endl;
-
 	desired_velocity_(0) = x_vel;
 	desired_velocity_(1) = y_vel;
 	desired_velocity_(2) = z_vel;
@@ -160,29 +157,24 @@ void SwipeMotionGenerator::ComputeDesiredVelocity() {
 		desired_velocity_.Zero();
 	}
 
-
-	msg_desired_velocity_.header.stamp = ros::Time::now();
-	msg_desired_velocity_.twist.linear.x  = desired_velocity_(0);
-	msg_desired_velocity_.twist.linear.y  = desired_velocity_(1);
-	msg_desired_velocity_.twist.linear.z  = desired_velocity_(2);
-
-	msg_desired_velocity_.twist.angular.x = 0;
-	msg_desired_velocity_.twist.angular.y = 0;
-	msg_desired_velocity_.twist.angular.z = 0;
+    msg_desired_velocity_.linear.x  = desired_velocity_(0);
+    msg_desired_velocity_.linear.y  = desired_velocity_(1);
+    msg_desired_velocity_.linear.z  = desired_velocity_(2);
+    msg_desired_velocity_.angular.x = 0;
+    msg_desired_velocity_.angular.y = 0;
+    msg_desired_velocity_.angular.z = 0;
 
 	CCDyn_filter_->SetTarget(desired_velocity_);
 	CCDyn_filter_->Update();
 	CCDyn_filter_->GetState(desired_velocity_filtered_);
 
-	msg_desired_velocity_filtered_.header.stamp = ros::Time::now();
-	msg_desired_velocity_filtered_.twist.linear.x  = desired_velocity_filtered_(0);
-	msg_desired_velocity_filtered_.twist.linear.y  = desired_velocity_filtered_(1);
-	msg_desired_velocity_filtered_.twist.linear.z  = desired_velocity_filtered_(2);
+    msg_desired_velocity_filtered_.linear.x  = desired_velocity_filtered_(0);
+    msg_desired_velocity_filtered_.linear.y  = desired_velocity_filtered_(1);
+    msg_desired_velocity_filtered_.linear.z  = desired_velocity_filtered_(2);
 
-	msg_desired_velocity_filtered_.twist.angular.x = 0;
-	msg_desired_velocity_filtered_.twist.angular.y = 0;
-	msg_desired_velocity_filtered_.twist.angular.z = 0;
-
+    msg_desired_velocity_filtered_.angular.x = 0;
+    msg_desired_velocity_filtered_.angular.y = 0;
+    msg_desired_velocity_filtered_.angular.z = 0;
 
 	mutex_.unlock();
 
@@ -250,60 +242,42 @@ void SwipeMotionGenerator::PublishFuturePath() {
 
 	pub_target_.publish(msg);
 
-	// create a temporary message
+    if (bPublish_DS_path_){
 
+        ROS_WARN_STREAM_THROTTLE(1, "Publishing Path...");
+        // setting the header of the path
+        msg_DesiredPath_.header.stamp = ros::Time::now();
+        msg_DesiredPath_.header.frame_id = "world";
+        MathLib::Vector simulated_pose = real_pose_;
+        MathLib::Vector simulated_vel;
+        simulated_vel.Resize(3);
 
-	// setting the header of the path
-	msg_DesiredPath_.header.stamp = ros::Time::now();
-	msg_DesiredPath_.header.frame_id = "world";
-
-
-
-
-	MathLib::Vector simulated_pose = real_pose_;
-	MathLib::Vector simulated_vel;
-	simulated_vel.Resize(3);
-
-	for (int frame = 0; frame < MAX_FRAME; frame++)
-	{
-
-
-
-	MathLib::Vector pose = simulated_pose - target_pose_  - target_offset_;
-
-
-	simulated_vel(0) = 0;
-	simulated_vel(1) = 0;
-	simulated_vel(2) = - OrthogonalDamping_ * Orth_damp_scaling_* pose(2);
-
-
-	if (simulated_vel(2)  > OrthVelLim_) {
-		simulated_vel(2) =  OrthVelLim_;
-	} else if (simulated_vel(2) < -OrthVelLim_) {
-		simulated_vel(2) = - OrthVelLim_;
-	}
-
-
-	if (pose(1) * SwipeDirection_ < 0) {
-		simulated_vel(1) = SwipeDirection_ * (SwipeVelocity_ + SwipeVel_offset_);
-	}
-
-
-
-		simulated_pose[0] +=  simulated_vel[0] * dt_ * 20;
-		simulated_pose[1] +=  simulated_vel[1] * dt_ * 20;
-		simulated_pose[2] +=  simulated_vel[2] * dt_ * 20;
-
-		msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
-		msg_DesiredPath_.poses[frame].header.frame_id = "world";
-		msg_DesiredPath_.poses[frame].pose.position.x = simulated_pose[0];
-		msg_DesiredPath_.poses[frame].pose.position.y = simulated_pose[1];
-		msg_DesiredPath_.poses[frame].pose.position.z = simulated_pose[2];
-
-		pub_DesiredPath_.publish(msg_DesiredPath_);
-
-
-	}
-
+        for (int frame = 0; frame < MAX_FRAME; frame++)
+        {
+            MathLib::Vector pose = simulated_pose - target_pose_  - target_offset_;
+            simulated_vel(0) = 0;
+            simulated_vel(1) = 0;
+            simulated_vel(2) = - OrthogonalDamping_ * Orth_damp_scaling_* pose(2);
+            if (simulated_vel(2)  > OrthVelLim_) {
+                simulated_vel(2) =  OrthVelLim_;
+            } else if (simulated_vel(2) < -OrthVelLim_) {
+                simulated_vel(2) = - OrthVelLim_;
+            }
+            if (pose(1) * SwipeDirection_ < 0) {
+                simulated_vel(1) = SwipeDirection_ * (SwipeVelocity_ + SwipeVel_offset_);
+            }
+            simulated_pose[0] +=  simulated_vel[0] * dt_ * 20;
+            simulated_pose[1] +=  simulated_vel[1] * dt_ * 20;
+            simulated_pose[2] +=  simulated_vel[2] * dt_ * 20;
+            msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
+            msg_DesiredPath_.poses[frame].header.frame_id = "world";
+            msg_DesiredPath_.poses[frame].pose.position.x = simulated_pose[0];
+            msg_DesiredPath_.poses[frame].pose.position.y = simulated_pose[1];
+            msg_DesiredPath_.poses[frame].pose.position.z = simulated_pose[2];
+            pub_DesiredPath_.publish(msg_DesiredPath_);
+        }
+    }
 
 }
+
+

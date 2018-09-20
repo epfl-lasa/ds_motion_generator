@@ -1,6 +1,4 @@
 #include "CycleMotionGenerator.h"
-// #include <tf/transform_datatypes.h>
-
 
 CycleMotionGenerator::CycleMotionGenerator(ros::NodeHandle &n,
         double frequency,
@@ -199,9 +197,6 @@ void CycleMotionGenerator::UpdateObjectState(const std_msgs::Float64MultiArray::
 
 	if(!_firstObject)
 	{
-		// desired_pose_ = real_pose_;
-		// std:cerr << desired_pose_(2) << " " <<  real_pose_(2) << std::endl;
-
 		_firstObject= true;
 	}
 }
@@ -241,54 +236,27 @@ void CycleMotionGenerator::ComputeDesiredVelocity() {
 		desired_velocity_des = desired_velocity_des / desired_velocity_des.Norm() * Velocity_limit_;
 	}
 
-	// if(_outputVelocity)
-	// {
-
 	float alpha = 0.5f;
 
-	MathLib::Vector error;
-	error.Resize(3);
-	error = desired_pose_-real_pose_;
+    MathLib::Vector error;
+    error.Resize(3);
+    error = desired_pose_-real_pose_;
+    for(int k =0; k < 3;k++)
+    {
+        desired_pose_(k) += dt_*((1-Alpha)*desired_velocity_(k)+Alpha*desired_velocity_des(k));
+        // desired_pose_(k) += dt_*desired_velocity_des(k);
+        // desired_pose_(k) = real_pose_(k)+dt_*((1-Alpha)*desired_velocity_(k)+Alpha*desired_velocity_des(k));
+        // desired_pose_(k) = real_pose_(k)+dt_*(desired_velocity_(k));
+        // desired_pose_(k) += dt_*desired_velocity_des(k);
+    }
 
-	// desired_velocity_ = desired_velocity_des;
+    msg_desired_velocity_.linear.x  = desired_velocity_(0);
+    msg_desired_velocity_.linear.y  = desired_velocity_(1);
+    msg_desired_velocity_.linear.z  = desired_velocity_(2);
 
-	// std::cerr << error.Norm() <<  " " << Alpha  << std::endl; 
-	// if(error.Norm()< 0.1)
-	// {	
-		for(int k =0; k < 3;k++)
-		{
-			desired_pose_(k) += dt_*((1-Alpha)*desired_velocity_(k)+Alpha*desired_velocity_des(k));
-			// desired_pose_(k) += dt_*desired_velocity_des(k);
-			// desired_pose_(k) = real_pose_(k)+dt_*((1-Alpha)*desired_velocity_(k)+Alpha*desired_velocity_des(k));
-			// desired_pose_(k) = real_pose_(k)+dt_*(desired_velocity_(k));
-			// desired_pose_(k) += dt_*desired_velocity_des(k);
-		}
-	// }
-
-
-	// }
-	// else
-	// {
-		// for(int k =0; k < 3;k++)
-		// {
-		// 	desired_pose_(k) = real_pose_(k)+dt_*desired_velocity_(k);
-		// }
-	// }
-
-
-
-	msg_desired_velocity_.header.stamp = ros::Time::now();
-	msg_desired_velocity_.twist.linear.x  = desired_velocity_(0);
-	msg_desired_velocity_.twist.linear.y  = desired_velocity_(1);
-	msg_desired_velocity_.twist.linear.z  = desired_velocity_(2);
-
-	// msg_desired_velocity_.twist.linear.x  = (1-Alpha)*desired_velocity_(0)+Alpha*desired_velocity_des(0);
-	// msg_desired_velocity_.twist.linear.y  = (1-Alpha)*desired_velocity_(1)+Alpha*desired_velocity_des(1);
-	// msg_desired_velocity_.twist.linear.z  = (1-Alpha)*desired_velocity_(2)+Alpha*desired_velocity_des(2);
-
-	msg_desired_velocity_.twist.angular.x = desired_pose_(0);
-	msg_desired_velocity_.twist.angular.y = desired_pose_(1);
-	msg_desired_velocity_.twist.angular.z = desired_pose_(2);
+    msg_desired_velocity_.angular.x = desired_pose_(0);
+    msg_desired_velocity_.angular.y = desired_pose_(1);
+    msg_desired_velocity_.angular.z = desired_pose_(2);
 
 	msg_desired_pose_.position.x = desired_pose_(0);
 	msg_desired_pose_.position.y = desired_pose_(1);
@@ -302,14 +270,14 @@ void CycleMotionGenerator::ComputeDesiredVelocity() {
 	CCDyn_filter_->Update();
 	CCDyn_filter_->GetState(desired_velocity_filtered_);
 
-	msg_desired_velocity_filtered_.header.stamp = ros::Time::now();
-	msg_desired_velocity_filtered_.twist.linear.x  = desired_velocity_filtered_(0);
-	msg_desired_velocity_filtered_.twist.linear.y  = desired_velocity_filtered_(1);
-	msg_desired_velocity_filtered_.twist.linear.z  = desired_velocity_filtered_(2);
+//	msg_desired_velocity_filtered_.header.stamp = ros::Time::now();
+    msg_desired_velocity_filtered_.linear.x  = desired_velocity_filtered_(0);
+    msg_desired_velocity_filtered_.linear.y  = desired_velocity_filtered_(1);
+    msg_desired_velocity_filtered_.linear.z  = desired_velocity_filtered_(2);
 
-	msg_desired_velocity_filtered_.twist.angular.x = 0;
-	msg_desired_velocity_filtered_.twist.angular.y = 0;
-	msg_desired_velocity_filtered_.twist.angular.z = 0;
+    msg_desired_velocity_filtered_.angular.x = 0;
+    msg_desired_velocity_filtered_.angular.y = 0;
+    msg_desired_velocity_filtered_.angular.z = 0;
 
 
 	mutex_.unlock();
@@ -485,14 +453,14 @@ void CycleMotionGenerator::PublishDesiredVelocity() {
 
 	if(_outputVelocity)
 	{
-		pub_desired_twist_.publish(msg_desired_velocity_.twist);
+        pub_desired_twist_.publish(msg_desired_velocity_);
 		pub_desiredOrientation_.publish(msg_desired_orientation);
 	}
 	else
 	{
 		pub_desired_twist_.publish(msg_desired_pose_);
 	}
-	pub_desired_twist_filtered_.publish(msg_desired_velocity_filtered_.twist);
+    pub_desired_twist_filtered_.publish(msg_desired_velocity_filtered_);
 
 }
 

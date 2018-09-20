@@ -22,7 +22,7 @@ int main(int argc, char **argv)
   double OrthogonalDamping;
   std::vector<double>  Target_1;
   std::vector<double>  Target_2;
-
+  bool bPublish_DS_path;
 
 
 
@@ -42,6 +42,10 @@ int main(int argc, char **argv)
     // return -1;
   }
 
+  if (!nh.getParam("publish_DS_path", bPublish_DS_path))   {
+    ROS_ERROR("Couldn't retrieve the publish DS path boolean. ");
+    // return -1;
+  }
 
   if (!nh.getParam("SwipeVelocity", SwipeVelocity))   {
     ROS_ERROR("Couldn't retrieve the swiping velocity. ");
@@ -64,7 +68,10 @@ int main(int argc, char **argv)
     // return -1;
   }
 
-  ROS_INFO("Starting the Motion generator...");
+  if (bPublish_DS_path)
+        ROS_INFO("Starting the PPoscilate Motion generator... Publishing path in this node. ");
+  else
+      ROS_INFO("Starting the PPoscilate Motion generator... NOT Publishing path in this node. ");
 
 
   PPOscilateMotionGenerator PPOscilate_motion_generator(nh,
@@ -75,7 +82,8 @@ int main(int argc, char **argv)
       SwipeVelocity,
       OrthogonalDamping,
       Target_1,
-      Target_2);
+      Target_2,
+      bPublish_DS_path);
 
   if (!PPOscilate_motion_generator.Init()) {
     return -1;

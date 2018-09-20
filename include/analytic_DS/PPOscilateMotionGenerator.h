@@ -3,8 +3,7 @@
 
 #include "ros/ros.h"
 #include "geometry_msgs/Pose.h"
-// #include "geometry_msgs/Twist.h"
-#include "geometry_msgs/TwistStamped.h"
+#include "geometry_msgs/Twist.h"
 #include "geometry_msgs/PointStamped.h"
 #include "nav_msgs/Path.h"
 
@@ -36,6 +35,7 @@ private:
 
 	double SwipeVel_offset_;
 	double Orth_damp_scaling_;
+    bool bPublish_DS_path_;
 
 	int TARGET_id;
 
@@ -62,9 +62,9 @@ private:
 	std::string output_topic_name_;
 	std::string output_filtered_topic_name_;
 
-	geometry_msgs::Pose msg_real_pose_;
-	geometry_msgs::TwistStamped msg_desired_velocity_;
-	geometry_msgs::TwistStamped msg_desired_velocity_filtered_;
+    geometry_msgs::Pose  msg_real_pose_;
+    geometry_msgs::Twist msg_desired_velocity_;
+    geometry_msgs::Twist msg_desired_velocity_filtered_;
 
 	nav_msgs::Path msg_DesiredPath_;
 	int MAX_FRAME = 200;
@@ -74,9 +74,6 @@ private:
 	//dynamic reconfig settig
 	dynamic_reconfigure::Server<ds_motion_generator::PPOscilate_paramsConfig> dyn_rec_srv_;
 	dynamic_reconfigure::Server<ds_motion_generator::PPOscilate_paramsConfig>::CallbackType dyn_rec_f_;
-
-
-
 
 	// Class variables
 	std::mutex mutex_;
@@ -108,7 +105,8 @@ public:
 	                     double SwipeVelocity,
 	                     double OrthogonalDamping,
 	                     std::vector<double> Target_1,
-	                     std::vector<double> Target_2);
+                         std::vector<double> Target_2,
+                         bool bPublish_DS_path);
 
 	bool Init();
 

@@ -1,4 +1,0 @@
-CenterRotation: [-0.55 ,0 ,0.12]
-radius: 0.025
-RotationSpeed:  2.5 # this is in rad/s
-ConvergenceRate: 2.7

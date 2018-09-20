@@ -1,6 +1,4 @@
 #include "PPOscilateMotionGenerator.h"
-// #include <tf/transform_datatypes.h>
-
 
 PPOscilateMotionGenerator::PPOscilateMotionGenerator(ros::NodeHandle &n,
         double frequency,
@@ -10,7 +8,8 @@ PPOscilateMotionGenerator::PPOscilateMotionGenerator(ros::NodeHandle &n,
         double SwipeVelocity,
         double OrthogonalDamping,
         std::vector<double> Target_1,
-        std::vector<double> Target_2)
+        std::vector<double> Target_2,
+        bool bPublish_DS_path)
 	: nh_(n),
 	  loop_rate_(frequency),
 	  input_topic_name_(input_topic_name),
@@ -24,7 +23,8 @@ PPOscilateMotionGenerator::PPOscilateMotionGenerator(ros::NodeHandle &n,
 	  Target_1_(Target_1),
 	  Target_2_(Target_2),
 	  SwipeVel_offset_(0),
-	  Orth_damp_scaling_(1) {
+      Orth_damp_scaling_(1),
+      bPublish_DS_path_(bPublish_DS_path){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -87,8 +87,8 @@ bool PPOscilateMotionGenerator::InitializeROS() {
 
 	sub_real_pose_ = nh_.subscribe( input_topic_name_ , 1000,
 	                                &PPOscilateMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
-	pub_desired_twist_ = nh_.advertise<geometry_msgs::TwistStamped>(output_topic_name_, 1);
-	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::TwistStamped>(output_filtered_topic_name_, 1);
+    pub_desired_twist_ = nh_.advertise<geometry_msgs::Twist>(output_topic_name_, 1);
+    pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::Twist>(output_filtered_topic_name_, 1);
 
 	pub_target_ = nh_.advertise<geometry_msgs::PointStamped>("DS/target", 1);
 	pub_DesiredPath_ = nh_.advertise<nav_msgs::Path>("DS/DesiredPath", 1);
@@ -169,32 +169,15 @@ void PPOscilateMotionGenerator::ComputeDesiredVelocity() {
 	}
 
 	MathLib::Vector pose = real_pose_ - target_pose_;
-
 	MathLib::Vector line = other_target_pose_ - target_pose_;
-
-
-
 
 	double proj = pose(0) * line(0) + pose(1) * line(1) + pose(2) * line(2);
 	MathLib::Vector pose_on_line = line / line.Norm() * proj;
-
-	// ROS_ERROR_STREAM("proj is " << proj);
-
 	ROS_WARN_STREAM_THROTTLE(1, "target" << TARGET_id);
-
-
-
 	MathLib::Vector pose_ortho_line = pose - pose_on_line;
-
-
 	MathLib::Vector vel_on_line = pose_on_line / pose_on_line.Norm() * ( - SwipeVelocity_ - SwipeVel_offset_);
-
-
 	MathLib::Vector vel_ortho_line =   pose_ortho_line * -(OrthogonalDamping_ * Orth_damp_scaling_) ;
-
 	desired_velocity_ = vel_on_line + vel_ortho_line;
-
-
 
 	if (desired_velocity_.Norm() > vel_limit_) {
 		desired_velocity_ = desired_velocity_ / desired_velocity_.Norm() * vel_limit_;
@@ -219,28 +202,24 @@ void PPOscilateMotionGenerator::ComputeDesiredVelocity() {
 	}
 
 
-	msg_desired_velocity_.header.stamp = ros::Time::now();
-	msg_desired_velocity_.twist.linear.x  = desired_velocity_(0);
-	msg_desired_velocity_.twist.linear.y  = desired_velocity_(1);
-	msg_desired_velocity_.twist.linear.z  = desired_velocity_(2);
+    msg_desired_velocity_.linear.x  = desired_velocity_(0);
+    msg_desired_velocity_.linear.y  = desired_velocity_(1);
+    msg_desired_velocity_.linear.z  = desired_velocity_(2);
+    msg_desired_velocity_.angular.x = 0;
+    msg_desired_velocity_.angular.y = 0;
+    msg_desired_velocity_.angular.z = 0;
 
-	msg_desired_velocity_.twist.angular.x = 0;
-	msg_desired_velocity_.twist.angular.y = 0;
-	msg_desired_velocity_.twist.angular.z = 0;
+    CCDyn_filter_->SetTarget(desired_velocity_);
+    CCDyn_filter_->Update();
+    CCDyn_filter_->GetState(desired_velocity_filtered_);
 
-	CCDyn_filter_->SetTarget(desired_velocity_);
-	CCDyn_filter_->Update();
-	CCDyn_filter_->GetState(desired_velocity_filtered_);
+    msg_desired_velocity_filtered_.linear.x  = desired_velocity_filtered_(0);
+    msg_desired_velocity_filtered_.linear.y  = desired_velocity_filtered_(1);
+    msg_desired_velocity_filtered_.linear.z  = desired_velocity_filtered_(2);
 
-	msg_desired_velocity_filtered_.header.stamp = ros::Time::now();
-	msg_desired_velocity_filtered_.twist.linear.x  = desired_velocity_filtered_(0);
-	msg_desired_velocity_filtered_.twist.linear.y  = desired_velocity_filtered_(1);
-	msg_desired_velocity_filtered_.twist.linear.z  = desired_velocity_filtered_(2);
-
-	msg_desired_velocity_filtered_.twist.angular.x = 0;
-	msg_desired_velocity_filtered_.twist.angular.y = 0;
-	msg_desired_velocity_filtered_.twist.angular.z = 0;
-
+    msg_desired_velocity_filtered_.angular.x = 0;
+    msg_desired_velocity_filtered_.angular.y = 0;
+    msg_desired_velocity_filtered_.angular.z = 0;
 
 	mutex_.unlock();
 
@@ -316,75 +295,40 @@ void PPOscilateMotionGenerator::PublishFuturePath() {
 		msg.point.y = Target_2_[1] + target_2_offset_(1);
 		msg.point.z = Target_2_[2] + target_2_offset_(2);
 	}
-
-
 	pub_target_.publish(msg);
 
-	// create a temporary message
+    if (bPublish_DS_path_){
+        // setting the header of the path
+        msg_DesiredPath_.header.stamp = ros::Time::now();
+        msg_DesiredPath_.header.frame_id = "world";
 
+        MathLib::Vector simulated_pose = real_pose_;
+        MathLib::Vector simulated_vel;
+        simulated_vel.Resize(3);
 
-	// setting the header of the path
-	msg_DesiredPath_.header.stamp = ros::Time::now();
-	msg_DesiredPath_.header.frame_id = "world";
+        for (int frame = 0; frame < MAX_FRAME; frame++)
+        {
+            MathLib::Vector pose = simulated_pose - target_pose_;
+            MathLib::Vector line = other_target_pose_ - target_pose_;
 
-
-
-
-	MathLib::Vector simulated_pose = real_pose_;
-	MathLib::Vector simulated_vel;
-	simulated_vel.Resize(3);
-
-	for (int frame = 0; frame < MAX_FRAME; frame++)
-	{
-
-
-		MathLib::Vector pose = simulated_pose - target_pose_;
-
-		MathLib::Vector line = other_target_pose_ - target_pose_;
-
-
-
-
-		double proj = pose(0) * line(0) + pose(1) * line(1) + pose(2) * line(2);
-		MathLib::Vector pose_on_line = line / line.Norm() * proj;
-
-		// ROS_ERROR_STREAM("proj is " << proj);
-
-		// ROS_WARN_STREAM_THROTTLE(1, "target" << TARGET_id);
-
-
-
-		MathLib::Vector pose_ortho_line = pose - pose_on_line;
-
-
-		MathLib::Vector vel_on_line = pose_on_line / pose_on_line.Norm() * ( - SwipeVelocity_ - SwipeVel_offset_);
-
-
-		MathLib::Vector vel_ortho_line =   pose_ortho_line * -(OrthogonalDamping_ * Orth_damp_scaling_) ;
-
-
-		simulated_vel = vel_on_line + vel_ortho_line;
-
-
-		if (simulated_vel.Norm() > vel_limit_) {
-			simulated_vel = simulated_vel / simulated_vel.Norm() * vel_limit_;
-		}
-
-
-		simulated_pose[0] +=  simulated_vel[0] * dt_ * 20;
-		simulated_pose[1] +=  simulated_vel[1] * dt_ * 20;
-		simulated_pose[2] +=  simulated_vel[2] * dt_ * 20;
-
-		msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
-		msg_DesiredPath_.poses[frame].header.frame_id = "world";
-		msg_DesiredPath_.poses[frame].pose.position.x = simulated_pose[0];
-		msg_DesiredPath_.poses[frame].pose.position.y = simulated_pose[1];
-		msg_DesiredPath_.poses[frame].pose.position.z = simulated_pose[2];
-
-		pub_DesiredPath_.publish(msg_DesiredPath_);
-
-
-	}
-
-
+            double proj = pose(0) * line(0) + pose(1) * line(1) + pose(2) * line(2);
+            MathLib::Vector pose_on_line = line / line.Norm() * proj;
+            MathLib::Vector pose_ortho_line = pose - pose_on_line;
+            MathLib::Vector vel_on_line = pose_on_line / pose_on_line.Norm() * ( - SwipeVelocity_ - SwipeVel_offset_);
+            MathLib::Vector vel_ortho_line =   pose_ortho_line * -(OrthogonalDamping_ * Orth_damp_scaling_) ;
+            simulated_vel = vel_on_line + vel_ortho_line;
+            if (simulated_vel.Norm() > vel_limit_) {
+                simulated_vel = simulated_vel / simulated_vel.Norm() * vel_limit_;
+            }
+            simulated_pose[0] +=  simulated_vel[0] * dt_ * 20;
+            simulated_pose[1] +=  simulated_vel[1] * dt_ * 20;
+            simulated_pose[2] +=  simulated_vel[2] * dt_ * 20;
+            msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
+            msg_DesiredPath_.poses[frame].header.frame_id = "world";
+            msg_DesiredPath_.poses[frame].pose.position.x = simulated_pose[0];
+            msg_DesiredPath_.poses[frame].pose.position.y = simulated_pose[1];
+            msg_DesiredPath_.poses[frame].pose.position.z = simulated_pose[2];
+            pub_DesiredPath_.publish(msg_DesiredPath_);
+        }
+    }
 }

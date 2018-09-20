@@ -1,6 +1,4 @@
 #include "LinearMotionGenerator.h"
-// #include <tf/transform_datatypes.h>
-
 
 LinearMotionGenerator::LinearMotionGenerator(ros::NodeHandle &n,
         double frequency,
@@ -228,25 +226,15 @@ void LinearMotionGenerator::DynCallback(ds_motion_generator::LINEAR_paramsConfig
 void LinearMotionGenerator::PublishFuturePath() {
 
 
-	// create a temporary message
-
-
 	// setting the header of the path
 	msg_DesiredPath_.header.stamp = ros::Time::now();
 	msg_DesiredPath_.header.frame_id = "world";
-
-
-
-
 	MathLib::Vector simulated_pose = real_pose_;
 	MathLib::Vector simulated_vel;
 	simulated_vel.Resize(3);
 
 	for (int frame = 0; frame < MAX_FRAME; frame++)
 	{
-
-
-
 		simulated_vel(0) = 0;
 		simulated_vel(1) = 0;
 		simulated_vel(2) = 0;
@@ -275,8 +263,6 @@ void LinearMotionGenerator::PublishFuturePath() {
 			simulated_vel(2) = +1 * (VELOCITY_  + VELOCITY_offset_);
 		}
 
-
-
 		simulated_pose[0] +=  simulated_vel[0] * dt_ * 100;
 		simulated_pose[1] +=  simulated_vel[1] * dt_ * 100;
 		simulated_pose[2] +=  simulated_vel[2] * dt_ * 100;
@@ -289,11 +275,7 @@ void LinearMotionGenerator::PublishFuturePath() {
 
 		pub_DesiredPath_.publish(msg_DesiredPath_);
 
-
-
-
 		geometry_msgs::PointStamped msg;
-
 		msg.header.frame_id = "world";
 		msg.header.stamp = ros::Time::now();
 		msg.point.x = simulated_pose[0];

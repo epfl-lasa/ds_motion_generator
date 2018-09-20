@@ -1,5 +1,5 @@
 #include "ros/ros.h"
-#include "DSMotionGenerator.h"
+#include "seDSMotionGenerator.h"
 
 
 #include <vector>
@@ -7,11 +7,10 @@
 
 int main(int argc, char **argv)
 {
-  ros::init(argc, argv, "active_motion_genrator_node");
+  ros::init(argc, argv, "seDS_motion_generator_node");
 
   ros::NodeHandle nh;
   double frequency = 500.0;
-
 
   // Parameters
   std::string input_topic_name;
@@ -20,14 +19,11 @@ int main(int argc, char **argv)
   
   int K_gmm;
   int dim;
+  bool bPublish_DS_path (false);
   std::vector<double> Priors;
   std::vector<double> Mu;
   std::vector<double> Sigma;
   std::vector<double> attractor;
-
-  // double Wn;
-  // std::vector<double> VelLimits;
-  // std::vector<double> AccLimits;
 
 
   if (!nh.getParam("input_topic_name", input_topic_name))   {
@@ -45,6 +41,10 @@ int main(int argc, char **argv)
     // return -1;
   }
 
+  if (!nh.getParam("publish_DS_path", bPublish_DS_path))   {
+    ROS_ERROR("Couldn't retrieve the publish DS path boolean. ");
+    // return -1;
+  }
   if (!nh.getParam("K", K_gmm))   {
     ROS_ERROR("Couldn't retrieve the number of guassians. ");
     // return -1;
@@ -78,13 +78,17 @@ int main(int argc, char **argv)
   }
 
 
-  ROS_INFO("Starting the Motion generator...");
+  if (bPublish_DS_path)
+        ROS_INFO("Starting the se-DS Motion generator... Publishing path in this node. ");
+  else
+      ROS_INFO("Starting the se-DS Motion generator... NOT Publishing path in this node. ");
 
-  DSMotionGenerator ds_motion_generator(nh, frequency,
+  seDSMotionGenerator ds_motion_generator(nh, frequency,
                                         K_gmm, dim, Priors, Mu, Sigma, attractor,
                                         input_topic_name,
                                         output_topic_name,
-                                        output_filtered_topic_name);
+                                        output_filtered_topic_name,
+                                        bPublish_DS_path);
   if (!ds_motion_generator.Init()) {
     return -1;
   }

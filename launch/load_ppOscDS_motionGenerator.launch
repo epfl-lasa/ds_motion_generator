@@ -1,0 +1,33 @@
+<?xml version="1.0" ?>
+<launch>
+  
+ <arg name="viz_DS_path"   default="true"/>
+# Things to Know!
+# input_topic name should contain          -- geometry_msgs::Pose
+# output_topic_name will write to          -- geometry_msgs::Twist
+# output_orientation_topic_name will write -- geometry_msgs::Quaternion
+<group ns="ds1">
+    <param name="input_topic_name"                 value="/lwr/ee_pose"/>
+    <param name="output_topic_name"                value="/ds1/desired_velocity"/>
+    <param name="output_filtered_topic_name"       value="/lwr/joint_controllers/passive_ds_command_vel"/>
+    <param name="publish_DS_path"                  value="false"/>
+    <rosparam command="load" file="$(find ds_motion_generator)/config/analytic_DS/PPOscilation.yml"/>
+    <node name="ds_node" pkg="ds_motion_generator" type="PPOscilate_motionGenerator_node" output="screen"/>
+</group>
+
+
+<group if="$(arg viz_DS_path)">
+  <group ns="ds1_path">
+    	<param name="input_topic_name"              value="/lwr/ee_pose"/>
+    	<param name="output_topic_name"             value=""/>
+    	<param name="output_filtered_topic_name"    value=""/>
+    	<param name="publish_DS_path"               value="true"/>
+    	<rosparam command="load" file="$(find ds_motion_generator)/config/analytic_DS/PPOscilation.yml"/>
+    	<node name="ds_node" pkg="ds_motion_generator" type="PPOscilate_motionGenerator_node" output="screen"/>
+	</group>
+</group>
+
+# This node published the desired orientation at the target
+<node pkg="rostopic" type="rostopic" name="angle_setting" args="pub /lwr/joint_controllers/passive_ds_command_orient geometry_msgs/Quaternion '{x: 0.73, y: 0.68, z: -0.012, w: -0.006}' -r 100" />
+
+</launch>

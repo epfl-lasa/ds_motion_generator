@@ -1,0 +1,19 @@
+<?xml version="1.0" ?>
+<launch>
+  
+# Things to Know!
+# input_topic name should contain          -- geometry_msgs::Pose
+# output_topic_name will write to          -- geometry_msgs::Twist
+# output_orientation_topic_name will write -- geometry_msgs::Quaternion
+<group ns="ds1">
+    <param name="input_topic_name"                 value="/lwr/ee_pose"/>
+    <param name="output_topic_name"                value="/ds1/desired_velocity"/>
+    <param name="output_filtered_topic_name"       value="/lwr/joint_controllers/passive_ds_command_vel"/>
+    <rosparam command="load" file="$(find ds_motion_generator)/config/analytic_DS/linear_motion.yml"/>
+    <node name="ds_node" pkg="ds_motion_generator" type="Linear_motionGenerator_node" output="screen"/>
+</group>
+
+# This node published the desired orientation at the target
+<node pkg="rostopic" type="rostopic" name="angle_setting" args="pub /lwr/joint_controllers/passive_ds_command_orient geometry_msgs/Quaternion '{x: 0.73, y: 0.68, z: -0.012, w: -0.006}' -r 100" />
+
+</launch>
