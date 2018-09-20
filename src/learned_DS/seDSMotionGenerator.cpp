@@ -7,6 +7,8 @@ seDSMotionGenerator::seDSMotionGenerator(ros::NodeHandle &n,
                                      std::vector<double> Priors,
                                      std::vector<double> Mu,
                                      std::vector<double> Sigma,
+                                     double Mu_scale,
+                                     double Sigma_scale,
                                      std::vector<double> attractor,
                                      std::string input_topic_name,
                                      std::string output_topic_name,
@@ -19,6 +21,8 @@ seDSMotionGenerator::seDSMotionGenerator(ros::NodeHandle &n,
 	  Priors_(Priors),
 	  Mu_(Mu),
 	  Sigma_(Sigma),
+      Mu_scale_(Mu_scale),
+      Sigma_scale_(Sigma_scale),
 	  attractor_(attractor),
 	  input_topic_name_(input_topic_name),
 	  output_topic_name_(output_topic_name),
@@ -77,6 +81,14 @@ bool seDSMotionGenerator::InitializeDS() {
 		return false;
 	}
 
+    /* Scale Mu and Sigma given scaling factor, default1=, but some models can have really high numbers */
+    for (int i = 0; i < K_gmm_ * dim_; i++) {
+        Mu_[i] = Mu_[i]*Mu_scale_;
+    }
+
+    for (int i = 0; i < K_gmm_ * dim_ * dim_; i++) {
+        Sigma_[i] = Sigma_[i]*Sigma_scale_;
+    }
 
     SED_GMM_.reset (new GMRDynamics(K_gmm_, dim_, dt_, Priors_, Mu_, Sigma_ ));
 	SED_GMM_->initGMR(0, 2, 3, 5 );

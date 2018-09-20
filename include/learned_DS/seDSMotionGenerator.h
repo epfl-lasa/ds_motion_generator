@@ -30,6 +30,7 @@ private:
     double max_desired_vel_;
     double pos_error_;
     bool   bPublish_DS_path_;
+    double Mu_scale_, Sigma_scale_;
     std::vector<double>  Priors_;
     std::vector<double>  Mu_;
     std::vector<double>  Sigma_;
@@ -104,6 +105,8 @@ public:
 	                  std::vector<double> Priors,
 	                  std::vector<double> Mu,
 	                  std::vector<double> Sigma,
+                      double Mu_scale,
+                      double Sigma_scale,
 	                  std::vector<double> attractor,
 	                  std::string input_topic_name,
 	                  std::string output_topic_name,
