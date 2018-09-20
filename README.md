@@ -55,7 +55,7 @@ The variable ```direction``` defines the direction of motion, which can be ```le
 
 --
 
-To test the **learned DS** via se-DS parametrization, we provide the following launch file
+To test the **learned DS** via se-DS [2] parametrization, we provide the following launch file
 ```
 $ roslaunch ds_motion_generator load_seDS_motionGenerator.launch DS_name:=free_ws viz_DS_path:=true
 ```
@@ -67,12 +67,16 @@ in which,apart from the input/output variables defined above, you must indicate 
 - ``Sigma``
 - ``Attractor``
 
-This file is stored in the ```config/learned_DS``` folder. The input variable ``DS_name`` in the launch file is used to indicate the names of the pre-learned se-DS models, which are: ``push_down,Curve_go_right,Curve_go_left,free_ws``. 
+This file is stored in the ```config/learned_DS/seDS``` folder. The input variable ``DS_name`` in the launch file is used to indicate the names of the pre-learned se-DS models, which are: ``push_down,Curve_go_right,Curve_go_left,free_ws``. 
 
 To learn/test your own se-DS model, you must generate this yaml file, which you can do by following the ``demo_learn_seDS.m`` script in the [ds-opt](https://github.com/nbfigueroa/ds-opt) package [3].
   
 --  
-  
+
+To test the **learned DS** via lpv-DS [2] parametrization, we provide the following launch file
+```
+$ roslaunch ds_motion_generator load_lpvDS_motionGenerator.launch DS_name:=via_point viz_DS_path:=true
+```
 
 #### Dynamic re-configuration of DS/filter parameters
 Finally, once running the node for your desired DS, you can modify the filtering parameters and some of the DS parameters dynamically. The definition of the parameters that can be dynamically reconfigured is provided in the ``cfg/``. Following an example of the parameters you can reconfigure:
