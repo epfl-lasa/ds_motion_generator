@@ -40,9 +40,9 @@ To test the **analytical DS** motions you can run any of the following launch fi
 $ roslaunch ds_motion_generator load_linearDS_motionGenerator.launch 
 ```
 Some imporant things to fill in the launch file are the following:
-1. the name of the input topic (potentially a position signal)
-   1. the name of the output topic (potentially a desired velocity signal)
-   1. the name of the topic for the filtered output.
+- The name of the input topic (potentially a position signal)
+- The name of the output topic (potentially a desired velocity signal)
+- The name of the topic for the filtered output.
 
 The current topics are assigned assuming you are using the [kuka-lwr-ros](https://github.com/epfl-lasa/kuka-lwr-ros) control interface and simulator (Gazebo). For the other analytical DS, the following launch files are provided:
 ```
@@ -77,13 +77,13 @@ To test your own se-DS model, you must generate this yaml file, which you can do
   
 
 #### Dynamic re-configuration of DS/filter parameters
-You can modify the filtering and some of the DS parameters dynamically (cfg folder)
-1. Wn : speed of the filter
-   1. fil_dx_lim : the limit on the velocity of the filter. (Note this is not the limit of the real velocity).
-   1. fil_ddx_lim : the limit on the accelarion of the filter. (Same note)
-   1. target_{x,y,z} : the position of the attractor.
-   1. scaling : simply a multiplier to scale the computed velocities based on the DS of choice.
-   1. trimmit : simply a threshold to limit the computed velocities based on the DS of choice.   
+Finally, once running the node for your desired DS, you can modify the filtering parameters and some of the DS parameters dynamically. The definition of the parameters that can be dynamically reconfigured is provided in the ``cfg/``. Following an example of the parameters you can reconfigure:
+- Wn : speed of the filter
+- fil_dx_lim : the limit on the velocity of the filter. (Note this is not the limit of the real velocity).
+- fil_ddx_lim : the limit on the accelarion of the filter. (Same note)
+- target_{x,y,z} : the position of the attractor.
+- scaling : simply a multiplier to scale the computed velocities based on the DS of choice.
+- trimmit : simply a threshold to limit the computed velocities based on the DS of choice.   
 
 **References**     
 > [1] Khoramshahi, M. and Billard, A. (2018) A Dynamical System Approach to Task-Adaptation in Physical Human-Robot Interaction. Under review in Autonomous Robots.    
