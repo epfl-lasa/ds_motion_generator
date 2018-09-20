@@ -89,9 +89,9 @@ Finally, once running the node for your desired DS, you can modify the filtering
 - trimmit : simply a threshold to limit the computed velocities based on the DS of choice.   
 
 **References**     
-> [1] Khoramshahi, M. and Billard, A. (2018) A Dynamical System Approach to Task-Adaptation in Physical Human-Robot Interaction. Under review in Autonomous Robots.    
+> [1] Khoramshahi, M. and Billard, A. (2018) A Dynamical System Approach to Task-Adaptation in Physical Human-Robot Interaction. Autonomous Robots.    
 > [2] Khansari Zadeh, S. M. and Billard, A. (2011) Learning Stable Non-Linear Dynamical Systems with Gaussian Mixture Models. IEEE Transaction on Robotics, vol. 27, num 5, p. 943-957.  
-> [3] Figueroa, N. and Billard, A. (2018) A Physically-Consistent Bayesian Non-Parametric Mixture Model for Dynamical System Learning. In Proceedings of the 2nd Conference on Robot Learning (CoRL). Accepted.     
+> [3] Figueroa, N. and Billard, A. (2018) A Physically-Consistent Bayesian Non-Parametric Mixture Model for Dynamical System Learning. In Proceedings of the 2nd Conference on Robot Learning (CoRL).     
 
 This package was initially implemented by [Mahdi Khoramshahi](http://lasa.epfl.ch/people/member.php?SCIPER=217217) and has been extended and modified by [Nadia Figueroa](http://lasa.epfl.ch/people/member.php?SCIPER=238387).  
 
