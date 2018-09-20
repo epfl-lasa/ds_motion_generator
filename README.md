@@ -2,9 +2,7 @@
 ---
 This package provides a nodified version of DS motion generators. Type of DS:
 - Analytically parameterized DS for simple motions used in [1], such as
-  - linear motion
-  - point-to-point oscillatory motion
-  - cyclic motion
+  - linear motions, point-to-point oscillatory motions, swiping and cyclic motions
 - Non-linear DS learned from demonstrations with the following approaches  
   - se-DS parametrization [2]**(Cleaning-up ...)**
   - lpv-DS parametrization [3]**(Working on ...)**
