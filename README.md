@@ -63,7 +63,7 @@ in which,apart from the input/output variables defined above, you must indicate 
 - ``Priors``
 - ``Mu``
 - ``Sigma``
-- ``Attractor``
+- ``Attractor``  
 Sometimes the parameters of ``Mu`` and ``Sigma`` might be too large; i.e. ``>1e6``. In these cases you can scale them and add the scaling values to the yaml file:
 - ``Mu_scale``
 - ``Sigma_scale``
