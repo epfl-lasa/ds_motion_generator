@@ -69,6 +69,7 @@ in which,apart from the input/output variables defined above, you must indicate 
 - ``Mu``
 - ``Sigma``
 - ``Attractor``
+
 This file is stored in the ```config/learned_DS``` folder. The input variable ``DS_name`` in the launch file is used to indicate the names of the pre-learned se-DS models, which are: ``push_down,Curve_go_right,Curve_go_left,free_ws``. 
 
 To test your own se-DS model, you must generate this yaml file, which you can do by following the ``demo_learn_seDS.m`` script in the [ds-opt](https://github.com/nbfigueroa/ds-opt) package [3].
