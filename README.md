@@ -49,7 +49,9 @@ The current topics are assigned assuming you are using the [kuka-lwr-ros](https:
 ```
 $ roslaunch ds_motion_generator load_ppOscDS_motionGenerator.launch viz_DS_path:=true
 ```
-The variable ```viz_DS_path``` defines if you want to visualize the integrated path of the DS. For the swipe motion the following launch file is provided:
+The variable ```viz_DS_path``` defines if you want to visualize the integrated path of the DS. 
+
+For the swipe motion the following launch file is provided:
 ```
 $ roslaunch ds_motion_generator load_swipeDS_motionGenerator.launch direction:=right viz_DS_path:=true
 ```
