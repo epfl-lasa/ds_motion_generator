@@ -66,6 +66,9 @@ in which,apart from the input/output variables defined above, you must indicate 
 - ``Mu``
 - ``Sigma``
 - ``Attractor``
+Sometimes the parameters of ``Mu`` and ``Sigma`` might be too large; i.e. ``>1e6``. In these cases you can scale them and add the scaling values to the yaml file:
+- ``Mu_scale``
+- ``Sigma_scale``
 
 This file is stored in the ```config/learned_DS/seDS``` folder. The input variable ``DS_name`` in the launch file is used to indicate the names of the pre-learned se-DS models, which are: ``push_down,Curve_go_right,Curve_go_left,free_ws``. 
 
