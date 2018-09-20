@@ -31,7 +31,7 @@ $ rosdep install --from-paths . --ignore-src --rosdistro indigo
 ```
 
 ## Usage
-#### DS Configuration and Launch File Specifications
+### DS Configuration and Launch File Specifications
 To test the **analytical DS** motions you can run any of the following launch file as the ones found in the ```launch/``` folder. For the linear DS, you should fill in the **DS configuration** file, which is a ```.yaml``` file stored in ```config/analytic_DS``` folder, the default is set to -y direction of motion. You can then test the launch file as follows:
 ```
 $ roslaunch ds_motion_generator load_linearDS_motionGenerator.launch 
@@ -78,7 +78,7 @@ To test the **learned DS** via lpv-DS [2] parametrization, we provide the follow
 $ roslaunch ds_motion_generator load_lpvDS_motionGenerator.launch DS_name:=via_point viz_DS_path:=true
 ```
 
-#### Dynamic re-configuration of DS/filter parameters
+### Dynamic re-configuration of DS/filter parameters
 Finally, once running the node for your desired DS, you can modify the filtering parameters and some of the DS parameters dynamically. The definition of the parameters that can be dynamically reconfigured is provided in the ``cfg/``. Following an example of the parameters you can reconfigure:
 - Wn : speed of the filter
 - fil_dx_lim : the limit on the velocity of the filter. (Note this is not the limit of the real velocity).
