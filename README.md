@@ -7,12 +7,11 @@ This package provides a nodified version of DS motion generators. Type of DS:
   <img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/linearMotion.gif" width="200"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/PPOscilateMotion.gif" width="200"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/SwipeMotion.gif" width="200"></>
     
 - Non-linear DS learned from demonstrations with the following approaches  
-  - se-DS parametrization [2], we provide a couple of pre-learned models of curvilinear motion with different targets as used in [1]; e.g. Push-Down Motion, Curve-Left Motion, Curve-Right Motion and Free WS (workspace) motion
+  - se-DS model parametrization [2]. We provide a couple of pre-learned models of curvilinear motion with different targets as used in [1]; e.g. Push-Down Motion, Curve-Left Motion, Curve-Right Motion and Free WS (workspace) motion
     <p align="center">
   <img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_pushDown.gif" width="200"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_curveLeft.gif" width="200"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_curveRight.gif" width="200"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_freeWS.gif" width="200">
 </>
-  - lpv-DS parametrization [3]**(Working on ...)**
-  - lags-DS parametrization [4] **(TODO)**
+  - lpv-DS model parametrization [3]. We provide a couple of pre-learned models of non-linear, non-monotic motions used in a variety of tasks in [3]; e.g..... **(Working on ...)**
   
 This package was initially implemented by [Mahdi Khoramshahi](http://lasa.epfl.ch/people/member.php?SCIPER=217217) and has been extended and modified by [Nadia Figueroa](http://lasa.epfl.ch/people/member.php?SCIPER=238387).  
 
@@ -63,7 +62,16 @@ To test the **learned DS** via se-DS parametrization, we provide the following l
 ```
 $ roslaunch ds_motion_generator load_seDS_motionGenerator.launch DS_name:=free_ws viz_DS_path:=true
 ```
-in which,apart from the input/output variables defined above, you must indicate the DS **DS configuration** file, which contains the the location of the GMM paremeters (i.e., a yaml file containing ``K`` (number of guassian), ``dim`` (the dimenstion input-output space), ``Priors``, ``Mu``, ``Sigma``). These files are stored in ```config/learned_DS``` folder. In this case the ``DS_name`` input variable is used to define the names of the pre-learned se-DS models, which are: ``push_down,Curve_go_right,Curve_go_left,free_ws``. To generate your own yaml file you can follow the ``demo_learn_seDS.m`` script in the [ds-opt](https://github.com/nbfigueroa/ds-opt) package.
+in which,apart from the input/output variables defined above, you must indicate the **DS configuration** file, which should contain the following information in YAML format:
+- ``K`` (number of guassian)
+- ``dim`` (the dimenstion input-output space)
+- ``Priors``
+- ``Mu``
+- ``Sigma``
+- ``Attractor``
+This file is stored in the ```config/learned_DS``` folder. The input variable ``DS_name`` in the launch file is used to indicate the names of the pre-learned se-DS models, which are: ``push_down,Curve_go_right,Curve_go_left,free_ws``. 
+
+To test your own se-DS model, you must generate this yaml file, which you can do by following the ``demo_learn_seDS.m`` script in the [ds-opt](https://github.com/nbfigueroa/ds-opt) package [3].
   
 --  
   
@@ -81,7 +89,6 @@ You can modify the filtering and some of the DS parameters dynamically (cfg fold
 > [1] Khoramshahi, M. and Billard, A. (2018) A Dynamical System Approach to Task-Adaptation in Physical Human-Robot Interaction. Under review in Autonomous Robots.    
 > [2] Khansari Zadeh, S. M. and Billard, A. (2011) Learning Stable Non-Linear Dynamical Systems with Gaussian Mixture Models. IEEE Transaction on Robotics, vol. 27, num 5, p. 943-957.  
 > [3] Figueroa, N. and Billard, A. (2018) A Physically-Consistent Bayesian Non-Parametric Mixture Model for Dynamical System Learning. In Proceedings of the 2nd Conference on Robot Learning (CoRL). Accepted.     
-> [4] Figueroa, N. and Billard, A. (2018) Locally Active Globally Stable Dynamical Systems: Theory, Learning and Experiments. In preparation.
 
 **Contact**: [Nadia Figueroa](http://lasa.epfl.ch/people/member.php?SCIPER=238387) (nadia.figueroafernandez AT epfl dot ch)
 
