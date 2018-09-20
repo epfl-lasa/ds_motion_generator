@@ -7,11 +7,11 @@ This package provides a nodified version of DS motion generators. Type of DS:
   <img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/linearMotion.gif" width="200"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/PPOscilateMotion.gif" width="200"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/SwipeMotion.gif" width="200"></>
     
 - Non-linear DS learned from demonstrations with the following approaches  
-  - se-DS model parametrization [2]. We provide a couple of pre-learned models of curvilinear motion with different targets as used in [1]; e.g. Push-Down Motion, Curve-Left Motion, Curve-Right Motion and Free WS (workspace) motion
+  - se-DS parametrization [2]. We provide a couple of pre-learned models of curvilinear motion with different targets as used in [1]; e.g. Push-Down Motion, Curve-Left Motion, Curve-Right Motion and Free WS (workspace) motion
     <p align="center">
   <img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_pushDown.gif" width="200"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_curveLeft.gif" width="200"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_curveRight.gif" width="200"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_freeWS.gif" width="200">
 </>
-  - lpv-DS model parametrization [3]. We provide a couple of pre-learned models of non-linear, non-monotic motions used in a variety of tasks in [3]; e.g..... **(Working on ...)**
+  - lpv-DS parametrization [3]. We provide a couple of pre-learned models of non-linear, non-monotic motions used in a variety of tasks in [3]; e.g..... **(Working on ...)**
   
 This package was initially implemented by [Mahdi Khoramshahi](http://lasa.epfl.ch/people/member.php?SCIPER=217217) and has been extended and modified by [Nadia Figueroa](http://lasa.epfl.ch/people/member.php?SCIPER=238387).  
 
