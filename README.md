@@ -53,7 +53,7 @@ $ roslaunch ds_motion_generator load_swipeDS_motionGenerator.launch direction:=r
 ```
 The variable ```direction``` defines the direction of motion, which can be ```left/right```. 
 
---
+---
 
 To test the **learned DS** via se-DS [2] parametrization, we provide the following launch file
 ```
@@ -71,7 +71,7 @@ This file is stored in the ```config/learned_DS/seDS``` folder. The input variab
 
 To learn/test your own se-DS model, you must generate this yaml file, which you can do by following the ``demo_learn_seDS.m`` script in the [ds-opt](https://github.com/nbfigueroa/ds-opt) package [3].
   
---  
+---  
 
 To test the **learned DS** via lpv-DS [2] parametrization, we provide the following launch file
 ```
