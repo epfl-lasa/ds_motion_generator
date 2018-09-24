@@ -6,3 +6,8 @@
     local-name: fast-gmm
     uri: git@github.com:epfl-lasa/fast-gmm.git
     version: devel
+    
+- git:
+    local-name: lpvDS
+    uri: git@github.com:nbfigueroa/lpvDS-lib.git
+    version: nadia
