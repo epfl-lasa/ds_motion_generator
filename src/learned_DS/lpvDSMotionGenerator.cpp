@@ -179,6 +179,8 @@ void lpvDSMotionGenerator::ComputeDesiredVelocity() {
 	mutex_.lock();
 
     // desired_velocity_ = SED_GMM_->getVelocity(real_pose_ - target_pose_ - target_offset_);
+    desired_velocity_ = LPV_DS_->compute_f(real_pose_, target_pose_ - target_offset_);
+
 
 	if (std::isnan(desired_velocity_.Norm2())) {
 		ROS_WARN_THROTTLE(1, "DS is generating NaN. Setting the output to zero.");
@@ -292,10 +294,10 @@ void lpvDSMotionGenerator::PublishFuturePath() {
 
         for (int frame = 0; frame < MAX_FRAME; frame++)
         {
-            // computing the next step based on the SED model
-            // DesiredPos = Active_GMR->getNextState();
+            // computing the next step based on the lpvDS model
 
             // simulated_vel = SED_GMM_->getVelocity(simulated_pose - target_pose_ - target_offset_);
+            simulated_vel = LPV_DS_->compute_f(simulated_pose, target_pose_ - target_offset_);
 
             simulated_pose[0] +=  simulated_vel[0] * dt_ * 20;
             simulated_pose[1] +=  simulated_vel[1] * dt_ * 20;
