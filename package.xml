@@ -46,6 +46,7 @@
   <build_depend>nav_msgs</build_depend>
   <build_depend>mathlib</build_depend>
   <build_depend>sgaussians</build_depend>
+  <build_depend>lpvDS</build_depend>
   <build_depend>dynamic_reconfigure</build_depend>
 
   
@@ -58,6 +59,7 @@
   <run_depend>dynamic_reconfigure</run_depend>
   <run_depend>mathlib</run_depend>
   <run_depend>sgaussians</run_depend>
+  <run_depend>lpvDS</run_depend>
   <run_depend>dynamic_reconfigure</run_depend>
 
 
