@@ -15,7 +15,6 @@ find_package(catkin REQUIRED COMPONENTS
   lpvDS
   dynamic_reconfigure
 )
-
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
 
@@ -139,7 +138,7 @@ target_link_libraries(PPOscilate_motionGenerator_node ds_motion_generator)
 add_executable(Linear_motionGenerator_node src/Linear_motionGenerator_node.cpp)
 target_link_libraries(Linear_motionGenerator_node ds_motion_generator)
 
-#### DS learned via se-DS
+#### DS learned from Demonstration
 add_executable(seDS_motionGenerator_node src/seDS_motionGenerator_node.cpp)
 target_link_libraries(seDS_motionGenerator_node ds_motion_generator)
 

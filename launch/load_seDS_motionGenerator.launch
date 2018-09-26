@@ -10,6 +10,8 @@
   - free_ws
   - push_down
   - 3D-CShape-bottom
+  - sink_seds
+  - via-point_seds
 
 # Things to Know!
 # input_topic name should contain          -- geometry_msgs::Pose
@@ -36,7 +38,7 @@
 </group>
 
 # This node published the desired orientation at the target
-<node pkg="rostopic" type="rostopic" name="angle_setting" args="pub /lwr/joint_controllers/passive_ds_command_orient geometry_msgs/Quaternion '{x: 0.73, y: 0.68, z: -0.012, w: -0.006}' -r 100" />
+<node pkg="rostopic" type="rostopic" name="angle_setting" args="pub /lwr/joint_controllers/passive_ds_command_orient geometry_msgs/Quaternion '{x:  0.0469, y: 0.9987, z: 0.0181, w:  -0.0015}' -r 100" />
 
 
 

@@ -54,6 +54,7 @@ private:
 
     // Publishers/Subscriber
     ros::Subscriber           sub_real_pose_;
+    ros::Subscriber           sub_desired_target_;
     ros::Publisher            pub_desired_twist_;
     ros::Publisher            pub_desired_orientation_;
     ros::Publisher            pub_desired_twist_filtered_;
@@ -63,12 +64,15 @@ private:
 
     // Topic Names
     std::string               input_topic_name_;
+    std::string               input_target_topic_name_;
     std::string               output_topic_name_;
     std::string               output_filtered_topic_name_;
+
 
     // Messages
     std_msgs::Bool            msg_passive_ds_;
     geometry_msgs::Pose       msg_real_pose_;
+    geometry_msgs::Point      msg_desired_target_;
     geometry_msgs::Quaternion msg_quaternion_;
     geometry_msgs::Twist      msg_desired_velocity_;
     geometry_msgs::Twist      msg_desired_velocity_filtered_;
@@ -86,6 +90,7 @@ private:
 
 	MathLib::Vector real_pose_;
 	MathLib::Vector target_pose_;
+    MathLib::Vector target_pose_dyn_;
 	MathLib::Vector target_offset_;
 
 
@@ -95,6 +100,7 @@ private:
 	double scaling_factor_;
 	double ds_vel_limit_;
 
+    bool bDynamic_target_;
 
 
 public:
@@ -111,7 +117,9 @@ public:
 	                  std::string input_topic_name,
 	                  std::string output_topic_name,
                       std::string output_filtered_topic_name,
-                      bool bPublish_DS_path);
+                      std::string input_target_topic_name,
+                      bool bPublish_DS_path,
+                      bool bDynamic_target);
 
     ~seDSMotionGenerator(void);
 
@@ -126,6 +134,8 @@ private:
 	bool InitializeROS();
 
 	void UpdateRealPosition(const geometry_msgs::Pose::ConstPtr& msg);
+
+    void UpdateDynamicTarget(const geometry_msgs::Point::ConstPtr& msg);
 
 	void ComputeDesiredVelocity();
 

@@ -131,10 +131,6 @@ private:
 
 	void PublishDesiredVelocity();
 
-    void ComputeDesiredOrientation();
-
-    void PublishDesiredOrientation();
-
 	void PublishFuturePath();
 
     void DynCallback(ds_motion_generator::lpvDS_paramsConfig &config, uint32_t level);

@@ -104,7 +104,7 @@ bool lpvDSMotionGenerator::InitializeDS() {
 	velLimits_.Resize(3);
 	CCDyn_filter_->SetVelocityLimits(velLimits_);
 
-    accLimits_.Resize(3);    /* Set the desired orientation as the initial one */
+    accLimits_.Resize(3);
     qx = msg_real_pose_.orientation.x;
     qy = msg_real_pose_.orientation.y;
     qz = msg_real_pose_.orientation.z;
@@ -128,7 +128,7 @@ bool lpvDSMotionGenerator::InitializeROS() {
     sub_real_pose_              = nh_.subscribe( input_topic_name_ , 1000, &lpvDSMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
     pub_desired_twist_          = nh_.advertise<geometry_msgs::Twist>(output_topic_name_, 1);    
 	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::Twist>(output_filtered_topic_name_, 1);
-    /* Doesn't see to work */
+    /* Doesn't seem to work */
     pub_tigger_passive_ds_      = nh_.advertise<std_msgs::Bool>("/lwr/joint_controllers/passive_ds_trigger", 1);
 
 
@@ -177,8 +177,6 @@ void lpvDSMotionGenerator::UpdateRealPosition(const geometry_msgs::Pose::ConstPt
 void lpvDSMotionGenerator::ComputeDesiredVelocity() {
 
 	mutex_.lock();
-
-    // desired_velocity_ = SED_GMM_->getVelocity(real_pose_ - target_pose_ - target_offset_);
     desired_velocity_ = LPV_DS_->compute_f(real_pose_, target_pose_ - target_offset_);
 
 
@@ -195,9 +193,8 @@ void lpvDSMotionGenerator::ComputeDesiredVelocity() {
 
     pos_error_ = (real_pose_ - target_pose_ - target_offset_).Norm2();
     ROS_WARN_STREAM_THROTTLE(1, "Distance to attractor:" << pos_error_);
-    if (pos_error_ < 1e-3){
+    if (pos_error_ < 1e-4){
         ROS_WARN_STREAM_THROTTLE(1, "[Attractor REACHED] Distance to attractor:" << pos_error_);
-        desired_velocity_ = desired_velocity_ /10;
     }
 
     msg_desired_velocity_.linear.x  = desired_velocity_(0);
@@ -295,8 +292,6 @@ void lpvDSMotionGenerator::PublishFuturePath() {
         for (int frame = 0; frame < MAX_FRAME; frame++)
         {
             // computing the next step based on the lpvDS model
-
-            // simulated_vel = SED_GMM_->getVelocity(simulated_pose - target_pose_ - target_offset_);
             simulated_vel = LPV_DS_->compute_f(simulated_pose, target_pose_ - target_offset_);
 
             simulated_pose[0] +=  simulated_vel[0] * dt_ * 20;

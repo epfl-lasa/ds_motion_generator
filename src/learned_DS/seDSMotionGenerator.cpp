@@ -13,7 +13,9 @@ seDSMotionGenerator::seDSMotionGenerator(ros::NodeHandle &n,
                                      std::string input_topic_name,
                                      std::string output_topic_name,
                                      std::string output_filtered_topic_name,
-                                     bool bPublish_DS_path)
+                                     std::string input_target_topic_name,
+                                     bool bPublish_DS_path,
+                                     bool bDynamic_target)
 	: nh_(n),
 	  loop_rate_(frequency),
 	  K_gmm_(K_gmm),
@@ -31,7 +33,9 @@ seDSMotionGenerator::seDSMotionGenerator(ros::NodeHandle &n,
 	  Wn_(0),
 	  scaling_factor_(5),
       ds_vel_limit_(0.1),
-      bPublish_DS_path_(bPublish_DS_path){
+      bPublish_DS_path_(bPublish_DS_path),
+      input_target_topic_name_(input_target_topic_name),
+      bDynamic_target_(bDynamic_target){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -97,9 +101,8 @@ bool seDSMotionGenerator::InitializeDS() {
 	target_offset_.Resize(3);
 	target_pose_.Resize(3);
 
-	for (int i = 0; i < attractor_.size(); i++) {
+    for (int i = 0; i < attractor_.size(); i++)
 		target_pose_(i) = attractor_[i];
-	}
 
 
 	// initializing the filter
@@ -131,8 +134,10 @@ bool seDSMotionGenerator::InitializeDS() {
 bool seDSMotionGenerator::InitializeROS() {
 
     sub_real_pose_              = nh_.subscribe( input_topic_name_ , 1000, &seDSMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
+    sub_desired_target_         = nh_.subscribe( input_target_topic_name_ , 1000, &seDSMotionGenerator::UpdateDynamicTarget, this, ros::TransportHints().reliable().tcpNoDelay());
     pub_desired_twist_          = nh_.advertise<geometry_msgs::Twist>(output_topic_name_, 1);    
 	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::Twist>(output_filtered_topic_name_, 1);
+
     /* Doesn't see to work */
     pub_tigger_passive_ds_      = nh_.advertise<std_msgs::Bool>("/lwr/joint_controllers/passive_ds_trigger", 1);
 
@@ -179,6 +184,19 @@ void seDSMotionGenerator::UpdateRealPosition(const geometry_msgs::Pose::ConstPtr
 	real_pose_(2) = msg_real_pose_.position.z;
 }
 
+
+void seDSMotionGenerator::UpdateDynamicTarget(const geometry_msgs::Point::ConstPtr& msg) {
+
+    msg_desired_target_ = *msg;
+
+    if (bDynamic_target_){
+        target_pose_(0) = msg_desired_target_.x;
+        target_pose_(1) = msg_desired_target_.y;
+        target_pose_(2) = msg_desired_target_.z;
+    }
+
+}
+
 void seDSMotionGenerator::ComputeDesiredVelocity() {
 
 	mutex_.lock();
@@ -198,10 +216,8 @@ void seDSMotionGenerator::ComputeDesiredVelocity() {
 
     pos_error_ = (real_pose_ - target_pose_ - target_offset_).Norm2();
     ROS_WARN_STREAM_THROTTLE(1, "Distance to attractor:" << pos_error_);
-    if (pos_error_ < 1e-3){
+    if (pos_error_ < 1e-4)
         ROS_WARN_STREAM_THROTTLE(1, "[Attractor REACHED] Distance to attractor:" << pos_error_);
-        desired_velocity_ = desired_velocity_ /10;
-    }
 
     msg_desired_velocity_.linear.x  = desired_velocity_(0);
     msg_desired_velocity_.linear.y  = desired_velocity_(1);
@@ -240,7 +256,7 @@ void seDSMotionGenerator::DynCallback(ds_motion_generator::seDS_paramsConfig &co
 
 	double  Wn = config.Wn;
 
-	ROS_INFO("Reconfigure request. Updatig the parameters ...");
+    ROS_INFO("Reconfigure request. Updating the parameters ...");
 
 
 	Wn_ = config.Wn;
