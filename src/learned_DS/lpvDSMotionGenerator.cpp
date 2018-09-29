@@ -12,7 +12,9 @@ lpvDSMotionGenerator::lpvDSMotionGenerator(ros::NodeHandle &n,
                                      std::string input_topic_name,
                                      std::string output_topic_name,
                                      std::string output_filtered_topic_name,
-                                     bool bPublish_DS_path)
+                                     std::string input_target_topic_name,
+                                     bool bPublish_DS_path,
+                                     bool bDynamic_target)
 	: nh_(n),
 	  loop_rate_(frequency),
 	  K_(K),
@@ -29,7 +31,9 @@ lpvDSMotionGenerator::lpvDSMotionGenerator(ros::NodeHandle &n,
 	  Wn_(0),
 	  scaling_factor_(5),
       ds_vel_limit_(0.1),
-      bPublish_DS_path_(bPublish_DS_path){
+      bPublish_DS_path_(bPublish_DS_path),
+      bDynamic_target_(bDynamic_target),
+      input_target_topic_name_(input_target_topic_name){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -126,7 +130,8 @@ bool lpvDSMotionGenerator::InitializeDS() {
 bool lpvDSMotionGenerator::InitializeROS() {
 
     sub_real_pose_              = nh_.subscribe( input_topic_name_ , 1000, &lpvDSMotionGenerator::UpdateRealPosition, this, ros::TransportHints().reliable().tcpNoDelay());
-    pub_desired_twist_          = nh_.advertise<geometry_msgs::Twist>(output_topic_name_, 1);    
+    sub_desired_target_         = nh_.subscribe( input_target_topic_name_ , 1000, &lpvDSMotionGenerator::UpdateDynamicTarget, this, ros::TransportHints().reliable().tcpNoDelay());
+    pub_desired_twist_          = nh_.advertise<geometry_msgs::Twist>(output_topic_name_, 1);
 	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::Twist>(output_filtered_topic_name_, 1);
     /* Doesn't seem to work */
     pub_tigger_passive_ds_      = nh_.advertise<std_msgs::Bool>("/lwr/joint_controllers/passive_ds_trigger", 1);
@@ -172,6 +177,19 @@ void lpvDSMotionGenerator::UpdateRealPosition(const geometry_msgs::Pose::ConstPt
 	real_pose_(0) = msg_real_pose_.position.x;
 	real_pose_(1) = msg_real_pose_.position.y;
 	real_pose_(2) = msg_real_pose_.position.z;
+}
+
+
+void lpvDSMotionGenerator::UpdateDynamicTarget(const geometry_msgs::Point::ConstPtr& msg) {
+
+    msg_desired_target_ = *msg;
+
+    if (bDynamic_target_){
+        target_pose_(0) = msg_desired_target_.x;
+        target_pose_(1) = msg_desired_target_.y;
+        target_pose_(2) = msg_desired_target_.z;
+    }
+
 }
 
 void lpvDSMotionGenerator::ComputeDesiredVelocity() {

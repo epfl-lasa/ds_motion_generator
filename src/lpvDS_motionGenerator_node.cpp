@@ -12,12 +12,14 @@ int main(int argc, char **argv)
 
   // Parameters
   std::string input_topic_name;
+  std::string input_target_topic_name;
   std::string output_topic_name;
   std::string output_filtered_topic_name;
   
   double K;
   double M;
   bool bPublish_DS_path (false);
+  bool bDynamic_target (false);
   std::vector<double> Priors;
   std::vector<double> Mu;
   std::vector<double> Sigma;
@@ -26,6 +28,11 @@ int main(int argc, char **argv)
 
 
   if (!nh.getParam("input_topic_name", input_topic_name))   {
+    ROS_ERROR("Couldn't retrieve the topic name for the input. ");
+    // return -1;
+  }
+
+  if (!nh.getParam("input_target_topic_name", input_target_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the input. ");
     // return -1;
   }
@@ -44,6 +51,12 @@ int main(int argc, char **argv)
     ROS_ERROR("Couldn't retrieve the publish DS path boolean. ");
     // return -1;
   }
+
+  if (!nh.getParam("dynamic_target", bDynamic_target))   {
+    ROS_ERROR("Couldn't retrieve the publish DS path boolean. ");
+    // return -1;
+  }
+
   if (!nh.getParam("K", K))   {
     ROS_ERROR("Couldn't retrieve the number of guassians. ");
     // return -1;
@@ -91,7 +104,9 @@ int main(int argc, char **argv)
                                         input_topic_name,
                                         output_topic_name,
                                         output_filtered_topic_name,
-                                        bPublish_DS_path);
+                                        input_target_topic_name,
+                                        bPublish_DS_path,
+                                        bDynamic_target);
   if (!lpvDS_motion_generator.Init()) {
     return -1;
   }
