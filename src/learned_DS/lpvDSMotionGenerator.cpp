@@ -195,8 +195,8 @@ void lpvDSMotionGenerator::UpdateDynamicTarget(const geometry_msgs::Point::Const
 void lpvDSMotionGenerator::ComputeDesiredVelocity() {
 
 	mutex_.lock();
-    desired_velocity_ = LPV_DS_->compute_f(real_pose_, target_pose_ - target_offset_);
 
+    desired_velocity_ = LPV_DS_->compute_f(real_pose_, target_pose_- target_offset_);
 
 	if (std::isnan(desired_velocity_.Norm2())) {
 		ROS_WARN_THROTTLE(1, "DS is generating NaN. Setting the output to zero.");

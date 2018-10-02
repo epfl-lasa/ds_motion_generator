@@ -78,7 +78,7 @@ private:
     geometry_msgs::Twist      msg_desired_velocity_filtered_;
 
 	nav_msgs::Path msg_DesiredPath_;
-	int MAX_FRAME = 200;
+    int MAX_FRAME = 200;
 
 	//dynamic reconfig settig
     dynamic_reconfigure::Server<ds_motion_generator::lpvDS_paramsConfig> dyn_rec_srv_;

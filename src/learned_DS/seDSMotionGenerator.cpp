@@ -201,7 +201,9 @@ void seDSMotionGenerator::ComputeDesiredVelocity() {
 
 	mutex_.lock();
 
-    desired_velocity_ = SED_GMM_->getVelocity(real_pose_ - target_pose_ - target_offset_);
+    MathLib::Vector Trans_pose ; Trans_pose.Resize(3);
+    Trans_pose = real_pose_ - target_pose_ - target_offset_;
+    desired_velocity_ = SED_GMM_->getVelocity(Trans_pose);
 
 	if (std::isnan(desired_velocity_.Norm2())) {
 		ROS_WARN_THROTTLE(1, "DS is generating NaN. Setting the output to zero.");
@@ -230,6 +232,9 @@ void seDSMotionGenerator::ComputeDesiredVelocity() {
     CCDyn_filter_->SetTarget(desired_velocity_);
     CCDyn_filter_->Update();
     CCDyn_filter_->GetState(desired_velocity_filtered_);
+
+
+
 
 	msg_desired_velocity_filtered_.linear.x  = desired_velocity_filtered_(0);
 	msg_desired_velocity_filtered_.linear.y  = desired_velocity_filtered_(1);
@@ -316,7 +321,25 @@ void seDSMotionGenerator::PublishFuturePath() {
             // computing the next step based on the SED model
             // DesiredPos = Active_GMR->getNextState();
 
+
+//            double simulated_pos_norm = simulated_pose.Norm2();
+
+//            /* Apply stupid rotation around Z*/
+//            double sin_angle = -1;   double cos_angle = 0;
+
+//            MathLib::Vector3 a_hat;
+//            a_hat(0) = simulated_vel(0)/simulated_pos_norm;
+//            a_hat(1) = simulated_vel(1)/simulated_pos_norm;
+//            a_hat(2) = simulated_vel(2)/simulated_pos_norm;
+
+
+//            simulated_vel(0) = simulated_vel_norm *(a_hat(0)*cos_angle - a_hat(1)*sin_angle );
+//            simulated_vel(1) = simulated_vel_norm *(a_hat(0)*sin_angle +  a_hat(1)*cos_angle);
+//            simulated_vel(2) = simulated_vel_norm * a_hat(2);
+
+
             simulated_vel = SED_GMM_->getVelocity(simulated_pose - target_pose_ - target_offset_);
+
             simulated_pose[0] +=  simulated_vel[0] * dt_ * 20;
             simulated_pose[1] +=  simulated_vel[1] * dt_ * 20;
             simulated_pose[2] +=  simulated_vel[2] * dt_ * 20;
