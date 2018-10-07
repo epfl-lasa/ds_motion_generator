@@ -80,6 +80,8 @@ To test the **learned DS** via lpv-DS [2] parametrization, we provide the follow
 $ roslaunch ds_motion_generator load_lpvDS_motionGenerator.launch DS_name:=via_point viz_DS_path:=true
 ```
 
+** Fill in information about LPV-DS parameters **
+
 ### Dynamic re-configuration of DS/filter parameters
 Finally, once running the node for your desired DS, you can modify the filtering parameters and some of the DS parameters dynamically. The definition of the parameters that can be dynamically reconfigured is provided in the ``cfg/``. Following an example of the parameters you can reconfigure:
 - Wn : speed of the filter
@@ -98,3 +100,5 @@ This package was initially implemented by [Mahdi Khoramshahi](http://lasa.epfl.c
 
 **Contact**: [Nadia Figueroa](http://lasa.epfl.ch/people/member.php?SCIPER=238387) (nadia.figueroafernandez AT epfl dot ch)
 
+**Acknowledgments**
+This work was supported by the EU project [Cogimon](https://cogimon.eu/cognitive-interaction-motion-cogimon) H2020-ICT-23-2014.
