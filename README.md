@@ -10,7 +10,8 @@ This package provides a nodified version of DS motion generators. Type of DS:
     <p align="center"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_pushDown.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_curveLeft.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_curveRight.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_freeWS.gif" width="180"></>
   - lpv-DS parametrization [3].  For testing, we provide a couple of pre-learned models of non-linear, non-monotic motions used in a variety of tasks in [3]; e.g. sink motion (inspection-line task), via-point motion (branding-line task), CShape motion (shelf-arranging task)
   
-  **Add GIFs of execution**
+<p align="center"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/sink-DS.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/viapoint-DS.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/cshape-DS.gif" width="180"></>
+  
  
 ## Installation
 Do the following steps:
