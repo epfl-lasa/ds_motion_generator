@@ -36,9 +36,9 @@
 </group>
 
 # This node published the desired orientation at the target (Orientation for table scenarios)
-<!-- <node pkg="rostopic" type="rostopic" name="angle_setting" args="pub /lwr/joint_controllers/passive_ds_command_orient geometry_msgs/Quaternion '{x: -0.0426, y: 0.998, z:  0.0039, w: -0.0356}' -r 100" /> -->
+  <node pkg="rostopic" type="rostopic" name="angle_setting" args="pub /lwr/joint_controllers/passive_ds_command_orient geometry_msgs/Quaternion '{x: -0.0426, y: 0.998, z:  0.0039, w: -0.0356}' -r 100" />
 
+# This node published the desired orientation at the target (Orientation for shelf scenario)
+  <!-- <node pkg="rostopic" type="rostopic" name="angle_setting" args="pub /lwr/joint_controllers/passive_ds_command_orient geometry_msgs/Quaternion '{x: 0.6811, y:  -0.300, z:  -0.3109, w:  0.5906}' -r 100" /> -->
 
-# This node published the desired orientation at the target (Orientation for table shelf scenarios)
-<node pkg="rostopic" type="rostopic" name="angle_setting" args="pub /lwr/joint_controllers/passive_ds_command_orient geometry_msgs/Quaternion '{x: 0.2385, y: -0.7107, z:   0.2612, w: 0.6080}' -r 100" />
 </launch>
