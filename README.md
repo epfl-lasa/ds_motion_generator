@@ -6,9 +6,11 @@ This package provides a nodified version of DS motion generators. Type of DS:
   <p align="center"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/linearMotion.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/PPOscilateMotion.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/SwipeMotion.gif" width="180"></>
     
 - Non-linear DS learned from demonstrations with the following approaches  
-  - se-DS parametrization [2]. We provide a couple of pre-learned models of curvilinear motion with different targets as used in [1]; e.g. Push-Down Motion, Curve-Left Motion, Curve-Right Motion and Free WS (workspace) motion
+  - se-DS parametrization [2]. For testing, we provide a couple of pre-learned models of curvilinear motion with different targets as used in [1]; e.g. Push-Down Motion, Curve-Left Motion, Curve-Right Motion and Free WS (workspace) motion
     <p align="center"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_pushDown.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_curveLeft.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_curveRight.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_freeWS.gif" width="180"></>
-  - lpv-DS parametrization [3]. We provide a couple of pre-learned models of non-linear, non-monotic motions used in a variety of tasks in [3]; e.g..... **(Working on ...)**
+  - lpv-DS parametrization [3].  For testing, we provide a couple of pre-learned models of non-linear, non-monotic motions used in a variety of tasks in [3]; e.g. sink motion (inspection-line task), via-point motion (branding-line task), CShape motion (shelf-arranging task)
+  
+  **Add GIFs of execution**
  
 ## Installation
 Do the following steps:
@@ -77,7 +79,10 @@ To learn/test your own se-DS model, you must generate this yaml file, which you 
 To test the **learned DS** via lpv-DS [2] parametrization, we provide the following launch file
 ```
 $ roslaunch ds_motion_generator load_lpvDS_motionGenerator.launch DS_name:=via_point viz_DS_path:=true
-```
+```  
+
+
+**Fill in information about LPV-DS parameters**
 
 ### Dynamic re-configuration of DS/filter parameters
 Finally, once running the node for your desired DS, you can modify the filtering parameters and some of the DS parameters dynamically. The definition of the parameters that can be dynamically reconfigured is provided in the ``cfg/``. Following an example of the parameters you can reconfigure:
@@ -97,3 +102,7 @@ This package was initially implemented by [Mahdi Khoramshahi](http://lasa.epfl.c
 
 **Contact**: [Nadia Figueroa](http://lasa.epfl.ch/people/member.php?SCIPER=238387) (nadia.figueroafernandez AT epfl dot ch)
 
+**Acknowledgments**
+This work was supported by the European Communitys Horizon 2020 Research and Innovation pro-
+gramme ICT-23-2014, grant agreement 644727-[Cogimon](https://cogimon.eu/cognitive-interaction-motion-cogimon) and
+643950-[SecondHands](https://secondhands.eu/).
