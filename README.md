@@ -78,7 +78,7 @@ To learn/test your own **se-DS model**, you must generate this yaml file, which 
 
 To test the **learned DS** via lpv-DS [2] parametrization, we provide the following launch file
 ```
-$ roslaunch ds_motion_generator load_lpvDS_motionGenerator.launch DS_name:=via_point viz_DS_path:=true
+$ roslaunch ds_motion_generator load_lpvDS_motionGenerator.launch DS_name:=sink-pqlf viz_DS_path:=true
 ```  
 in which,apart from the input/output variables defined above, you must indicate the **DS configuration** file, which should contain the following information in YAML format:
 - ``K`` (number of guassian)
