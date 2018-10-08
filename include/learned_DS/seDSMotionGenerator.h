@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 Learning Algorithms and Systems Laboratory, EPFL, Switzerland
+ * Copyright (C) 2018 Learning Algorithms and Systems Laboratory, EPFL, Switzerland
  * Authors: Mahdi Khoramshahi and Nadia Figueroa
  * email:   {mahdi.khoramshahi,nadia.figueroafernandez}@epfl.ch
  * website: lasa.epfl.ch
