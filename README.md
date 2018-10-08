@@ -3,15 +3,15 @@
 This package provides a nodified version of DS motion generators. Type of DS:
 - Analytically parameterized DS for simple motions used in [1], such as
   - linear motions, point-to-point oscillatory motions and swiping as below
-  <p align="center"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/linearMotion.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/PPOscilateMotion.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/SwipeMotion.gif" width="180"></>
+  <p align="center"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/linearMotion.gif" width="250"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/PPOscilateMotion.gif" width="250"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/SwipeMotion.gif" width="250"></>
     
 - Non-linear DS learned from demonstrations with the following approaches  
-  - se-DS parametrization [2]. For testing, we provide a couple of pre-learned models of curvilinear motion with different targets as used in [1]; e.g. Push-Down Motion, Curve-Left Motion, Curve-Right Motion and Free WS (workspace) motion
-    <p align="center"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_pushDown.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_curveLeft.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_curveRight.gif" width="180"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_freeWS.gif" width="180"></>
-  - lpv-DS parametrization [3].  For testing, we provide a couple of pre-learned models of non-linear, non-monotic motions used in a variety of tasks in [3]; e.g. sink motion (inspection-line task), via-point motion (branding-line task), CShape motion (shelf-arranging task)
+  - **se-DS parametrization [2]**. For testing, we provide a couple of pre-learned models of curvilinear motion with different targets as used in [1]; e.g. Push-Down Motion, Curve-Left Motion, Curve-Right Motion and Free WS (workspace) motion
+ <p align="center"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_pushDown.gif" width="200"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_curveLeft.gif" width="200"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_curveRight.gif" width="200"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/seDS_freeWS.gif" width="200"></>
   
-  **Add GIFs of execution**
- 
+  - **lpv-DS parametrization [3]**.  For testing, we provide a couple of pre-learned models of non-linear, non-monotic motions used in a variety of tasks in [3]; e.g. sink motion, via-point motion, CShape motion  
+<p align="center"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/sink-DS.gif" width="250"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/viapoint-DS.gif" width="250"><img src="https://github.com/epfl-lasa/ds_motion_generator/blob/nadia/img/cshape-DS.gif" width="250"></>
+  
 ## Installation
 Do the following steps:
 * In your catkin src directory clone the repository
@@ -65,14 +65,14 @@ in which,apart from the input/output variables defined above, you must indicate 
 - ``Priors``
 - ``Mu``
 - ``Sigma``
-- ``Attractor``  
+- ``attractor``  
 Sometimes the parameters of ``Mu`` and ``Sigma`` might be too large; i.e. ``>1e6``. In these cases you can scale them and add the scaling values to the yaml file:
 - ``Mu_scale``
 - ``Sigma_scale``
 
 This file is stored in the ```config/learned_DS/seDS``` folder. The input variable ``DS_name`` in the launch file is used to indicate the names of the pre-learned se-DS models, which are: ``push_down,Curve_go_right,Curve_go_left,free_ws``. 
 
-To learn/test your own se-DS model, you must generate this yaml file, which you can do by following the ``demo_learn_seDS.m`` script in the [ds-opt](https://github.com/nbfigueroa/ds-opt) package [3].
+To learn/test your own **se-DS model**, you must generate this yaml file, which you can do by following the ``demo_learn_seDS.m`` script in the [ds-opt](https://github.com/nbfigueroa/ds-opt) package [3].
   
 ---  
 
@@ -80,6 +80,18 @@ To test the **learned DS** via lpv-DS [2] parametrization, we provide the follow
 ```
 $ roslaunch ds_motion_generator load_lpvDS_motionGenerator.launch DS_name:=via_point viz_DS_path:=true
 ```  
+in which,apart from the input/output variables defined above, you must indicate the **DS configuration** file, which should contain the following information in YAML format:
+- ``K`` (number of guassian)
+- ``dim`` (the dimenstion input-output space)
+- ``Priors``
+- ``Mu``
+- ``Sigma``
+- ``A``
+- ``attractor``  
+
+This file is stored in the ```config/learned_DS/lpvDS``` folder. The input variable ``DS_name`` in the launch file is used to indicate the names of the pre-learned se-DS models, which are: ``sink-pqlf,via-point-pqlf,CShape-top-pqlf``. 
+
+To learn/test your own **lpv-DS model**, you must generate this yaml file, which you can do by following the ``demo_learn_lpvDS.m`` script in the [ds-opt](https://github.com/nbfigueroa/ds-opt) package [3].
 
 
 **Fill in information about LPV-DS parameters**
