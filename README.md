@@ -32,28 +32,26 @@ $ rosdep install --from-paths . --ignore-src --rosdistro indigo
 
 ## Usage
 ### DS Configuration and Launch File Specifications
-To test the **analytical DS** motions you can run any of the following launch file as the ones found in the ```launch/``` folder. For the linear DS, you should fill in the **DS configuration** file, which is a ```.yaml``` file stored in ```config/analytic_DS``` folder, the default is set to -y direction of motion. You can then test the launch file as follows:
-```
-$ roslaunch ds_motion_generator load_linearDS_motionGenerator.launch 
-```
-Some imporant things to fill in the launch file are the following:
-- The name of the input topic (potentially a position signal)
-- The name of the output topic (potentially a desired velocity signal)
-- The name of the topic for the filtered output.
+- To test the **analytical DS** motions you can run any of the following launch file as the ones found in the ```launch/``` folder. For the linear DS, you should fill in the **DS configuration** file, which is a ```.yaml``` file stored in ```config/analytic_DS``` folder, the default is set to -y direction of motion. You can then test the launch file as follows:
+  ```
+  $ roslaunch ds_motion_generator load_linearDS_motionGenerator.launch 
+  ```
+  Some imporant things to fill in the launch file are the following:
+  - The name of the input topic (potentially a position signal)
+  - The name of the output topic (potentially a desired velocity signal)
+  - The name of the topic for the filtered output.
 
-The current topics are assigned assuming you are using the [kuka-lwr-ros](https://github.com/epfl-lasa/kuka-lwr-ros) control interface and simulator (Gazebo). For the other analytical DS, the following launch files are provided:
-```
-$ roslaunch ds_motion_generator load_ppOscDS_motionGenerator.launch viz_DS_path:=true
-```
-The variable ```viz_DS_path``` defines if you want to visualize the integrated path of the DS. 
+  The current topics are assigned assuming you are using the [kuka-lwr-ros](https://github.com/epfl-lasa/kuka-lwr-ros) control interface and simulator (Gazebo). For the other analytical DS, the following launch files are provided:
+  ```
+  $ roslaunch ds_motion_generator load_ppOscDS_motionGenerator.launch viz_DS_path:=true
+  ```
+  The variable ```viz_DS_path``` defines if you want to visualize the integrated path of the DS. 
 
-For the swipe motion the following launch file is provided:
-```
-$ roslaunch ds_motion_generator load_swipeDS_motionGenerator.launch direction:=right viz_DS_path:=true
-```
-The variable ```direction``` defines the direction of motion, which can be ```left/right```. 
-
----
+  For the swipe motion the following launch file is provided:
+  ```
+  $ roslaunch ds_motion_generator load_swipeDS_motionGenerator.launch direction:=right viz_DS_path:=true
+  ```
+  The variable ```direction``` defines the direction of motion, which can be ```left/right```. 
 
 - To test the **learned DS** via **se-DS** [2] parametrization, we provide the following launch file
   ```
