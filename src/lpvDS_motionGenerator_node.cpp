@@ -113,9 +113,9 @@ int main(int argc, char **argv)
   }
 
   if (bPublish_DS_path)
-        ROS_INFO("Starting the se-DS Motion generator... Publishing path in this node. ");
+        ROS_INFO("Starting the lpv-DS Motion generator... Publishing path in this node. ");
   else
-      ROS_INFO("Starting the se-DS Motion generator... NOT Publishing path in this node. ");
+      ROS_INFO("Starting the lpv-DS Motion generator... NOT Publishing path in this node. ");
 
   lpvDSMotionGenerator lpvDS_motion_generator(nh, frequency,
                                         (int)K, (int)M, Priors, Mu, Sigma, A,                                        
