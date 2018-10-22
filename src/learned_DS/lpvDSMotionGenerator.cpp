@@ -33,7 +33,8 @@ lpvDSMotionGenerator::lpvDSMotionGenerator(ros::NodeHandle &n,
                                      std::string output_filtered_topic_name,
                                      std::string input_target_topic_name,
                                      bool bPublish_DS_path,
-                                     bool bDynamic_target)
+                                     bool bDynamic_target,
+                                     double path_offset)
 	: nh_(n),
 	  loop_rate_(frequency),
 	  K_(K),
@@ -52,7 +53,8 @@ lpvDSMotionGenerator::lpvDSMotionGenerator(ros::NodeHandle &n,
       ds_vel_limit_(0.1),
       bPublish_DS_path_(bPublish_DS_path),
       bDynamic_target_(bDynamic_target),
-      input_target_topic_name_(input_target_topic_name){
+      input_target_topic_name_(input_target_topic_name),
+      path_offset_(path_offset){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -339,10 +341,13 @@ void lpvDSMotionGenerator::PublishFuturePath() {
         msg_DesiredPath_.header.frame_id = "world";
 
         MathLib::Vector simulated_pose = real_pose_;
+
+        // Add offset to the path
+        for (int m=1;m<M_;m++)
+        	simulated_pose[m] = simulated_pose[m] + path_offset_;
+        
         MathLib::Vector simulated_vel;
-
         simulated_vel.Resize(M_);
-
         for (int frame = 0; frame < MAX_FRAME; frame++)
         {
             // computing the next step based on the lpvDS model

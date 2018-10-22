@@ -97,6 +97,7 @@ private:
     geometry_msgs::Twist      msg_desired_velocity_filtered_;
 
 	nav_msgs::Path msg_DesiredPath_;
+    double path_offset_;
     int MAX_FRAME = 200;
 
 	//dynamic reconfig settig
@@ -136,7 +137,8 @@ public:
                       std::string output_filtered_topic_name,
                       std::string input_target_topic_name,
                       bool bPublish_DS_path,
-                      bool bDynamic_target);
+                      bool bDynamic_target,
+                      double path_offset);
 
     ~lpvDSMotionGenerator(void);
 

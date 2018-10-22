@@ -44,7 +44,7 @@ int main(int argc, char **argv)
   std::vector<double> Sigma;
   std::vector<double> A;
   std::vector<double> attractor;
-
+  double path_offset;
 
   if (!nh.getParam("input_topic_name", input_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the input. ");
@@ -72,7 +72,7 @@ int main(int argc, char **argv)
   }
 
   if (!nh.getParam("dynamic_target", bDynamic_target))   {
-    ROS_ERROR("Couldn't retrieve the publish DS path boolean. ");
+    ROS_ERROR("Couldn't retrieve the dynamic target boolean. ");
     // return -1;
   }
 
@@ -112,6 +112,11 @@ int main(int argc, char **argv)
     // return -1;
   }
 
+  if (!nh.getParam("path_offset", path_offset))   {
+    ROS_ERROR("Couldn't retrieve path_offset. ");
+    // return -1;
+  }
+
   if (bPublish_DS_path)
         ROS_INFO("Starting the lpv-DS Motion generator... Publishing path in this node. ");
   else
@@ -125,7 +130,8 @@ int main(int argc, char **argv)
                                         output_filtered_topic_name,
                                         input_target_topic_name,
                                         bPublish_DS_path,
-                                        bDynamic_target);
+                                        bDynamic_target,
+                                        path_offset);
   if (!lpvDS_motion_generator.Init()) {
     return -1;
   }
