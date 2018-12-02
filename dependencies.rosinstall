@@ -9,5 +9,5 @@
     
 - git:
     local-name: lpvDS
-    uri: https://github.com/epfl-lasa/lpvDS-lib.git
+    uri: https://github.com/nbfigueroa/lpvDS-lib.git
     version: nadia
