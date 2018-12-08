@@ -63,8 +63,8 @@ lpvDSMotionGenerator::~lpvDSMotionGenerator(){
 }
 bool lpvDSMotionGenerator::Init() {
 
-	real_pose_.Resize(3);
-	desired_velocity_.Resize(3);
+	real_pose_.Resize(M_);
+	desired_velocity_.Resize(M_);
 
 	if (!InitializeDS()) {
 		ROS_ERROR_STREAM("ERROR intializing the DS");
@@ -112,8 +112,8 @@ bool lpvDSMotionGenerator::InitializeDS() {
     LPV_DS_.reset(new lpvDS(K_, M_, Priors_, Mu_, Sigma_, A_));
 
 
-	target_offset_.Resize(3);
-	target_pose_.Resize(3);
+	target_offset_.Resize(M_);
+	target_pose_.Resize(M_);
 
 	for (int i = 0; i < attractor_.size(); i++) {
 		target_pose_(i) = attractor_[i];
@@ -121,13 +121,13 @@ bool lpvDSMotionGenerator::InitializeDS() {
 
 
 	// initializing the filter
-	CCDyn_filter_.reset (new CDDynamics(3, dt_, Wn_));
+	CCDyn_filter_.reset (new CDDynamics(M_, dt_, Wn_));
 
 	// we should set the size automagically
-	velLimits_.Resize(3);
+	velLimits_.Resize(M_);
 	CCDyn_filter_->SetVelocityLimits(velLimits_);
+    accLimits_.Resize(M_);
 
-    accLimits_.Resize(3);
     qx = msg_real_pose_.orientation.x;
     qy = msg_real_pose_.orientation.y;
     qz = msg_real_pose_.orientation.z;
@@ -135,10 +135,8 @@ bool lpvDSMotionGenerator::InitializeDS() {
 	CCDyn_filter_->SetAccelLimits(accLimits_);
 
 
-	MathLib::Vector initial(3);
-
+	MathLib::Vector initial(M_);
 	initial.Zero();
-
 	CCDyn_filter_->SetState(initial);
 	CCDyn_filter_->SetTarget(initial);
 	return true;
@@ -152,12 +150,13 @@ bool lpvDSMotionGenerator::InitializeROS() {
     sub_desired_target_         = nh_.subscribe( input_target_topic_name_ , 1000, &lpvDSMotionGenerator::UpdateDynamicTarget, this, ros::TransportHints().reliable().tcpNoDelay());
     pub_desired_twist_          = nh_.advertise<geometry_msgs::Twist>(output_topic_name_, 1);
 	pub_desired_twist_filtered_ = nh_.advertise<geometry_msgs::Twist>(output_filtered_topic_name_, 1);
+    
     /* Doesn't seem to work */
     pub_tigger_passive_ds_      = nh_.advertise<std_msgs::Bool>("/lwr/joint_controllers/passive_ds_trigger", 1);
 
 
 	pub_target_ = nh_.advertise<geometry_msgs::PointStamped>("DS/target", 1);
-	pub_DesiredPath_ = nh_.advertise<nav_msgs::Path>("DS/DesiredPath", 1);    
+	pub_DesiredPath_ = nh_.advertise<nav_msgs::Path>("DS/DesiredPath_1", 1);    
     msg_DesiredPath_.poses.resize(MAX_FRAME);
 
 	dyn_rec_f_ = boost::bind(&lpvDSMotionGenerator::DynCallback, this, _1, _2);
@@ -195,7 +194,8 @@ void lpvDSMotionGenerator::UpdateRealPosition(const geometry_msgs::Pose::ConstPt
 
 	real_pose_(0) = msg_real_pose_.position.x;
 	real_pose_(1) = msg_real_pose_.position.y;
-	real_pose_(2) = msg_real_pose_.position.z;
+	if (M_== 3)
+		real_pose_(2) = msg_real_pose_.position.z;
 }
 
 
@@ -206,7 +206,8 @@ void lpvDSMotionGenerator::UpdateDynamicTarget(const geometry_msgs::Point::Const
     if (bDynamic_target_){
         target_pose_(0) = msg_desired_target_.x;
         target_pose_(1) = msg_desired_target_.y;
-        target_pose_(2) = msg_desired_target_.z;
+        if (M_== 3)
+        	target_pose_(2) = msg_desired_target_.z;
     }
 
 }
@@ -236,11 +237,17 @@ void lpvDSMotionGenerator::ComputeDesiredVelocity() {
 
     msg_desired_velocity_.linear.x  = desired_velocity_(0);
     msg_desired_velocity_.linear.y  = desired_velocity_(1);
-    msg_desired_velocity_.linear.z  = desired_velocity_(2);
+    if (M_== 3){
+    	msg_desired_velocity_.linear.z  = desired_velocity_(2);
+    	ROS_WARN_STREAM_THROTTLE(1, "Desired Velocities:" << desired_velocity_(0) << " " << desired_velocity_(1) << " " << desired_velocity_(2));
+    } else{
+		msg_desired_velocity_.linear.z  = 0;
+		ROS_WARN_STREAM_THROTTLE(1, "Desired Velocities:" << desired_velocity_(0) << " " << desired_velocity_(1));
+    }
 	msg_desired_velocity_.angular.x = 0;
 	msg_desired_velocity_.angular.y = 0;
 	msg_desired_velocity_.angular.z = 0;
-    ROS_WARN_STREAM_THROTTLE(1, "Desired Velocities:" << desired_velocity_(0) << " " << desired_velocity_(1) << " " << desired_velocity_(2));
+    
 
     CCDyn_filter_->SetTarget(desired_velocity_);
     CCDyn_filter_->Update();
@@ -248,13 +255,16 @@ void lpvDSMotionGenerator::ComputeDesiredVelocity() {
 
 	msg_desired_velocity_filtered_.linear.x  = desired_velocity_filtered_(0);
 	msg_desired_velocity_filtered_.linear.y  = desired_velocity_filtered_(1);
-	msg_desired_velocity_filtered_.linear.z  = desired_velocity_filtered_(2);
+	if (M_== 3){
+		msg_desired_velocity_filtered_.linear.z  = desired_velocity_filtered_(2);
+		ROS_WARN_STREAM_THROTTLE(1, "Desired Filtered Velocities:" << desired_velocity_filtered_(0) << " " << desired_velocity_filtered_(1) << " " << desired_velocity_filtered_(2));
+	}else{
+		msg_desired_velocity_.linear.z  = 0;
+		ROS_WARN_STREAM_THROTTLE(1, "Desired Filtered Velocities:" << desired_velocity_filtered_(0) << " " << desired_velocity_filtered_(1) );	
+	}
 	msg_desired_velocity_filtered_.angular.x = 0;
 	msg_desired_velocity_filtered_.angular.y = 0;
 	msg_desired_velocity_filtered_.angular.z = 0;
-
-    ROS_WARN_STREAM_THROTTLE(1, "Desired Filtered Velocities:" << desired_velocity_filtered_(0) << " " << desired_velocity_filtered_(1) << " " << desired_velocity_filtered_(2));
-
 	mutex_.unlock();
 
 }
@@ -281,7 +291,8 @@ void lpvDSMotionGenerator::DynCallback(ds_motion_generator::lpvDS_paramsConfig &
 
 	velLimits_(0) = vlim;
 	velLimits_(1) = vlim;
-	velLimits_(2) = vlim;
+	if (M_==3)
+		velLimits_(2) = vlim;
 
 	CCDyn_filter_->SetVelocityLimits(velLimits_);
 
@@ -290,13 +301,15 @@ void lpvDSMotionGenerator::DynCallback(ds_motion_generator::lpvDS_paramsConfig &
 
 	accLimits_(0) = alim;
 	accLimits_(1) = alim;
-	accLimits_(2) = alim;
+	if (M_==3)
+		accLimits_(2) = alim;
 
 	CCDyn_filter_->SetAccelLimits(accLimits_);
 
 	target_offset_(0) = config.offset_x;
 	target_offset_(1) = config.offset_y;
-	target_offset_(2) = config.offset_z;
+	if (M_==3)
+		target_offset_(2) = config.offset_z;
 
 	scaling_factor_ = config.scaling;
 	ds_vel_limit_   = config.trimming;
@@ -311,12 +324,16 @@ void lpvDSMotionGenerator::PublishFuturePath() {
 	msg.header.stamp = ros::Time::now();
 	msg.point.x = target_pose_[0] + target_offset_[0];
 	msg.point.y = target_pose_[1] + target_offset_[1];
-	msg.point.z = target_pose_[2] + target_offset_[2];
+	if (M_ == 3)
+		msg.point.z = target_pose_[2] + target_offset_[2];
+	else
+		msg.point.z = 0.25;
 	pub_target_.publish(msg);
 
     if (bPublish_DS_path_){
 
         ROS_WARN_STREAM_THROTTLE(1, "Publishing Path...");
+        
         // setting the header of the path
         msg_DesiredPath_.header.stamp = ros::Time::now();
         msg_DesiredPath_.header.frame_id = "world";
@@ -324,7 +341,7 @@ void lpvDSMotionGenerator::PublishFuturePath() {
         MathLib::Vector simulated_pose = real_pose_;
         MathLib::Vector simulated_vel;
 
-        simulated_vel.Resize(3);
+        simulated_vel.Resize(M_);
 
         for (int frame = 0; frame < MAX_FRAME; frame++)
         {
@@ -333,15 +350,23 @@ void lpvDSMotionGenerator::PublishFuturePath() {
 
             simulated_pose[0] +=  simulated_vel[0] * dt_ * 20;
             simulated_pose[1] +=  simulated_vel[1] * dt_ * 20;
-            simulated_pose[2] +=  simulated_vel[2] * dt_ * 20;
+            if (M_==3)
+            	simulated_pose[2] +=  simulated_vel[2] * dt_ * 20;
 
             msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
             msg_DesiredPath_.poses[frame].header.frame_id = "world";
             msg_DesiredPath_.poses[frame].pose.position.x = simulated_pose[0];
             msg_DesiredPath_.poses[frame].pose.position.y = simulated_pose[1];
-            msg_DesiredPath_.poses[frame].pose.position.z = simulated_pose[2];
+            if (M_==3){
+            	msg_DesiredPath_.poses[frame].pose.position.z = simulated_pose[2];
+            }
+            else{
+            	msg_DesiredPath_.poses[frame].pose.position.z = 0.25;
+            }
+
             pub_DesiredPath_.publish(msg_DesiredPath_);
         }
+
     }
 
 }

@@ -29,6 +29,7 @@
 
 #include <vector>
 #include <mutex>
+#include <stdlib.h> 
 
 #include "MathLib.h"
 #include "lpvDS.h"
