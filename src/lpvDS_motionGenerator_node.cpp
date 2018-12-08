@@ -48,7 +48,7 @@ int main(int argc, char **argv)
 
   if (!nh.getParam("input_topic_name", input_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the input. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("input_target_topic_name", input_target_topic_name))   {

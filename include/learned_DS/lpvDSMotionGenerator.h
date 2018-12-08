@@ -98,7 +98,7 @@ private:
 
 	nav_msgs::Path msg_DesiredPath_;
     double path_offset_;
-    int MAX_FRAME = 200;
+    int MAX_FRAME = 400;
 
 	//dynamic reconfig settig
     dynamic_reconfigure::Server<ds_motion_generator::lpvDS_paramsConfig> dyn_rec_srv_;
