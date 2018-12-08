@@ -1,13 +1,13 @@
 - git:
     local-name: mathlib
-    uri: git@github.com:epfl-lasa/mathlib.git
+    uri: https://github.com/epfl-lasa/mathlib.git
     
 - git:
     local-name: fast-gmm
-    uri: git@github.com:epfl-lasa/fast-gmm.git
+    uri: https://github.com/epfl-lasa/fast-gmm.git
     version: devel
     
 - git:
     local-name: lpvDS
-    uri: git@github.com:nbfigueroa/lpvDS-lib.git
+    uri: https://github.com/nbfigueroa/lpvDS-lib.git
     version: nadia
