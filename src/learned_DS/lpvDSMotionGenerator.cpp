@@ -353,8 +353,8 @@ void lpvDSMotionGenerator::PublishFuturePath() {
             // computing the next step based on the lpvDS model
             simulated_vel = LPV_DS_->compute_f(simulated_pose, target_pose_ - target_offset_);
 
-            simulated_pose[0] +=  simulated_vel[0] * dt_ * 400;
-            simulated_pose[1] +=  simulated_vel[1] * dt_ * 400;
+            simulated_pose[0] +=  0.1* simulated_vel[0] * dt_ * 400;
+            simulated_pose[1] +=  0.1* simulated_vel[1] * dt_ * 400;
             if (M_==3)
             	simulated_pose[2] +=  simulated_vel[2] * dt_ * 400;
 
