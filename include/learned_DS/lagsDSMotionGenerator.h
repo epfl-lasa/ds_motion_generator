@@ -132,6 +132,7 @@ private:
 	double ds_vel_limit_;
 
     bool bDynamic_target_;
+    bool bGlobal_;
 
 
 public:

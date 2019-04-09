@@ -48,7 +48,7 @@ lagsDSMotionGenerator::lagsDSMotionGenerator(ros::NodeHandle &n,
 								      bPublish_DS_path_(bPublish_DS_path),
 								      bDynamic_target_(bDynamic_target),
 								      input_target_topic_name_(input_target_topic_name),
-								      path_offset_(path_offset){
+								      path_offset_(path_offset),bGlobal_(0){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -93,11 +93,31 @@ bool lagsDSMotionGenerator::InitializeDS() {
 	}
 
     if (A_g_.size() != K_ * M_ * M_ ) {
-        ROS_ERROR_STREAM("InitializeDS: " << K_ * M_ * M_ << " elements in A is expected while " << A_g_.size() << " is provided.");
+        ROS_ERROR_STREAM("InitializeDS: " << K_ * M_ * M_ << " elements in A_g is expected while " << A_g_.size() << " is provided.");
         return false;
     }
     if (att_g_.size() != M_) {
-		ROS_ERROR_STREAM("InitializeDS: Please provide 6 elements for the attractor. It has " << att_g_.size() << " elements.");
+		ROS_ERROR_STREAM("InitializeDS: Please provide" << M_ << "elements for the attractor. It has " << att_g_.size() << " elements.");
+		return false;
+	}
+    if (A_l_.size() != K_ * M_ * M_ ) {
+        ROS_ERROR_STREAM("InitializeDS: " << K_ * M_ * M_ << " elements in A_l is expected while " << A_l_.size() << " is provided.");
+        return false;
+    }
+	if (A_d_.size() != K_ * M_ * M_ ) {
+        ROS_ERROR_STREAM("InitializeDS: " << K_ * M_ * M_ << " elements in A_d is expected while " << A_d_.size() << " is provided.");
+        return false;
+    }
+	if (att_l_.size() != K_ * M_) {
+		ROS_ERROR_STREAM("InitializeDS: " << K_ * M_ << " elements in att_l is expected while " << att_l_.size() << " is provided.");
+		return false;
+	}
+	if (w_l_.size() != K_ * M_) {
+		ROS_ERROR_STREAM("InitializeDS: " << K_ * M_ << " elements in w_l is expected while " << w_l_.size() << " is provided.");
+		return false;
+	}
+	if (b_l_.size() != K_) {
+		ROS_ERROR_STREAM("InitializeDS: " << K_ << " b_l is expected while " << b_l_.size() << " is provided.");
 		return false;
 	}
 
@@ -111,6 +131,9 @@ bool lagsDSMotionGenerator::InitializeDS() {
 	for (int i = 0; i < att_g_.size(); i++) {
 		target_pose_(i) = att_g_[i];
 	}
+
+	/* Set attractor, for now it is assumed to be static and the same as the learned model */
+	LAGS_DS_->set_att_g(target_pose_);
 
 
 	// initializing the filter
@@ -209,7 +232,13 @@ void lagsDSMotionGenerator::ComputeDesiredVelocity() {
 
 	mutex_.lock();
 
-    desired_velocity_ = LAGS_DS_->compute_fg(real_pose_, target_pose_- target_offset_);
+	if (bGlobal_)
+		/* If you only want to use the global component */
+	    desired_velocity_ = LAGS_DS_->compute_fg(real_pose_, target_pose_- target_offset_);
+	else
+    	/* If you only want to use the full combined Locally Active Globally Stable DS */
+    	desired_velocity_ = LAGS_DS_->compute_f(real_pose_);
+
     ROS_WARN_STREAM_THROTTLE(1, "Desired Velocities before limits:" << desired_velocity_(0) << " " << desired_velocity_(1));
 
 	if (std::isnan(desired_velocity_.Norm2())) {
@@ -342,8 +371,13 @@ void lagsDSMotionGenerator::PublishFuturePath() {
         simulated_vel.Resize(M_);
         for (int frame = 0; frame < MAX_FRAME; frame++)
         {
-            // computing the next step based on the lagsDS model
-            simulated_vel = LAGS_DS_->compute_fg(simulated_pose, target_pose_ - target_offset_);
+            // computing the next step based on the lagsDS modeL
+			if (bGlobal_)
+            	/* If you only want to use the global component */
+    			simulated_vel = LAGS_DS_->compute_fg(simulated_pose, target_pose_ - target_offset_);
+			else
+    			/* If you only want to use the full combined Locally Active Globally Stable DS */
+				simulated_vel = LAGS_DS_->compute_f(simulated_pose);
 
             simulated_pose[0] +=  0.1* simulated_vel[0] * dt_ * 400;
             simulated_pose[1] +=  0.1* simulated_vel[1] * dt_ * 400;
