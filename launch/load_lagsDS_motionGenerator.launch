@@ -2,14 +2,10 @@
 <launch>
  
  # You can fill in here the name of your DS or pass it through the command line or another launch file!
- <arg name="DS_name"       default="iCub-Narrow-Passage"/>
+ <arg name="DS_name"       default="iCub-Narrow-Passage-LAGS"/>
  <arg name="viz_DS_path"   default="true"/>
 # Example Options:
-  - CShape-bottom-pqlf
-  - CShape-top-pqlf
-  - sink-pqlf
-  - via-point-pqlf
-  - ...
+  - iCub
 
 # Things to Know!
 # input_topic name should contain          -- geometry_msgs::Pose
@@ -20,8 +16,8 @@
     <param name="output_topic_name"                 value="/ds1/desired_velocity"/>
     <param name="output_filtered_topic_name"        value="/lwr/joint_controllers/passive_ds_command_vel"/>
     <param name="publish_DS_path"                   value="false"/>
-    <rosparam command="load" file="$(find ds_motion_generator)/config/learned_DS/lpvDS/$(arg DS_name).yml"/>
-    <node name="lpvDS_node" pkg="ds_motion_generator"  type="lpvDS_motionGenerator_node" output="screen"/>
+    <rosparam command="load" file="$(find ds_motion_generator)/config/learned_DS/lagsDS/$(arg DS_name)/$(arg DS_name).yml"/>
+    <node name="lagsDS_node" pkg="ds_motion_generator"  type="lagsDS_motionGenerator_node" output="screen"/>
 </group>
 
 <group if="$(arg viz_DS_path)">
@@ -30,8 +26,8 @@
       <param name="output_topic_name"                 value=""/>
       <param name="output_filtered_topic_name"        value=""/>    
       <param name="publish_DS_path"                   value="true"/>
-      <rosparam command="load" file="$(find ds_motion_generator)/config/learned_DS/lpvDS/$(arg DS_name).yml"/>
-      <node name="lpvDS_node" pkg="ds_motion_generator"  type="lpvDS_motionGenerator_node" output="screen"/>
+      <rosparam command="load" file="$(find ds_motion_generator)/config/learned_DS/lagsDS/$(arg DS_name)/$(arg DS_name).yml"/>
+      <node name="lagsDS_node" pkg="ds_motion_generator"  type="lagsDS_motionGenerator_node" output="screen"/>
   </group>
 </group>
 

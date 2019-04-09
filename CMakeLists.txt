@@ -13,7 +13,9 @@ find_package(catkin REQUIRED COMPONENTS
   mathlib
   sgaussians
   lpvDS
+  lagsDS
   dynamic_reconfigure
+  gaussian_process_regression
 )
 ## System dependencies are found with CMake's conventions
 # find_package(Boost REQUIRED COMPONENTS system)
@@ -71,6 +73,7 @@ find_package(catkin REQUIRED COMPONENTS
  generate_dynamic_reconfigure_options(
   cfg/seDS_params.cfg
   cfg/lpvDS_params.cfg
+  cfg/lagsDS_params.cfg
   cfg/SWIPE_params.cfg
   cfg/CYCLE_params.cfg
   cfg/PPOscilate_params.cfg
@@ -90,7 +93,7 @@ find_package(catkin REQUIRED COMPONENTS
 catkin_package(
  INCLUDE_DIRS include/analytic_DS include/learned_DS
  LIBRARIES ds_motion_generator
- CATKIN_DEPENDS roscpp rospy std_msgs nav_msgs mathlib sgaussians lpvDS dynamic_reconfigure 
+ CATKIN_DEPENDS roscpp rospy std_msgs nav_msgs mathlib sgaussians lpvDS lagsDS dynamic_reconfigure 
 )
 
 ###########
@@ -103,7 +106,8 @@ set(H_FILES ${INCLUDE_DIR}/analytic_DS/LinearMotionGenerator.h
             ${INCLUDE_DIR}/analytic_DS/CycleMotionGenerator.h
             ${INCLUDE_DIR}/analytic_DS/SwipeMotionGenerator.h
             ${INCLUDE_DIR}/learned_DS/seDSMotionGenerator.h
-            ${INCLUDE_DIR}/learned_DS/lpvDSMotionGenerator.h)
+            ${INCLUDE_DIR}/learned_DS/lpvDSMotionGenerator.h
+            ${INCLUDE_DIR}/learned_DS/lagsDSMotionGenerator.h)
 
 ## Specify locations of header files
 ## Your package locations should be listed before other locations
@@ -115,6 +119,7 @@ include_directories(${dynamic_reconfigure_PACKAGE_PATH}/cmake/cfgbuild.cmake)
 set(SRCS
     src/learned_DS/seDSMotionGenerator.cpp
     src/learned_DS/lpvDSMotionGenerator.cpp
+    src/learned_DS/lagsDSMotionGenerator.cpp
     src/analytic_DS/SwipeMotionGenerator.cpp
     src/analytic_DS/CycleMotionGenerator.cpp
     src/analytic_DS/PPOscilateMotionGenerator.cpp
@@ -146,6 +151,10 @@ target_link_libraries(seDS_motionGenerator_node ds_motion_generator)
 add_executable(lpvDS_motionGenerator_node src/lpvDS_motionGenerator_node.cpp)
 target_link_libraries(lpvDS_motionGenerator_node ds_motion_generator)
 
+
+add_executable(lagsDS_motionGenerator_node src/lagsDS_motionGenerator_node.cpp)
+target_link_libraries(lagsDS_motionGenerator_node ds_motion_generator)
+
 ### ADD Nodes that use the library
 add_dependencies(seDS_motionGenerator_node 
 	${${PROJECT_NAME}_EXPORTED_TARGETS} 
@@ -153,6 +162,12 @@ add_dependencies(seDS_motionGenerator_node
 	${PROJECT_NAME}_gencfg)
 
 add_dependencies(lpvDS_motionGenerator_node 
+  ${${PROJECT_NAME}_EXPORTED_TARGETS} 
+  ${catkin_EXPORTED_TARGETS}
+  ${PROJECT_NAME}_gencfg)
+
+
+add_dependencies(lagsDS_motionGenerator_node 
   ${${PROJECT_NAME}_EXPORTED_TARGETS} 
   ${catkin_EXPORTED_TARGETS}
   ${PROJECT_NAME}_gencfg)
@@ -183,3 +198,4 @@ target_link_libraries(PPOscilate_motionGenerator_node ds_motion_generator ${catk
 target_link_libraries(Linear_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
 target_link_libraries(seDS_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
 target_link_libraries(lpvDS_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
+target_link_libraries(lagsDS_motionGenerator_node ds_motion_generator ${catkin_LIBRARIES} )
