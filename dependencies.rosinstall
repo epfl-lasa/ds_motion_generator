@@ -11,3 +11,15 @@
     local-name: lpvDS
     uri: https://github.com/nbfigueroa/lpvDS-lib.git
     version: nadia
+
+- git:
+    local-name: lagsDS
+    uri: https://github.com/nbfigueroa/lagsDS-lib.git
+    version: master
+
+- git: 
+    local-name: gaussian-process-regression
+    uri: https://github.com/epfl-lasa/gaussian-process-regression.git
+    version: master
+
+
