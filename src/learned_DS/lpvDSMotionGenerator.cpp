@@ -116,9 +116,11 @@ bool lpvDSMotionGenerator::InitializeDS() {
 
 	target_offset_.Resize(M_);
 	target_pose_.Resize(M_);
+	learned_att_.Resize(M_);
 
 	for (int i = 0; i < attractor_.size(); i++) {
 		target_pose_(i) = attractor_[i];
+		learned_att_(i) = attractor_[i];
 	}
 
 
@@ -218,7 +220,12 @@ void lpvDSMotionGenerator::ComputeDesiredVelocity() {
 
 	mutex_.lock();
 
-    desired_velocity_ = LPV_DS_->compute_f(real_pose_, target_pose_- target_offset_);
+    /* Old way, doesn't work for changing target or attractor different from learned one */
+//    desired_velocity_ = LPV_DS_->compute_f(real_pose_, target_pose_- target_offset_);
+
+    /* This works for the above scenarios */
+	desired_velocity_ = LPV_DS_->compute_f(real_pose_ - (target_pose_ - target_offset_ - learned_att_), learned_att_);
+
     ROS_WARN_STREAM_THROTTLE(1, "Desired Velocities before limits:" << desired_velocity_(0) << " " << desired_velocity_(1));
 
 	if (std::isnan(desired_velocity_.Norm2())) {
@@ -351,13 +358,17 @@ void lpvDSMotionGenerator::PublishFuturePath() {
         simulated_vel.Resize(M_);
         for (int frame = 0; frame < MAX_FRAME; frame++)
         {
-            // computing the next step based on the lpvDS model
-            simulated_vel = LPV_DS_->compute_f(simulated_pose, target_pose_ - target_offset_);
 
-            simulated_pose[0] +=  0.1* simulated_vel[0] * dt_ * 400;
-            simulated_pose[1] +=  0.1* simulated_vel[1] * dt_ * 400;
+            /* Old way, doesn't work for changing target or attractor different from learned one */
+        //    simulated_vel = LPV_DS_->compute_f(simulated_pose, target_pose_- target_offset_);
+
+            /* This works for the above scenarios */
+			simulated_vel = LPV_DS_->compute_f(simulated_pose - (target_pose_ - target_offset_ - learned_att_), learned_att_);
+
+            simulated_pose[0] +=  simulated_vel[0] * dt_ * 40;
+            simulated_pose[1] +=  simulated_vel[1] * dt_ * 40;
             if (M_==3)
-            	simulated_pose[2] +=  simulated_vel[2] * dt_ * 400;
+                simulated_pose[2] +=  simulated_vel[2] * dt_ * 40;
 
             msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
             msg_DesiredPath_.poses[frame].header.frame_id = "world";

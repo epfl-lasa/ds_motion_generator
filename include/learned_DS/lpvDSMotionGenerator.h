@@ -98,7 +98,10 @@ private:
 
 	nav_msgs::Path msg_DesiredPath_;
     double path_offset_;
-    int MAX_FRAME = 800;
+    /* For iCub Visualization */
+    //    int MAX_FRAME = 800;
+    /* For KUKA Real-time */
+    int MAX_FRAME = 200;
 
 	//dynamic reconfig settig
     dynamic_reconfigure::Server<ds_motion_generator::lpvDS_paramsConfig> dyn_rec_srv_;
@@ -109,8 +112,11 @@ private:
 	std::mutex mutex_;
 
 	MathLib::Vector real_pose_;
-	MathLib::Vector target_pose_;
-	MathLib::Vector target_offset_;
+    MathLib::Vector learned_att_;
+
+    /* For dynamics target/chaning attractor */
+    MathLib::Vector target_pose_;
+    MathLib::Vector target_offset_;
 
 
 	MathLib::Vector desired_velocity_;
