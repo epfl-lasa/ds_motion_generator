@@ -49,7 +49,7 @@ lpvDSMotionGenerator::lpvDSMotionGenerator(ros::NodeHandle &n,
 	  output_filtered_topic_name_(output_filtered_topic_name),
 	  dt_(1 / frequency),
 	  Wn_(0),
-	  scaling_factor_(5),
+      scaling_factor_(1),
       ds_vel_limit_(0.1),
       bPublish_DS_path_(bPublish_DS_path),
       bDynamic_target_(bDynamic_target),
@@ -365,10 +365,10 @@ void lpvDSMotionGenerator::PublishFuturePath() {
             /* This works for the above scenarios */
             simulated_vel = LPV_DS_->compute_f(simulated_pose - (target_pose_ - target_offset_ - learned_att_), learned_att_);
 
-            simulated_pose[0] +=  simulated_vel[0] * dt_ * 40;
-            simulated_pose[1] +=  simulated_vel[1] * dt_ * 40;
+            simulated_pose[0] +=  simulated_vel[0] * dt_ * 10;
+            simulated_pose[1] +=  simulated_vel[1] * dt_ * 10;
             if (M_==3)
-                simulated_pose[2] +=  simulated_vel[2] * dt_ * 40;
+                simulated_pose[2] +=  simulated_vel[2] * dt_ * 10;
 
             msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
             msg_DesiredPath_.poses[frame].header.frame_id = "world";

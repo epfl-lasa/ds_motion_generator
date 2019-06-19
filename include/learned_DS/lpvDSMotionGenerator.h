@@ -101,7 +101,7 @@ private:
     /* For iCub Visualization */
 //    int MAX_FRAME = 800;
     /* For KUKA Real-time */
-    int MAX_FRAME = 200;
+    int MAX_FRAME = 400;
 
 	//dynamic reconfig settig
     dynamic_reconfigure::Server<ds_motion_generator::lpvDS_paramsConfig> dyn_rec_srv_;
