@@ -47,7 +47,6 @@ private:
     double max_desired_vel_;
     double pos_error_;
     bool   bPublish_DS_path_;
-    // double Mu_scale_, Sigma_scale_;
 
     // Paramaters for LAGS Class
     int K_;
@@ -121,6 +120,7 @@ private:
 	std::mutex mutex_;
 
 	MathLib::Vector real_pose_;
+    MathLib::Vector learned_att_;
 	MathLib::Vector target_pose_;
 	MathLib::Vector target_offset_;
 

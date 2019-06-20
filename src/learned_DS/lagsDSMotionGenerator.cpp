@@ -43,12 +43,12 @@ lagsDSMotionGenerator::lagsDSMotionGenerator(ros::NodeHandle &n,
 									  output_filtered_topic_name_(output_filtered_topic_name),
 									  dt_(1 / frequency),
 									  Wn_(0),
-									  scaling_factor_(5),
+                                      scaling_factor_(2),
 								      ds_vel_limit_(0.1),
 								      bPublish_DS_path_(bPublish_DS_path),
 								      bDynamic_target_(bDynamic_target),
 								      input_target_topic_name_(input_target_topic_name),
-								      path_offset_(path_offset),bGlobal_(0){
+                                      path_offset_(path_offset),bGlobal_(1){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -127,13 +127,15 @@ bool lagsDSMotionGenerator::InitializeDS() {
 
 	target_offset_.Resize(M_);
 	target_pose_.Resize(M_);
+    learned_att_.Resize(M_);
 
 	for (int i = 0; i < att_g_.size(); i++) {
 		target_pose_(i) = att_g_[i];
+        learned_att_(i) = att_g_[i];
 	}
 
 	/* Set attractor, for now it is assumed to be static and the same as the learned model */
-	LAGS_DS_->set_att_g(target_pose_);
+    LAGS_DS_->set_att_g(learned_att_);
 
 
 	// initializing the filter
@@ -234,10 +236,10 @@ void lagsDSMotionGenerator::ComputeDesiredVelocity() {
 
 	if (bGlobal_)
 		/* If you only want to use the global component */
-	    desired_velocity_ = LAGS_DS_->compute_fg(real_pose_, target_pose_- target_offset_);
+        desired_velocity_ = LAGS_DS_->compute_fg(real_pose_ - (target_pose_- target_offset_ - learned_att_), learned_att_);
 	else
     	/* If you only want to use the full combined Locally Active Globally Stable DS */
-    	desired_velocity_ = LAGS_DS_->compute_f(real_pose_);
+        desired_velocity_ = LAGS_DS_->compute_f(real_pose_ - (target_pose_- target_offset_ - learned_att_));
 
     ROS_WARN_STREAM_THROTTLE(1, "Desired Velocities before limits:" << desired_velocity_(0) << " " << desired_velocity_(1));
 
@@ -250,7 +252,7 @@ void lagsDSMotionGenerator::ComputeDesiredVelocity() {
 
 	if (desired_velocity_.Norm() > ds_vel_limit_) {
 		desired_velocity_ = desired_velocity_ / desired_velocity_.Norm() * ds_vel_limit_;
-	}
+    }
 
     pos_error_ = (real_pose_ - target_pose_ - target_offset_).Norm2();
     ROS_WARN_STREAM_THROTTLE(1, "Distance to attractor:" << pos_error_);
@@ -374,15 +376,15 @@ void lagsDSMotionGenerator::PublishFuturePath() {
             // computing the next step based on the lagsDS modeL
 			if (bGlobal_)
             	/* If you only want to use the global component */
-    			simulated_vel = LAGS_DS_->compute_fg(simulated_pose, target_pose_ - target_offset_);
+                simulated_vel = LAGS_DS_->compute_fg(simulated_pose - (target_pose_- target_offset_ - learned_att_), learned_att_);
 			else
     			/* If you only want to use the full combined Locally Active Globally Stable DS */
-				simulated_vel = LAGS_DS_->compute_f(simulated_pose);
+                simulated_vel = LAGS_DS_->compute_f(simulated_pose - (target_pose_- target_offset_ - learned_att_));
 
-            simulated_pose[0] +=  0.1* simulated_vel[0] * dt_ * 400;
-            simulated_pose[1] +=  0.1* simulated_vel[1] * dt_ * 400;
+            simulated_pose[0] +=  simulated_vel[0] * dt_ * 10;
+            simulated_pose[1] +=  simulated_vel[1] * dt_ * 10;
             if (M_==3)
-            	simulated_pose[2] +=  simulated_vel[2] * dt_ * 400;
+                simulated_pose[2] +=  simulated_vel[2] * dt_ * 10;
 
             msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
             msg_DesiredPath_.poses[frame].header.frame_id = "world";
