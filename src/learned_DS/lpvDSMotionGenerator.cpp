@@ -49,7 +49,7 @@ lpvDSMotionGenerator::lpvDSMotionGenerator(ros::NodeHandle &n,
 	  output_filtered_topic_name_(output_filtered_topic_name),
 	  dt_(1 / frequency),
 	  Wn_(0),
-      scaling_factor_(1),
+      scaling_factor_(1.0),
       ds_vel_limit_(0.1),
       bPublish_DS_path_(bPublish_DS_path),
       bDynamic_target_(bDynamic_target),
@@ -210,8 +210,12 @@ void lpvDSMotionGenerator::UpdateDynamicTarget(const geometry_msgs::Point::Const
     if (bDynamic_target_){
         target_pose_(0) = msg_desired_target_.x;
         target_pose_(1) = msg_desired_target_.y;
+		/* For Writing Task */
+		target_pose_(2) = msg_desired_target_.z;
+
+        /* General Implementation when DS it 2D
         if (M_== 3)
-        	target_pose_(2) = msg_desired_target_.z;
+        	target_pose_(2) = msg_desired_target_.z;*/
     }
 
 }
@@ -334,10 +338,12 @@ void lpvDSMotionGenerator::PublishFuturePath() {
 	msg.header.stamp = ros::Time::now();
 	msg.point.x = target_pose_[0] + target_offset_[0];
 	msg.point.y = target_pose_[1] + target_offset_[1];
+	/* General Implementation when DS it 2D */
 	if (M_ == 3)
 		msg.point.z = target_pose_[2] + target_offset_[2];
 	else
-		msg.point.z = 0.25;
+        msg.point.z = 0.31;
+
 	pub_target_.publish(msg);
 
     if (bPublish_DS_path_){
@@ -356,6 +362,8 @@ void lpvDSMotionGenerator::PublishFuturePath() {
         
         MathLib::Vector simulated_vel;
         simulated_vel.Resize(M_);
+        
+
         for (int frame = 0; frame < MAX_FRAME; frame++)
         {
 
@@ -364,22 +372,38 @@ void lpvDSMotionGenerator::PublishFuturePath() {
 
             /* This works for the above scenarios */
             simulated_vel = LPV_DS_->compute_f(simulated_pose - (target_pose_ - target_offset_ - learned_att_), learned_att_);
+			
+			/* For Writing Task */
+        	double z_gain = desired_velocity_.Norm(), simulated_vel_z;
+        	if (z_gain < 0.5)
+            	z_gain = 0.5;
+			simulated_vel_z = -z_gain * (real_pose_(2) - target_pose_(2));
+
 
             simulated_pose[0] +=  simulated_vel[0] * dt_ * 10;
-            simulated_pose[1] +=  simulated_vel[1] * dt_ * 10;
+            simulated_pose[1] +=  simulated_vel[1] * dt_ * 10;            
+            /* General Implementation when DS it 2D
             if (M_==3)
-                simulated_pose[2] +=  simulated_vel[2] * dt_ * 10;
+                simulated_pose[2] +=  simulated_vel[2] * dt_ * 10;*/
+			
+			/* For Writing Task */
+			simulated_pose[2] +=  simulated_vel_z* dt_ * 10;
 
             msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
             msg_DesiredPath_.poses[frame].header.frame_id = "world";
             msg_DesiredPath_.poses[frame].pose.position.x = simulated_pose[0];
             msg_DesiredPath_.poses[frame].pose.position.y = simulated_pose[1];
+
+            /* General Implementation when DS it 2D
             if (M_==3){
             	msg_DesiredPath_.poses[frame].pose.position.z = simulated_pose[2];
             }
             else{
-            	msg_DesiredPath_.poses[frame].pose.position.z = 0.25;
-            }
+                msg_DesiredPath_.poses[frame].pose.position.z = 0.29;
+            }*/
+            
+            /* For Writing Task */
+			msg_DesiredPath_.poses[frame].pose.position.z = simulated_pose[2];
 
             pub_DesiredPath_.publish(msg_DesiredPath_);
         }

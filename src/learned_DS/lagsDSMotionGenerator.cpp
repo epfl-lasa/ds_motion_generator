@@ -43,12 +43,12 @@ lagsDSMotionGenerator::lagsDSMotionGenerator(ros::NodeHandle &n,
 									  output_filtered_topic_name_(output_filtered_topic_name),
 									  dt_(1 / frequency),
 									  Wn_(0),
-                                      scaling_factor_(2),
-								      ds_vel_limit_(0.1),
+                                      scaling_factor_(1.05),
+                                      ds_vel_limit_(0.15),
 								      bPublish_DS_path_(bPublish_DS_path),
 								      bDynamic_target_(bDynamic_target),
 								      input_target_topic_name_(input_target_topic_name),
-                                      path_offset_(path_offset),bGlobal_(1){
+                                      path_offset_(path_offset),bGlobal_(0){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -239,7 +239,7 @@ void lagsDSMotionGenerator::ComputeDesiredVelocity() {
         desired_velocity_ = LAGS_DS_->compute_fg(real_pose_ - (target_pose_- target_offset_ - learned_att_), learned_att_);
 	else
     	/* If you only want to use the full combined Locally Active Globally Stable DS */
-        desired_velocity_ = LAGS_DS_->compute_f(real_pose_ - (target_pose_- target_offset_ - learned_att_));
+        desired_velocity_ = LAGS_DS_->compute_f(real_pose_ - (target_pose_- target_offset_ - learned_att_),1);
 
     ROS_WARN_STREAM_THROTTLE(1, "Desired Velocities before limits:" << desired_velocity_(0) << " " << desired_velocity_(1));
 
@@ -250,7 +250,10 @@ void lagsDSMotionGenerator::ComputeDesiredVelocity() {
 
 	desired_velocity_ = desired_velocity_ * scaling_factor_;
 
-	if (desired_velocity_.Norm() > ds_vel_limit_) {
+    /* Same velocity throughout state-space to avoid jittering */
+//    desired_velocity_ = desired_velocity_ / desired_velocity_.Norm() * 0.1;
+
+    if (desired_velocity_.Norm() > ds_vel_limit_) {
 		desired_velocity_ = desired_velocity_ / desired_velocity_.Norm() * ds_vel_limit_;
     }
 
@@ -366,7 +369,7 @@ void lagsDSMotionGenerator::PublishFuturePath() {
         MathLib::Vector simulated_pose = real_pose_;
 
         // Add offset to the path
-        for (int m=1;m<M_;m++)
+        for (int m=0;m<M_;m++)
         	simulated_pose[m] = simulated_pose[m] + path_offset_;
         
         MathLib::Vector simulated_vel;
