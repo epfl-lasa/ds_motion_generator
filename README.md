@@ -16,7 +16,7 @@ This package provides a nodified version of DS motion generators. Type of DS:
 Do the following steps:
 * In your catkin src directory clone the repository
 ```
-$ git clone -b nadia https://github.com/epfl-lasa/ds_motion_generator.git
+$ git clone -b nadia https://github.com/nbfigueroa/ds_motion_generator.git
 ```
 * wstool gets all other git repository dependencies, after the following steps you should see extra catkin 
   packages in your src directory.
