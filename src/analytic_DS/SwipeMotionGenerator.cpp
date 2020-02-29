@@ -29,7 +29,8 @@ SwipeMotionGenerator::SwipeMotionGenerator(ros::NodeHandle &n,
         double SwipeVelocity,
         double OrthogonalDamping,
         std::vector<double> SwipeTarget,
-        bool bPublish_DS_path)
+        bool bPublish_DS_path, 
+        std::string world_frame_name)
 	: nh_(n),
 	  loop_rate_(frequency),
 	  input_topic_name_(input_topic_name),
@@ -44,7 +45,8 @@ SwipeMotionGenerator::SwipeMotionGenerator(ros::NodeHandle &n,
 	  SwipeTarget_(SwipeTarget),
 	  SwipeVel_offset_(0),
       Orth_damp_scaling_(1),
-      bPublish_DS_path_(bPublish_DS_path){
+      bPublish_DS_path_(bPublish_DS_path), 
+      world_frame_name_(world_frame_name){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -162,7 +164,6 @@ void SwipeMotionGenerator::ComputeDesiredVelocity() {
 		z_vel = - OrthVelLim_;
 	}
 
-
 	if (pose(1) * SwipeDirection_ < 0) {
 		y_vel = SwipeDirection_ * (SwipeVelocity_ + SwipeVel_offset_);
 	}
@@ -253,7 +254,7 @@ void SwipeMotionGenerator::PublishFuturePath() {
 
 	geometry_msgs::PointStamped msg;
 
-	msg.header.frame_id = "world";
+	msg.header.frame_id = world_frame_name_;
 	msg.header.stamp = ros::Time::now();
 	msg.point.x = real_pose_[0];
 	msg.point.y = target_pose_[1] + target_offset_[1];
@@ -266,7 +267,7 @@ void SwipeMotionGenerator::PublishFuturePath() {
         ROS_WARN_STREAM_THROTTLE(1, "Publishing Path...");
         // setting the header of the path
         msg_DesiredPath_.header.stamp = ros::Time::now();
-        msg_DesiredPath_.header.frame_id = "world";
+        msg_DesiredPath_.header.frame_id = world_frame_name_;
         MathLib::Vector simulated_pose = real_pose_;
         MathLib::Vector simulated_vel;
         simulated_vel.Resize(3);
@@ -289,7 +290,7 @@ void SwipeMotionGenerator::PublishFuturePath() {
             simulated_pose[1] +=  simulated_vel[1] * dt_ * 20;
             simulated_pose[2] +=  simulated_vel[2] * dt_ * 20;
             msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
-            msg_DesiredPath_.poses[frame].header.frame_id = "world";
+            msg_DesiredPath_.poses[frame].header.frame_id = world_frame_name_;
             msg_DesiredPath_.poses[frame].pose.position.x = simulated_pose[0];
             msg_DesiredPath_.poses[frame].pose.position.y = simulated_pose[1];
             msg_DesiredPath_.poses[frame].pose.position.z = simulated_pose[2];

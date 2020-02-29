@@ -43,3 +43,9 @@ xO_all: [-0.6734083775121931, -0.3056825698357682, 0.47586883917668027, -0.42685
 dt: 0.01
 Mu_scale: 1.0
 Sigma_scale: 6017.0
+
+# EPFL KUKA Setting
+# world_frame_name: "world" 
+
+# MIT UR10 Setting
+world_frame_name: "base_link" 

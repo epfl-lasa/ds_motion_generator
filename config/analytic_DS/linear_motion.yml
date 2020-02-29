@@ -1,3 +1,6 @@
 velocity: 0.1
 
-direction: "-y"
+direction: "+z"
+
+# world_frame: "world"   # For kuka gazebo and real (EPFL)
+world_frame_name: "base_link" # For UR10 gazebo and real (MIT)

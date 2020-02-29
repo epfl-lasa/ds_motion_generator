@@ -64,14 +64,15 @@ private:
 	ros::Rate loop_rate_;
 
 	ros::Subscriber sub_real_pose_;
-	ros::Publisher pub_desired_twist_;
-	ros::Publisher pub_desired_twist_filtered_;
-	ros::Publisher pub_target_;
-	ros::Publisher pub_DesiredPath_;
+	ros::Publisher  pub_desired_twist_;
+	ros::Publisher  pub_desired_twist_filtered_;
+	ros::Publisher  pub_target_;
+	ros::Publisher  pub_DesiredPath_;
 
 	std::string input_topic_name_;
 	std::string output_topic_name_;
 	std::string output_filtered_topic_name_;
+	std::string world_frame_name_;
 
 	geometry_msgs::Pose msg_real_pose_;
 	geometry_msgs::TwistStamped msg_desired_velocity_;
@@ -108,7 +109,8 @@ public:
 	                      std::string output_topic_name,
 	                      std::string output_filtered_topic_name,
 	                      std::string direction,
-	                      double linearVelocity);
+	                      double linearVelocity, 
+	                      std::string world_frame_name);
 
 	bool Init();
 

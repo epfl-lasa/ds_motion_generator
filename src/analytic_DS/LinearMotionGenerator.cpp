@@ -25,7 +25,8 @@ LinearMotionGenerator::LinearMotionGenerator(ros::NodeHandle &n,
         std::string output_topic_name,
         std::string output_filtered_topic_name,
         std::string direction,
-        double linearVelocity)
+        double linearVelocity, 
+        std::string world_frame_name)
 	: nh_(n),
 	  loop_rate_(frequency),
 	  input_topic_name_(input_topic_name),
@@ -35,7 +36,8 @@ LinearMotionGenerator::LinearMotionGenerator(ros::NodeHandle &n,
 	  VELOCITY_(linearVelocity),
 	  VELOCITY_offset_(0),
 	  dt_(1 / frequency),
-	  Wn_(0) {
+	  Wn_(0) , 
+	  world_frame_name_(world_frame_name){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -247,7 +249,7 @@ void LinearMotionGenerator::PublishFuturePath() {
 
 	// setting the header of the path
 	msg_DesiredPath_.header.stamp = ros::Time::now();
-	msg_DesiredPath_.header.frame_id = "world";
+	msg_DesiredPath_.header.frame_id = world_frame_name_;
 	MathLib::Vector simulated_pose = real_pose_;
 	MathLib::Vector simulated_vel;
 	simulated_vel.Resize(3);
@@ -287,7 +289,7 @@ void LinearMotionGenerator::PublishFuturePath() {
 		simulated_pose[2] +=  simulated_vel[2] * dt_ * 100;
 
 		msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
-		msg_DesiredPath_.poses[frame].header.frame_id = "world";
+		msg_DesiredPath_.poses[frame].header.frame_id = world_frame_name_;
 		msg_DesiredPath_.poses[frame].pose.position.x = simulated_pose[0];
 		msg_DesiredPath_.poses[frame].pose.position.y = simulated_pose[1];
 		msg_DesiredPath_.poses[frame].pose.position.z = simulated_pose[2];
@@ -295,7 +297,7 @@ void LinearMotionGenerator::PublishFuturePath() {
 		pub_DesiredPath_.publish(msg_DesiredPath_);
 
 		geometry_msgs::PointStamped msg;
-		msg.header.frame_id = "world";
+		msg.header.frame_id = world_frame_name_;
 		msg.header.stamp = ros::Time::now();
 		msg.point.x = simulated_pose[0];
 		msg.point.y = simulated_pose[1];

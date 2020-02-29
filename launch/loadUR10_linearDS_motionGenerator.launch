@@ -1,0 +1,22 @@
+<?xml version="1.0" ?>
+<launch>
+  
+# Publishes ee-pose of UR10 from joint states
+<!-- <node name="cartState_publisher_node" pkg="robbieyuri_boilerplate" type="cartState_publisher_node.py" output="screen"/> -->
+
+# Things to Know!
+# input_topic name should contain          -- geometry_msgs::Pose
+# output_topic_name will write to          -- geometry_msgs::Twist
+<group ns="ds1">
+    <param name="input_topic_name"                 value="/UR10arm/ee_pose"/>
+    <param name="output_topic_name"                value="/UR10arm/desired_twist_"/>
+    # Sends directly to low-level controller
+    <param name="output_filtered_topic_name"       value="/arm/twist_controller/command_twist"/>
+    # Sends directly to external CDDynamics filter before sending it to low-level controller
+    <!-- <param name="output_filtered_topic_name"       value="/UR10arm/desired_twist"/> -->
+    <rosparam command="load" file="$(find ds_motion_generator)/config/analytic_DS/linear_motion.yml"/>
+    <node name="ds_node" pkg="ds_motion_generator" type="Linear_motionGenerator_node" output="screen"/>
+</group>
+
+
+</launch>

@@ -36,7 +36,8 @@ int main(int argc, char **argv)
   std::string input_target_topic_name;
   std::string output_topic_name;
   std::string output_filtered_topic_name;
-  
+  std::string world_frame_name;
+
   int K_gmm;
   int dim;
   bool bPublish_DS_path (false);
@@ -49,75 +50,61 @@ int main(int argc, char **argv)
   double Sigma_scale (1.0);
 
 
+
+  /************** Mandatory parameters **************/  
   if (!nh.getParam("input_topic_name", input_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the input. ");
-    // return -1;
+    return -1;
   }
-
-  if (!nh.getParam("input_target_topic_name", input_target_topic_name))   {
-    ROS_ERROR("Couldn't retrieve the topic name for the input target. ");
-    // return -1;
-  }
-
 
   if (!nh.getParam("output_topic_name", output_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the output. ");
-    // return -1;
+    return -1;
+  }
+
+  if (!nh.getParam("world_frame_name", world_frame_name))   {
+    ROS_ERROR("Couldn't retrieve the world reference frame name for the output. ");
+    return -1;
   }
 
   if (!nh.getParam("output_filtered_topic_name", output_filtered_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the filtered output. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("publish_DS_path", bPublish_DS_path))   {
     ROS_ERROR("Couldn't retrieve the publish DS path boolean. ");
-    // return -1;
-  }
-
-  if (!nh.getParam("dynamic_target", bDynamic_target))   {
-    ROS_ERROR("Couldn't retrieve the publish DS path boolean. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("K", K_gmm))   {
     ROS_ERROR("Couldn't retrieve the number of guassians. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("dim", dim))  {
     ROS_ERROR("Couldn't retrieve the dimension of the state space. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("Priors", Priors))   {
     ROS_ERROR("Couldn't retrieve Priors. Maybe you need to use [] in case of k=1");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("Mu", Mu))   {
     ROS_ERROR("Couldn't retrieve Mu. ");
-    // return -1;
-  }
-
-  if (!nh.getParam("Mu_scale", Mu_scale))   {
-    ROS_ERROR("Couldn't retrieve Mu scaling factor. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("Sigma", Sigma))  {
     ROS_ERROR("Couldn't retrieve Sigma. ");
-    // return -1;
-  }
-
-  if (!nh.getParam("Sigma_scale", Sigma_scale) ) {
-    ROS_ERROR("Couldn't retrieve Sigma scaling factor. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("attractor", attractor))  {
     ROS_ERROR("Couldn't retrieve the attractor for the DS. ");
-    // return -1;
+    return -1;
   }
 
   if (bPublish_DS_path)
@@ -126,7 +113,23 @@ int main(int argc, char **argv)
       ROS_INFO("Starting the se-DS Motion generator... NOT Publishing path in this node. ");
 
 
+  /************** Optional parameters **************/  
+  if (!nh.getParam("input_target_topic_name", input_target_topic_name))   {
+    ROS_WARN("Couldn't retrieve the topic name for the dynamic target, assuming no dynamic target. ");
+  }
+  if (!nh.getParam("dynamic_target", bDynamic_target))   {
+    ROS_WARN("Couldn't retrieve the publish dynamic target boolean, assuming no dynamic target. ");
+  }
+    if (!nh.getParam("Mu_scale", Mu_scale))   {
+    ROS_WARN("Couldn't retrieve Mu scaling factor, assuming 1 ");
+  }
+  if (!nh.getParam("Sigma_scale", Sigma_scale) ) {
+    ROS_WARN("Couldn't retrieve Sigma_scale, assuming 1. ");
+  }
   ROS_INFO_STREAM("Mu_scaling: " << Mu_scale << " Sigma_scale: " << Sigma_scale);
+
+
+  /************** Initialize SEDS NODE **************/  
   seDSMotionGenerator ds_motion_generator(nh, frequency,
                                         K_gmm, dim, Priors, Mu, Sigma,
                                         Mu_scale, Sigma_scale,
@@ -136,7 +139,8 @@ int main(int argc, char **argv)
                                         output_filtered_topic_name,
                                         input_target_topic_name,
                                         bPublish_DS_path,
-                                        bDynamic_target);
+                                        bDynamic_target,
+                                        world_frame_name);
   if (!ds_motion_generator.Init()) {
     return -1;
   }

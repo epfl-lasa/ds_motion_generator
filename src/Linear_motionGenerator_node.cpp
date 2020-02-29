@@ -36,39 +36,41 @@ int main(int argc, char **argv)
   std::string input_topic_name;
   std::string output_topic_name;
   std::string output_filtered_topic_name;
+  std::string world_frame_name;
 
   std::string direction;
   double velocity;
 
 
-
-
-
   if (!nh.getParam("input_topic_name", input_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the input. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("output_topic_name", output_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the output. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("output_filtered_topic_name", output_filtered_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the filtered output. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("direction", direction))   {
     ROS_ERROR("Couldn't retrieve the swiping velocity. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("velocity", velocity))   {
     ROS_ERROR("Couldn't retrieve the velocity. ");
-    // return -1;
+    return -1;
   }
 
+  if (!nh.getParam("world_frame_name", world_frame_name))   {
+    ROS_ERROR("Couldn't name of world reference frame. ");
+    return -1;
+  }
 
 
   ROS_INFO("Starting the Motion generator...");
@@ -80,7 +82,7 @@ int main(int argc, char **argv)
       output_topic_name,
       output_filtered_topic_name,
       direction,
-      velocity);
+      velocity, world_frame_name);  
 
   if (!linear_motion_generator.Init()) {
     return -1;

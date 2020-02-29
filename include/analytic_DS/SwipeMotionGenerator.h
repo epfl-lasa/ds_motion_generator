@@ -75,6 +75,7 @@ private:
 	std::string input_topic_name_;
 	std::string output_topic_name_;
 	std::string output_filtered_topic_name_;
+	std::string world_frame_name_;
 
 	geometry_msgs::Pose msg_real_pose_;
     geometry_msgs::Twist msg_desired_velocity_;
@@ -118,7 +119,8 @@ public:
 	                     double SwipeVelocity,
 	                     double OrthogonalDamping,
                          std::vector<double> SwipeTarget,
-                         bool bPublish_DS_path);
+                         bool bPublish_DS_path,
+                         std::string world_frame_name);
 
 	bool Init();
 

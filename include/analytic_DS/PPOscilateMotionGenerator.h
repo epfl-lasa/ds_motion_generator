@@ -80,13 +80,14 @@ private:
 	std::string input_topic_name_;
 	std::string output_topic_name_;
 	std::string output_filtered_topic_name_;
+	std::string world_frame_name_;
 
     geometry_msgs::Pose  msg_real_pose_;
     geometry_msgs::Twist msg_desired_velocity_;
     geometry_msgs::Twist msg_desired_velocity_filtered_;
 
 	nav_msgs::Path msg_DesiredPath_;
-	int MAX_FRAME = 200;
+	int MAX_FRAME = 400;
 
 
 
@@ -125,7 +126,8 @@ public:
 	                     double OrthogonalDamping,
 	                     std::vector<double> Target_1,
                          std::vector<double> Target_2,
-                         bool bPublish_DS_path);
+                         bool bPublish_DS_path, 
+                         std::string world_frame_name);
 
 	bool Init();
 

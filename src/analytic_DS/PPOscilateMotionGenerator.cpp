@@ -28,7 +28,8 @@ PPOscilateMotionGenerator::PPOscilateMotionGenerator(ros::NodeHandle &n,
         double OrthogonalDamping,
         std::vector<double> Target_1,
         std::vector<double> Target_2,
-        bool bPublish_DS_path)
+        bool bPublish_DS_path, 
+        std::string world_frame_name)
 	: nh_(n),
 	  loop_rate_(frequency),
 	  input_topic_name_(input_topic_name),
@@ -38,16 +39,16 @@ PPOscilateMotionGenerator::PPOscilateMotionGenerator(ros::NodeHandle &n,
 	  Wn_(0),
 	  SwipeVelocity_(SwipeVelocity),
 	  OrthogonalDamping_(OrthogonalDamping),
-	  vel_limit_(0.1),
+	  vel_limit_(0.3),
 	  Target_1_(Target_1),
 	  Target_2_(Target_2),
 	  SwipeVel_offset_(0),
       Orth_damp_scaling_(1),
-      bPublish_DS_path_(bPublish_DS_path){
+      bPublish_DS_path_(bPublish_DS_path),
+      world_frame_name_(world_frame_name){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
-
 
 bool PPOscilateMotionGenerator::Init() {
 
@@ -189,13 +190,16 @@ void PPOscilateMotionGenerator::ComputeDesiredVelocity() {
 
 	MathLib::Vector pose = real_pose_ - target_pose_;
 	MathLib::Vector line = other_target_pose_ - target_pose_;
+    double proj = pose(0) * line(0) + pose(1) * line(1) + pose(2) * line(2);
 
-	double proj = pose(0) * line(0) + pose(1) * line(1) + pose(2) * line(2);
+
 	MathLib::Vector pose_on_line = line / line.Norm() * proj;
 	ROS_WARN_STREAM_THROTTLE(1, "target" << TARGET_id);
 	MathLib::Vector pose_ortho_line = pose - pose_on_line;
 	MathLib::Vector vel_on_line = pose_on_line / pose_on_line.Norm() * ( - SwipeVelocity_ - SwipeVel_offset_);
 	MathLib::Vector vel_ortho_line =   pose_ortho_line * -(OrthogonalDamping_ * Orth_damp_scaling_) ;
+
+
 	desired_velocity_ = vel_on_line + vel_ortho_line;
 
 	if (desired_velocity_.Norm() > vel_limit_) {
@@ -213,16 +217,20 @@ void PPOscilateMotionGenerator::ComputeDesiredVelocity() {
 
 	// ROS_WARN_STREAM("PP_line_ " << desired_velocity_(0) << "\t" << desired_velocity_(1) << "\t" << desired_velocity_(2) << "\t" << desired_velocity_(3) ) ;
 
-
-
 	if (std::isnan(desired_velocity_.Norm2())) {
 		ROS_WARN_THROTTLE(1, "DS is generating NaN. Setting the output to zero.");
 		desired_velocity_.Zero();
 	}
 
 
-    msg_desired_velocity_.linear.x  = desired_velocity_(0);
-    msg_desired_velocity_.linear.y  = desired_velocity_(1);
+	// For Kuka setting
+    // msg_desired_velocity_.linear.x  = desired_velocity_(0);
+    // msg_desired_velocity_.linear.y  = desired_velocity_(1);
+	
+	// For UR10 setting
+    msg_desired_velocity_.linear.x  = -desired_velocity_(1);
+    msg_desired_velocity_.linear.y  = desired_velocity_(0);
+
     msg_desired_velocity_.linear.z  = desired_velocity_(2);
     msg_desired_velocity_.angular.x = 0;
     msg_desired_velocity_.angular.y = 0;
@@ -301,7 +309,7 @@ void PPOscilateMotionGenerator::PublishFuturePath() {
 
 	geometry_msgs::PointStamped msg;
 
-	msg.header.frame_id = "world";
+	msg.header.frame_id = world_frame_name_;
 	msg.header.stamp = ros::Time::now();
 
 	if (TARGET_id == 1) {
@@ -319,7 +327,7 @@ void PPOscilateMotionGenerator::PublishFuturePath() {
     if (bPublish_DS_path_){
         // setting the header of the path
         msg_DesiredPath_.header.stamp = ros::Time::now();
-        msg_DesiredPath_.header.frame_id = "world";
+        msg_DesiredPath_.header.frame_id = world_frame_name_;
 
         MathLib::Vector simulated_pose = real_pose_;
         MathLib::Vector simulated_vel;
@@ -343,7 +351,7 @@ void PPOscilateMotionGenerator::PublishFuturePath() {
             simulated_pose[1] +=  simulated_vel[1] * dt_ * 20;
             simulated_pose[2] +=  simulated_vel[2] * dt_ * 20;
             msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
-            msg_DesiredPath_.poses[frame].header.frame_id = "world";
+            msg_DesiredPath_.poses[frame].header.frame_id = world_frame_name_;
             msg_DesiredPath_.poses[frame].pose.position.x = simulated_pose[0];
             msg_DesiredPath_.poses[frame].pose.position.y = simulated_pose[1];
             msg_DesiredPath_.poses[frame].pose.position.z = simulated_pose[2];

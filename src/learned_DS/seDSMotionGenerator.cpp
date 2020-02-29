@@ -34,7 +34,8 @@ seDSMotionGenerator::seDSMotionGenerator(ros::NodeHandle &n,
                                      std::string output_filtered_topic_name,
                                      std::string input_target_topic_name,
                                      bool bPublish_DS_path,
-                                     bool bDynamic_target)
+                                     bool bDynamic_target, 
+                                     std::string world_frame_name)
 	: nh_(n),
 	  loop_rate_(frequency),
 	  K_gmm_(K_gmm),
@@ -54,7 +55,8 @@ seDSMotionGenerator::seDSMotionGenerator(ros::NodeHandle &n,
       ds_vel_limit_(0.1),
       bPublish_DS_path_(bPublish_DS_path),
       input_target_topic_name_(input_target_topic_name),
-      bDynamic_target_(bDynamic_target){
+      bDynamic_target_(bDynamic_target),
+      world_frame_name_(world_frame_name){
 
 	ROS_INFO_STREAM("Motion generator node is created at: " << nh_.getNamespace() << " with freq: " << frequency << "Hz");
 }
@@ -316,7 +318,7 @@ void seDSMotionGenerator::DynCallback(ds_motion_generator::seDS_paramsConfig &co
 void seDSMotionGenerator::PublishFuturePath() {
 
 	geometry_msgs::PointStamped msg;
-	msg.header.frame_id = "world";
+	msg.header.frame_id = world_frame_name_;
 	msg.header.stamp = ros::Time::now();
 	msg.point.x = target_pose_[0] + target_offset_[0];
 	msg.point.y = target_pose_[1] + target_offset_[1];
@@ -328,7 +330,7 @@ void seDSMotionGenerator::PublishFuturePath() {
         ROS_WARN_STREAM_THROTTLE(1, "Publishing Path...");
         // setting the header of the path
         msg_DesiredPath_.header.stamp = ros::Time::now();
-        msg_DesiredPath_.header.frame_id = "world";
+        msg_DesiredPath_.header.frame_id = world_frame_name_;
 
         MathLib::Vector simulated_pose = real_pose_;
         MathLib::Vector simulated_vel;
@@ -364,7 +366,7 @@ void seDSMotionGenerator::PublishFuturePath() {
             simulated_pose[2] +=  simulated_vel[2] * dt_ * 20;
 
             msg_DesiredPath_.poses[frame].header.stamp = ros::Time::now();
-            msg_DesiredPath_.poses[frame].header.frame_id = "world";
+            msg_DesiredPath_.poses[frame].header.frame_id = world_frame_name_;
             msg_DesiredPath_.poses[frame].pose.position.x = simulated_pose[0];
             msg_DesiredPath_.poses[frame].pose.position.y = simulated_pose[1];
             msg_DesiredPath_.poses[frame].pose.position.z = simulated_pose[2];

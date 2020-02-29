@@ -36,6 +36,7 @@ int main(int argc, char **argv)
   std::string input_topic_name;
   std::string output_topic_name;
   std::string output_filtered_topic_name;
+  std::string world_frame_name;
 
   double SwipeVelocity;
   double OrthogonalDamping;
@@ -48,43 +49,50 @@ int main(int argc, char **argv)
 
   if (!nh.getParam("input_topic_name", input_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the input. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("output_topic_name", output_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the output. ");
-    // return -1;
+    return -1;
   }
+
+  if (!nh.getParam("world_frame_name", world_frame_name))   {
+    ROS_ERROR("Couldn't retrieve the world reference frame name for the output. ");
+    return -1;
+  }
+
+
 
   if (!nh.getParam("output_filtered_topic_name", output_filtered_topic_name))   {
     ROS_ERROR("Couldn't retrieve the topic name for the filtered output. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("publish_DS_path", bPublish_DS_path))   {
     ROS_ERROR("Couldn't retrieve the publish DS path boolean. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("SwipeVelocity", SwipeVelocity))   {
     ROS_ERROR("Couldn't retrieve the swiping velocity. ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("OrthogonalDamping", OrthogonalDamping))  {
     ROS_ERROR("Couldn't retrieve the orthogonal damping ");
-    // return -1;
+    return -1;
   }
 
   if (!nh.getParam("Target_1", Target_1)) {
     ROS_ERROR("Couldn't retrieve the first target. ");
-    // return -1;
+    return -1;
   }
 
 
   if (!nh.getParam("Target_2", Target_2)) {
     ROS_ERROR("Couldn't retrieve the second target. ");
-    // return -1;
+    return -1;
   }
 
   if (bPublish_DS_path)
@@ -102,7 +110,8 @@ int main(int argc, char **argv)
       OrthogonalDamping,
       Target_1,
       Target_2,
-      bPublish_DS_path);
+      bPublish_DS_path,
+      world_frame_name);
 
   if (!PPOscilate_motion_generator.Init()) {
     return -1;

@@ -2,10 +2,14 @@
 SwipeVelocity: 0.1
 
 OrthogonalDamping: 0.8
+OrthVelLim: 0.1
 
-OrthVelLim: 0.25
- 
+# Parameters for UR10 gazebo and real (MIT)
+world_frame_name: "base_link" 
+Target_1: [0.84 ,  0.35 , 0.9]
+Target_2: [0.84 , -0.35 , 0.9]
 
-Target_1: [-0.54 ,  0.25 , 0.1 ]
-
-Target_2: [-0.54 , -0.25 , 0.1 ]
+# Parameters for kuka gazebo and real (EPFL)
+# world_frame: "world"   
+# Target_1: [-0.54 ,  0.25 , 0.1 ]
+# Target_2: [-0.54 , -0.25 , 0.1 ]
